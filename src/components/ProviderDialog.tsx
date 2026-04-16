@@ -1,0 +1,145 @@
+import { useState, useEffect } from "react";
+import { Dialog, DialogTitle, DialogContent, TextField, DialogActions, Button } from "@mui/material";
+import { Provider } from "@/../interface";
+import { encodeSafeUrl, decodeSafeUrl } from "@/libs/urlUtils";
+
+interface ProviderDialogProps {
+  open: boolean;
+  onClose: () => void;
+  onSave: (payload: Partial<Provider>) => Promise<void>;
+  initialData: Provider | null;
+}
+
+export default function ProviderDialog({
+  open,
+  onClose,
+  onSave,
+  initialData,
+}: ProviderDialogProps) {
+  const [formData, setFormData] = useState({
+    name: '', address: '', district: '', province: '',
+    postalcode: '', tel: '', region: '', picture: '', dailyrate: ''
+  });
+  const [isSubmitting, setIsSubmitting] = useState(false);
+
+  useEffect(() => {
+    if (open) {
+      if (initialData) {
+        setFormData({
+          name: initialData.name || '',
+          address: initialData.address || '',
+          district: initialData.district || '',
+          province: initialData.province || '',
+          postalcode: initialData.postalcode || '',
+          tel: initialData.tel || '',
+          region: initialData.region || '',
+          picture: decodeSafeUrl(initialData.picture || ''),
+          dailyrate: (initialData.dailyrate || '').toString()
+        });
+      } else {
+        setFormData({
+          name: '', address: '', district: '', province: '',
+          postalcode: '', tel: '', region: '', picture: '', dailyrate: ''
+        });
+      }
+    }
+  }, [open, initialData]);
+
+  const handleSave = async () => {
+    if (!formData.name) return alert('Name is required');
+    
+    setIsSubmitting(true);
+    try {
+      const payload: Partial<Provider> = {
+        ...formData,
+        picture: encodeSafeUrl(formData.picture),
+        dailyrate: formData.dailyrate ? parseFloat(formData.dailyrate) : 0
+      };
+      await onSave(payload);
+    } finally {
+      setIsSubmitting(false);
+    }
+  };
+
+  return (
+    <Dialog open={open} onClose={!isSubmitting ? onClose : undefined} fullWidth maxWidth="sm">
+      <DialogTitle sx={{ fontWeight: 'bold' }}>
+        {initialData ? 'Edit Provider' : 'Add New Provider'}
+      </DialogTitle>
+      <DialogContent sx={{ display: 'flex', flexDirection: 'column', gap: 2, pt: '20px !important' }}>
+        <TextField 
+          label="Provider Name" 
+          fullWidth 
+          value={formData.name} 
+          onChange={e => setFormData({...formData, name: e.target.value})} 
+        />
+        <TextField 
+          label="Address" 
+          fullWidth 
+          value={formData.address} 
+          onChange={e => setFormData({...formData, address: e.target.value})} 
+        />
+        <div className="flex gap-2 w-full">
+          <TextField 
+            label="District" 
+            fullWidth 
+            value={formData.district} 
+            onChange={e => setFormData({...formData, district: e.target.value})} 
+          />
+          <TextField 
+            label="Province" 
+            fullWidth 
+            value={formData.province} 
+            onChange={e => setFormData({...formData, province: e.target.value})} 
+          />
+        </div>
+        <div className="flex gap-2 w-full">
+          <TextField 
+            label="Postal Code" 
+            fullWidth 
+            value={formData.postalcode} 
+            onChange={e => setFormData({...formData, postalcode: e.target.value})} 
+          />
+          <TextField 
+            label="Region" 
+            fullWidth 
+            value={formData.region} 
+            onChange={e => setFormData({...formData, region: e.target.value})} 
+          />
+        </div>
+        <div className="flex gap-2 w-full">
+          <TextField 
+            label="Telephone" 
+            fullWidth 
+            value={formData.tel} 
+            onChange={e => setFormData({...formData, tel: e.target.value})} 
+          />
+          <TextField 
+            label="Daily Rate" 
+            fullWidth 
+            type="number"
+            value={formData.dailyrate} 
+            onChange={e => setFormData({...formData, dailyrate: e.target.value})} 
+          />
+        </div>
+        <TextField 
+          label="Picture URL" 
+          fullWidth 
+          value={formData.picture} 
+          onChange={e => setFormData({...formData, picture: e.target.value})} 
+        />
+      </DialogContent>
+      <DialogActions sx={{ p: 2 }}>
+        <Button onClick={onClose} disabled={isSubmitting} sx={{ color: '#666' }}>Cancel</Button>
+        <Button 
+          onClick={handleSave} 
+          variant="contained" 
+          disabled={isSubmitting || !formData.name}
+          sx={{ backgroundColor: '#FFD600', color: '#111111', '&:hover': { backgroundColor: '#e0b400' } }}
+        >
+          {isSubmitting ? 'Saving...' : initialData ? 'Update Provider' : 'Create Provider'}
+        </Button>
+      </DialogActions>
+    </Dialog>
+  );
+}
