@@ -3,6 +3,8 @@ import Image from "next/image";
 import InteractiveCard from "./InteractiveCard";
 import { decodeSafeUrl } from "@/libs/urlUtils";
 
+import { Rating } from "@mui/material";
+
 export default function CarCard({
   id,
   brand,
@@ -15,6 +17,8 @@ export default function CarCard({
   fuelType,
   rentPrice,
   available,
+  rating,
+  reviewCount,
   onEdit,
   onDelete,
 }: {
@@ -29,6 +33,8 @@ export default function CarCard({
   fuelType: string;
   rentPrice: number;
   available: boolean;
+  rating?: number;
+  reviewCount?: number;
   onEdit?: () => void;
   onDelete?: () => void;
 }) {
@@ -52,7 +58,19 @@ export default function CarCard({
           <div className="flex justify-between items-start">
             <div>
               <h3 className="text-[#111111] font-bold text-xl">{brand} {model}</h3>
-              <p className="text-[#111111] text-xs font-bold uppercase tracking-widest opacity-50">{licensePlate}</p>
+              <div className="flex items-center gap-2 mt-1">
+                <p className="text-[#111111] text-xs font-bold uppercase tracking-widest opacity-50">{licensePlate}</p>
+                {reviewCount !== undefined && reviewCount > 0 && (
+                  <>
+                    <span className="text-stone-300">•</span>
+                    <div className="flex items-center gap-1">
+                      <Rating value={rating} readOnly precision={0.5} size="small" sx={{ color: '#FFD600', fontSize: '14px' }} />
+                      <span className="text-[10px] font-black text-[#111111]">{rating?.toFixed(1)}</span>
+                      <span className="text-[10px] font-bold text-stone-400">({reviewCount})</span>
+                    </div>
+                  </>
+                )}
+              </div>
             </div>
             <span className="bg-[#FFD600]/10 text-[#111111] px-2 py-1 rounded text-[10px] font-bold uppercase border border-[#FFD600]/20">
               {year}

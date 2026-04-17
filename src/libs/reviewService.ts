@@ -23,7 +23,7 @@ export async function addBookingReview(token: string, bookingId: string, payload
 }
 
 export async function getMyReviews(token: string): Promise<ResponseList<Review>> {
-  const response = await fetch(`${baseUrl}/reviews/me`, {
+  const response = await fetch(`${baseUrl}/reviews`, {
     method: "GET",
     headers: {
       authorization: `Bearer ${token}`,
@@ -37,14 +37,17 @@ export async function getMyReviews(token: string): Promise<ResponseList<Review>>
   return await response.json();
 }
 
-export async function getCarReviews(carId: string): Promise<ResponseList<Review>> {
-  const response = await fetch(`${baseUrl}/cars/${carId}/reviews`, {
+export async function getReviewById(token: string, reviewId: string): Promise<ResponseSingle<Review>> {
+  const response = await fetch(`${baseUrl}/reviews/${reviewId}`, {
     method: "GET",
+    headers: {
+      authorization: `Bearer ${token}`,
+    },
   });
 
   if (!response.ok) {
     const errorData = await response.json();
-    throw new Error(errorData.message || "Failed to fetch car reviews");
+    throw new Error(errorData.message || "Failed to fetch review");
   }
   return await response.json();
 }
@@ -62,6 +65,21 @@ export async function updateReview(token: string, reviewId: string, payload: Rev
   if (!response.ok) {
     const errorData = await response.json();
     throw new Error(errorData.message || "Failed to update review");
+  }
+  return await response.json();
+}
+
+export async function deleteReview(token: string, reviewId: string): Promise<{ success: boolean; message: string }> {
+  const response = await fetch(`${baseUrl}/reviews/${reviewId}`, {
+    method: "DELETE",
+    headers: {
+      authorization: `Bearer ${token}`,
+    },
+  });
+
+  if (!response.ok) {
+    const errorData = await response.json();
+    throw new Error(errorData.message || "Failed to delete review");
   }
   return await response.json();
 }

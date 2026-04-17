@@ -10,7 +10,7 @@ import ConfirmDeleteDialog from './ConfirmDeleteDialog';
 import ConfirmDialog from './ConfirmDialog';
 import SuccessDialog from './SuccessDialog';
 import ReviewSubmissionDialog from './ReviewSubmissionDialog';
-import { addBookingReview } from '@/libs/reviewService';
+import { addBookingReview, updateReview, deleteReview } from '@/libs/reviewService';
 
 export default function BookingList({ initialBookings, onRefresh }: { initialBookings: Booking[], onRefresh: () => void }) {
   const { data: session } = useSession();
@@ -22,6 +22,8 @@ export default function BookingList({ initialBookings, onRefresh }: { initialBoo
   const [returnSubmitting, setReturnSubmitting] = useState(false);
   const [successMessage, setSuccessMessage] = useState('');
   const [reviewingBooking, setReviewingBooking] = useState<Booking | null>(null);
+  const [isReviewEditing, setIsReviewEditing] = useState(false);
+  const [bookingToReviewDelete, setBookingToReviewDelete] = useState<Booking | null>(null);
 
   const handleUpdate = async (payload: { bookingDate: string; returnDate: string }) => {
     if (!token || !editingBooking) return;
@@ -72,12 +74,30 @@ export default function BookingList({ initialBookings, onRefresh }: { initialBoo
   const handleReviewSubmit = async (rating: number, comment: string) => {
     if (!token || !reviewingBooking) return;
     try {
-      await addBookingReview(token, reviewingBooking._id, { rating, comment });
+      if (isReviewEditing && reviewingBooking.review) {
+        await updateReview(token, reviewingBooking.review._id, { rating, comment });
+        alert("Review updated successfully!");
+      } else {
+        await addBookingReview(token, reviewingBooking._id, { rating, comment });
+        alert("Thank you for your feedback!");
+      }
       setReviewingBooking(null);
-      alert("Thank you for your feedback!");
+      setIsReviewEditing(false);
       onRefresh();
     } catch (err: any) {
       alert(err.message || "Failed to submit review");
+    }
+  };
+
+  const handleReviewDeleteConfirm = async () => {
+    if (!token || !bookingToReviewDelete || !bookingToReviewDelete.review) return;
+    try {
+      await deleteReview(token, bookingToReviewDelete.review._id);
+      setBookingToReviewDelete(null);
+      alert("Review deleted successfully.");
+      onRefresh();
+    } catch (err: any) {
+      alert(err.message || "Failed to delete review");
     }
   };
 
@@ -98,7 +118,9 @@ export default function BookingList({ initialBookings, onRefresh }: { initialBoo
           onEdit={() => setEditingBooking(booking)}
           onDelete={() => setBookingToDelete(booking)}
           onComplete={() => handleComplete(booking)}
-          onReview={() => setReviewingBooking(booking)}
+          onReview={() => { setReviewingBooking(booking); setIsReviewEditing(false); }}
+          onReviewEdit={() => { setReviewingBooking(booking); setIsReviewEditing(true); }}
+          onReviewDelete={() => setBookingToReviewDelete(booking)}
         />
       ))}
 
@@ -146,10 +168,22 @@ export default function BookingList({ initialBookings, onRefresh }: { initialBoo
       {/* Review Dialog */}
       <ReviewSubmissionDialog 
         open={!!reviewingBooking}
-        onClose={() => setReviewingBooking(null)}
+        onClose={() => { setReviewingBooking(null); setIsReviewEditing(false); }}
         onSave={handleReviewSubmit}
         bookingDescription={reviewingBooking ? `${reviewingBooking.car?.brand} ${reviewingBooking.car?.model}` : ""}
+        initialData={isReviewEditing ? reviewingBooking?.review : null}
       />
+
+      {/* Review Deletion Confirmation */}
+      {bookingToReviewDelete && (
+        <ConfirmDeleteDialog 
+          open={!!bookingToReviewDelete}
+          title="Delete Review"
+          description="Are you sure you want to delete your review? This action cannot be undone."
+          onConfirm={handleReviewDeleteConfirm}
+          onClose={() => setBookingToReviewDelete(null)}
+        />
+      )}
     </div>
   );
 }

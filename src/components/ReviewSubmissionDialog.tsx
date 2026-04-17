@@ -18,6 +18,7 @@ interface ReviewSubmissionDialogProps {
   onClose: () => void;
   onSave: (rating: number, comment: string) => Promise<void>;
   bookingDescription?: string;
+  initialData?: { rating: number; comment?: string } | null;
 }
 
 export default function ReviewSubmissionDialog({
@@ -25,18 +26,19 @@ export default function ReviewSubmissionDialog({
   onClose,
   onSave,
   bookingDescription = '',
+  initialData,
 }: ReviewSubmissionDialogProps) {
   const [rating, setRating] = useState<number | null>(3);
   const [comment, setComment] = useState('');
   const [isSubmitting, setIsSubmitting] = useState(false);
 
   useEffect(() => {
-    if (!open) {
-      setRating(3);
-      setComment('');
+    if (open) {
+      setRating(initialData?.rating || 3);
+      setComment(initialData?.comment || '');
       setIsSubmitting(false);
     }
-  }, [open]);
+  }, [open, initialData]);
 
   const handleSave = async () => {
     if (!rating || rating < 1 || rating > 5) {

@@ -10,7 +10,7 @@ import CarCard from "./CarCard";
 import CarDialog from "./CarDialog";
 import ConfirmDeleteDialog from "./ConfirmDeleteDialog";
 import { createCar, updateCar, deleteCar } from "@/libs/carService";
-import { Fab, Typography } from "@mui/material";
+import { Fab, Typography, Rating } from "@mui/material";
 
 const PlusIcon = () => (
   <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.5" strokeLinecap="round" strokeLinejoin="round">
@@ -113,8 +113,11 @@ export default function ProviderDetailWithCars({ initialProvider }: { initialPro
                     <span className="inline-block bg-[#111111] text-white px-4 py-1.5 rounded-full text-[10px] font-black uppercase tracking-widest mt-1">{provider.region}</span>
                   </div>
                   <div>
-                    <Typography className="text-[10px] font-black text-stone-400 uppercase tracking-widest mb-1">Provider Rating</Typography>
-                    <p className="text-[#FFD600] font-black text-lg leading-tight uppercase italic">Excellent ★★★★★</p>
+                    <Typography className="text-[10px] font-black text-stone-400 uppercase tracking-widest mb-1">Service Quality</Typography>
+                    <div className="flex items-center gap-2">
+                        <Rating value={5} readOnly size="small" sx={{ color: '#FFD600' }} />
+                        <span className="text-[#111111] font-black text-xs uppercase tracking-widest">Excellent</span>
+                    </div>
                   </div>
                 </div>
             </div>

@@ -3,18 +3,45 @@
 import { useEffect, useState } from 'react';
 import Image from 'next/image';
 import { useParams } from 'next/navigation';
-import { getCar } from '@/libs/carService';
-import { getCarReviews } from '@/libs/reviewService';
+import { getCar, getCarReviews } from '@/libs/carService';
+import { getMyReviews } from '@/libs/reviewService';
 import { Car, Review } from '@/../interface';
 import { decodeSafeUrl } from '@/libs/urlUtils';
 import ReviewCard from '@/components/ReviewCard';
 import { CircularProgress, Rating, Typography, Divider } from '@mui/material';
+import { useSession } from 'next-auth/react';
+import ConfirmDeleteDialog from '@/components/ConfirmDeleteDialog';
+import ReviewSubmissionDialog from '@/components/ReviewSubmissionDialog';
+import { updateReview, deleteReview } from '@/libs/reviewService';
+import { getPayloadFromToken } from '@/libs/authService';
 
 export default function CarDetailPage() {
+    const { data: session } = useSession();
+    const token = session?.user?.token;
+    const payload = token ? getPayloadFromToken(token) : null;
+    const currentUserId = payload?.id || payload?._id;
+
     const { id } = useParams<{ id: string }>();
     const [car, setCar] = useState<Car | null>(null);
     const [reviews, setReviews] = useState<Review[]>([]);
     const [loading, setLoading] = useState(true);
+
+    const [reviewToEdit, setReviewToEdit] = useState<Review | null>(null);
+    const [reviewToDelete, setReviewToDelete] = useState<Review | null>(null);
+
+    const refreshData = async () => {
+        if (!id) return;
+        try {
+            const [carData, reviewsData] = await Promise.all([
+                getCar(id),
+                getCarReviews(id)
+            ]);
+            setCar(carData.data);
+            setReviews(reviewsData.data);
+        } catch (error) {
+            console.error("Error fetching car details or reviews:", error);
+        }
+    };
 
     useEffect(() => {
         if (!id) return;
@@ -133,12 +160,23 @@ export default function CarDetailPage() {
                             </div>
                         ) : (
                             <div className="space-y-6">
-                                {reviews.map((review) => (
-                                    <ReviewCard key={review._id} review={review} showUser={true} />
-                                ))}
+                                {reviews.map((review) => {
+                                    const reviewOwnerId = (review.userId as any)?._id || review.userId || (review as any).user?._id || (review as any).user;
+                                    const isOwner = currentUserId && String(reviewOwnerId) === String(currentUserId);
+                                    
+                                    return (
+                                        <ReviewCard 
+                                            key={review._id} 
+                                            review={review} 
+                                            showUser={true} 
+                                            onEdit={isOwner ? () => setReviewToEdit(review) : undefined}
+                                            onDelete={isOwner ? () => setReviewToDelete(review) : undefined}
+                                        />
+                                    );
+                                })}
                             </div>
                         )}
-                    </section> section
+                    </section>
                 </div>
 
                 {/* Sidebar / Call to Action */}
@@ -179,6 +217,38 @@ export default function CarDetailPage() {
                     </div>
                 </div>
             </div>
+
+            {/* Review Edit Dialog */}
+            <ReviewSubmissionDialog 
+                open={!!reviewToEdit}
+                onClose={() => setReviewToEdit(null)}
+                onSave={async (rating, comment) => {
+                    if (!token || !reviewToEdit) return;
+                    await updateReview(token, reviewToEdit._id, { rating, comment });
+                    setReviewToEdit(null);
+                    alert("Review updated successfully!");
+                    await refreshData();
+                }}
+                bookingDescription={`${car.brand} ${car.model}`}
+                initialData={reviewToEdit}
+            />
+
+            {/* Review Delete Confirmation */}
+            {reviewToDelete && (
+                <ConfirmDeleteDialog 
+                    open={!!reviewToDelete}
+                    title="Delete Review"
+                    description="Are you sure you want to delete your review? This action cannot be undone."
+                    onConfirm={async () => {
+                        if (!token || !reviewToDelete) return;
+                        await deleteReview(token, reviewToDelete._id);
+                        setReviewToDelete(null);
+                        alert("Review deleted successfully.");
+                        await refreshData();
+                    }}
+                    onClose={() => setReviewToDelete(null)}
+                />
+            )}
         </main>
     );
 }

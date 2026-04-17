@@ -1,4 +1,4 @@
-import { Car, Provider, ResponseList, ResponseSingle } from "@/../interface";
+import { Car, Provider, ResponseList, ResponseSingle, Review } from "@/../interface";
 import { baseUrl } from '../config/api';
 
 export async function getCars(token?: string): Promise<ResponseList<Car>> {
@@ -70,6 +70,18 @@ export async function deleteCar(token: string, id: string) {
   if (!response.ok) {
     const errorData = await response.json();
     throw new Error(errorData.message || "Failed to delete car");
+  }
+  return await response.json();
+}
+
+export async function getCarReviews(carId: string): Promise<ResponseList<Review>> {
+  const response = await fetch(`${baseUrl}/cars/${carId}/reviews`, {
+    method: "GET",
+  });
+
+  if (!response.ok) {
+    const errorData = await response.json();
+    throw new Error(errorData.message || "Failed to fetch car reviews");
   }
   return await response.json();
 }
