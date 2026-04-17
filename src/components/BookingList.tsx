@@ -2,7 +2,7 @@
 
 import { useState } from 'react';
 import { Booking } from '@/../interface';
-import { updateBooking, deleteBooking } from '@/libs/bookingService';
+import { updateBooking, deleteBooking, completeBooking } from '@/libs/bookingService';
 import { useSession } from 'next-auth/react';
 import BookingCard from './BookingCard';
 import BookingDialog from './BookingDialog';
@@ -37,6 +37,17 @@ export default function BookingList({ initialBookings, onRefresh }: { initialBoo
     }
   };
 
+  const handleComplete = async (booking: Booking) => {
+    if (!token) return;
+    try {
+      await completeBooking(token, booking._id);
+      alert("Car returned successfully. Booking completed!");
+      onRefresh();
+    } catch (err: any) {
+      alert(err.message || "Failed to complete booking");
+    }
+  };
+
   if (initialBookings.length === 0) {
     return (
       <div className="py-20 text-center w-full">
@@ -53,6 +64,7 @@ export default function BookingList({ initialBookings, onRefresh }: { initialBoo
           booking={booking}
           onEdit={() => setEditingBooking(booking)}
           onDelete={() => setBookingToDelete(booking)}
+          onComplete={() => handleComplete(booking)}
         />
       ))}
 

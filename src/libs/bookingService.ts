@@ -80,3 +80,18 @@ export async function deleteBooking(token: string, id: string) {
   }
   return await response.json();
 }
+
+export async function completeBooking(token: string, id: string) {
+  const response = await fetch(`${baseUrl}/bookings/${id}/complete`, {
+    method: "PUT",
+    headers: {
+      authorization: `Bearer ${token}`,
+    },
+  });
+
+  if (!response.ok) {
+    const errorData = await response.json();
+    throw new Error(errorData.message || "Failed to complete booking");
+  }
+  return await response.json();
+}

@@ -141,6 +141,7 @@ export default function ProviderDetailWithCars({ initialProvider }: { initialPro
             provider.cars.map((car) => (
               <CarCard 
                 key={car._id}
+                id={car._id}
                 brand={car.brand}
                 model={car.model}
                 imgSrc={car.picture}
