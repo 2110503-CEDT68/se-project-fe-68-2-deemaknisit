@@ -43,6 +43,7 @@ export interface Booking {
   bookingDate: string;
   returnDate: string;
   totalCost: number;
+  status?: string;
   user: User;
   car: {
     _id: string;
@@ -58,6 +59,22 @@ export interface Booking {
   };
   provider: string;
   createdAt: string;
+}
+
+export interface Review {
+  _id: string;
+  userId: string;
+  providerId: string;
+  bookingId: string;
+  rating: number;
+  comment?: string;
+  createdAt?: string;
+  updatedAt?: string;
+}
+
+export interface ReviewPayload {
+  rating: number;
+  comment?: string;
 }
 
 export interface LocalBookingItem {
