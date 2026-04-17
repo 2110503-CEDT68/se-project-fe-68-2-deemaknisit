@@ -7,6 +7,8 @@ import { useSession } from 'next-auth/react';
 import BookingCard from './BookingCard';
 import BookingDialog from './BookingDialog';
 import ConfirmDeleteDialog from './ConfirmDeleteDialog';
+import ConfirmDialog from './ConfirmDialog';
+import SuccessDialog from './SuccessDialog';
 import ReviewSubmissionDialog from './ReviewSubmissionDialog';
 import { addBookingReview } from '@/libs/reviewService';
 
@@ -16,6 +18,9 @@ export default function BookingList({ initialBookings, onRefresh }: { initialBoo
 
   const [editingBooking, setEditingBooking] = useState<Booking | null>(null);
   const [bookingToDelete, setBookingToDelete] = useState<Booking | null>(null);
+  const [bookingToReturn, setBookingToReturn] = useState<Booking | null>(null);
+  const [returnSubmitting, setReturnSubmitting] = useState(false);
+  const [successMessage, setSuccessMessage] = useState('');
   const [reviewingBooking, setReviewingBooking] = useState<Booking | null>(null);
 
   const handleUpdate = async (payload: { bookingDate: string; returnDate: string }) => {
@@ -40,15 +45,28 @@ export default function BookingList({ initialBookings, onRefresh }: { initialBoo
     }
   };
 
-  const handleComplete = async (booking: Booking) => {
-    if (!token) return;
+  const handleComplete = (booking: Booking) => {
+    setBookingToReturn(booking);
+  };
+
+  const handleReturnConfirm = async () => {
+    if (!token || !bookingToReturn) return;
+    setReturnSubmitting(true);
+
     try {
-      await completeBooking(token, booking._id);
-      alert("Car returned successfully. Booking completed!");
+      await completeBooking(token, bookingToReturn._id);
+      setBookingToReturn(null);
+      setSuccessMessage('Car returned successfully. Booking completed!');
       onRefresh();
     } catch (err: any) {
       alert(err.message || "Failed to complete booking");
+    } finally {
+      setReturnSubmitting(false);
     }
+  };
+
+  const handleSuccessClose = () => {
+    setSuccessMessage('');
   };
 
   const handleReviewSubmit = async (rating: number, comment: string) => {
@@ -57,6 +75,7 @@ export default function BookingList({ initialBookings, onRefresh }: { initialBoo
       await addBookingReview(token, reviewingBooking._id, { rating, comment });
       setReviewingBooking(null);
       alert("Thank you for your feedback!");
+      onRefresh();
     } catch (err: any) {
       alert(err.message || "Failed to submit review");
     }
@@ -101,6 +120,28 @@ export default function BookingList({ initialBookings, onRefresh }: { initialBoo
           onClose={() => setBookingToDelete(null)}
         />
       )}
+
+      {/* Return Confirmation */}
+      {bookingToReturn && (
+        <ConfirmDialog
+          open={!!bookingToReturn}
+          title="Confirm Return"
+          description={`Mark ${bookingToReturn.car?.brand} ${bookingToReturn.car?.model} as returned and complete this booking?`}
+          confirmText="Return Car"
+          cancelText="Keep Booking"
+          confirmColor="#111111"
+          onConfirm={handleReturnConfirm}
+          onClose={() => setBookingToReturn(null)}
+          isSubmitting={returnSubmitting}
+        />
+      )}
+
+      <SuccessDialog
+        open={!!successMessage}
+        title="Return Completed"
+        message={successMessage}
+        onClose={handleSuccessClose}
+      />
 
       {/* Review Dialog */}
       <ReviewSubmissionDialog 
