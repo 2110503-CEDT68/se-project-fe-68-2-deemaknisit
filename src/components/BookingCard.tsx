@@ -55,6 +55,24 @@ export default function BookingCard({
             <p className="text-[#111111] font-black text-sm">{rDate}</p>
           </div>
         </div>
+
+        <div className="rounded-3xl border border-stone-200 bg-stone-50 p-4 mt-4">
+          {isComplete ? (
+            booking.review ? (
+              <div className="space-y-2">
+                <div className="flex items-center justify-between gap-4">
+                  <span className="text-sm font-bold uppercase tracking-widest text-stone-500">Your Review</span>
+                  <span className="text-sm font-black text-yellow-500">{`${booking.review.rating}/5`}</span>
+                </div>
+                <p className="text-sm text-stone-600">{booking.review.comment || 'No comment provided.'}</p>
+              </div>
+            ) : (
+              <div className="text-sm text-stone-500">No review yet for this completed booking.</div>
+            )
+          ) : (
+            <div className="text-sm text-stone-500">Booking not complete yet. Review will appear here after return.</div>
+          )}
+        </div>
       </div>
 
       <div className="flex flex-row sm:flex-col gap-2 w-full sm:w-auto mt-4 sm:mt-0 pt-4 sm:pt-0 border-t sm:border-t-0 sm:border-l border-stone-100 sm:pl-6">

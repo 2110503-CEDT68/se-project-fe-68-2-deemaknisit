@@ -58,6 +58,7 @@ export interface Booking {
     };
   };
   provider: string;
+  review?: Review | null;
   createdAt: string;
 }
 
