@@ -7,12 +7,14 @@ export default function BookingCard({
   booking,
   onEdit,
   onDelete,
-  onComplete
+  onComplete,
+  onReview
 }: {
   booking: Booking;
   onEdit?: () => void;
   onDelete?: () => void;
   onComplete?: () => void;
+  onReview?: () => void;
 }) {
   // Extract info from backend structure
   const providerName = booking.car?.provider?.name || "Rental Provider";
@@ -23,16 +25,17 @@ export default function BookingCard({
   const rDate = new Date(booking.returnDate).toLocaleDateString('en-GB', { day: 'numeric', month: 'short', year: 'numeric' });
 
   return (
-    <div className={`w-full max-w-2xl bg-white border border-stone-200 rounded-3xl p-6 shadow-sm hover:shadow-md transition-shadow flex flex-col sm:flex-row items-center gap-6 ${isComplete ? 'opacity-75' : ''}`}>
+    <div className={`w-full max-w-2xl bg-white border rounded-[32px] p-6 shadow-sm transition-all duration-300 flex flex-col sm:flex-row items-center gap-6 ${isComplete ? 'border-green-100 bg-green-50/20' : 'border-stone-200 hover:shadow-md'}`}>
       <div className="flex-grow space-y-3">
         <div className="flex justify-between items-start">
           <div>
-            <div className="flex items-center gap-2 mb-1">
+            <div className="flex items-center gap-3 mb-1">
                 <h3 className="text-[#111111] font-bold text-xl">{carDescription}</h3>
                 {isComplete && (
-                    <span className="bg-stone-100 text-stone-500 px-2 py-0.5 rounded-full text-[9px] font-black uppercase tracking-widest border border-stone-200">
-                        Returned
-                    </span>
+                    <div className="flex items-center gap-1.5 bg-green-500/10 text-green-600 px-2.5 py-1 rounded-full border border-green-500/20">
+                        <div className="w-1.5 h-1.5 rounded-full bg-green-500 animate-pulse" />
+                        <span className="text-[10px] font-black uppercase tracking-widest">Completed</span>
+                    </div>
                 )}
             </div>
             <p className="text-stone-400 text-xs font-bold uppercase tracking-widest">{providerName}</p>
@@ -42,19 +45,29 @@ export default function BookingCard({
           </div>
         </div>
 
-        <div className="flex gap-4 pt-2">
+        <div className="flex gap-6 pt-2">
           <div className="flex-1">
-            <p className="text-[10px] font-bold text-stone-400 uppercase tracking-tighter">Pickup</p>
-            <p className="text-[#111111] font-medium">{bDate}</p>
+            <p className="text-[10px] font-bold text-stone-400 uppercase tracking-widest mb-1">Pickup</p>
+            <p className="text-[#111111] font-black text-sm">{bDate}</p>
           </div>
           <div className="flex-1">
-            <p className="text-[10px] font-bold text-stone-400 uppercase tracking-tighter">Return</p>
-            <p className="text-[#111111] font-medium">{rDate}</p>
+            <p className="text-[10px] font-bold text-stone-400 uppercase tracking-widest mb-1">Return</p>
+            <p className="text-[#111111] font-black text-sm">{rDate}</p>
           </div>
         </div>
       </div>
 
       <div className="flex flex-row sm:flex-col gap-2 w-full sm:w-auto mt-4 sm:mt-0 pt-4 sm:pt-0 border-t sm:border-t-0 sm:border-l border-stone-100 sm:pl-6">
+        {isComplete && onReview && (
+          <Button 
+            onClick={onReview} 
+            variant="contained" 
+            fullWidth
+            sx={{ backgroundColor: '#FFD600', color: '#111111', fontWeight: '900', borderRadius: '16px', py: 1.5, fontSize: '11px', letterSpacing: '0.1em', '&:hover': { backgroundColor: '#111111', color: '#FFD600' } }}
+          >
+            Review
+          </Button>
+        )}
         {!isComplete && onComplete && (
           <Button 
             onClick={onComplete} 

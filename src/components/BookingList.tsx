@@ -7,6 +7,8 @@ import { useSession } from 'next-auth/react';
 import BookingCard from './BookingCard';
 import BookingDialog from './BookingDialog';
 import ConfirmDeleteDialog from './ConfirmDeleteDialog';
+import ReviewSubmissionDialog from './ReviewSubmissionDialog';
+import { addBookingReview } from '@/libs/reviewService';
 
 export default function BookingList({ initialBookings, onRefresh }: { initialBookings: Booking[], onRefresh: () => void }) {
   const { data: session } = useSession();
@@ -14,6 +16,7 @@ export default function BookingList({ initialBookings, onRefresh }: { initialBoo
 
   const [editingBooking, setEditingBooking] = useState<Booking | null>(null);
   const [bookingToDelete, setBookingToDelete] = useState<Booking | null>(null);
+  const [reviewingBooking, setReviewingBooking] = useState<Booking | null>(null);
 
   const handleUpdate = async (payload: { bookingDate: string; returnDate: string }) => {
     if (!token || !editingBooking) return;
@@ -48,6 +51,17 @@ export default function BookingList({ initialBookings, onRefresh }: { initialBoo
     }
   };
 
+  const handleReviewSubmit = async (rating: number, comment: string) => {
+    if (!token || !reviewingBooking) return;
+    try {
+      await addBookingReview(token, reviewingBooking._id, { rating, comment });
+      setReviewingBooking(null);
+      alert("Thank you for your feedback!");
+    } catch (err: any) {
+      alert(err.message || "Failed to submit review");
+    }
+  };
+
   if (initialBookings.length === 0) {
     return (
       <div className="py-20 text-center w-full">
@@ -65,6 +79,7 @@ export default function BookingList({ initialBookings, onRefresh }: { initialBoo
           onEdit={() => setEditingBooking(booking)}
           onDelete={() => setBookingToDelete(booking)}
           onComplete={() => handleComplete(booking)}
+          onReview={() => setReviewingBooking(booking)}
         />
       ))}
 
@@ -86,6 +101,14 @@ export default function BookingList({ initialBookings, onRefresh }: { initialBoo
           onClose={() => setBookingToDelete(null)}
         />
       )}
+
+      {/* Review Dialog */}
+      <ReviewSubmissionDialog 
+        open={!!reviewingBooking}
+        onClose={() => setReviewingBooking(null)}
+        onSave={handleReviewSubmit}
+        bookingDescription={reviewingBooking ? `${reviewingBooking.car?.brand} ${reviewingBooking.car?.model}` : ""}
+      />
     </div>
   );
 }
