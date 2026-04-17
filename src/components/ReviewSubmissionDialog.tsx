@@ -30,6 +30,7 @@ export default function ReviewSubmissionDialog({
 }: ReviewSubmissionDialogProps) {
   const [rating, setRating] = useState<number | null>(3);
   const [comment, setComment] = useState('');
+  const [error, setError] = useState<string | null>(null);
   const [isSubmitting, setIsSubmitting] = useState(false);
 
   useEffect(() => {
@@ -37,17 +38,26 @@ export default function ReviewSubmissionDialog({
       setRating(initialData?.rating || 3);
       setComment(initialData?.comment || '');
       setIsSubmitting(false);
+      setError(null);
     }
   }, [open, initialData]);
 
   const handleSave = async () => {
+    setError(null);
+
     if (!rating || rating < 1 || rating > 5) {
-      return alert('Please choose a rating between 1 and 5.');
+      return setError('Please choose a rating between 1 and 5.');
+    }
+
+    if (!comment || comment.trim() === '') {
+      return setError('require your comment');
     }
 
     setIsSubmitting(true);
     try {
       await onSave(rating, comment);
+    } catch (err: any) {
+      setError(err.message || 'Failed to save review');
     } finally {
       setIsSubmitting(false);
     }
@@ -78,9 +88,19 @@ export default function ReviewSubmissionDialog({
           multiline
           minRows={4}
           value={comment}
-          onChange={(event) => setComment(event.target.value)}
+          onChange={(event) => {
+            setComment(event.target.value);
+            if (error === 'require your comment' && event.target.value.trim() !== '') {
+              setError(null);
+            }
+          }}
           placeholder="Share your experience with the provider or car..."
           fullWidth
+          error={error === 'require your comment'}
+          helperText={error === 'require your comment' ? 'Please share your thoughts - we require your comment!' : ''}
+          FormHelperTextProps={{
+            sx: { fontWeight: 'bold', fontSize: '0.75rem' }
+          }}
         />
       </DialogContent>
       <DialogActions sx={{ p: 3, display: 'flex', justifyContent: 'space-between' }}>

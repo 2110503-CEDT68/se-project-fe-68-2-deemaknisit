@@ -112,8 +112,8 @@ export default function BookingList({ initialBookings, onRefresh }: { initialBoo
   return (
     <div className="flex flex-col items-center gap-6 w-full max-w-4xl pb-10">
       {initialBookings.map((booking) => (
-        <BookingCard 
-          key={booking._id} 
+        <BookingCard
+          key={booking._id}
           booking={booking}
           onEdit={() => setEditingBooking(booking)}
           onDelete={() => setBookingToDelete(booking)}
@@ -125,7 +125,7 @@ export default function BookingList({ initialBookings, onRefresh }: { initialBoo
       ))}
 
       {/* Editing Dialog */}
-      <BookingDialog 
+      <BookingDialog
         open={!!editingBooking}
         onClose={() => setEditingBooking(null)}
         onSave={handleUpdate}
@@ -134,7 +134,7 @@ export default function BookingList({ initialBookings, onRefresh }: { initialBoo
 
       {/* Deleting Confirmation */}
       {bookingToDelete && (
-        <ConfirmDeleteDialog 
+        <ConfirmDeleteDialog
           open={!!bookingToDelete}
           title="Cancel Booking"
           description="Are you sure you want to cancel this booking? This action cannot be undone."
@@ -166,7 +166,7 @@ export default function BookingList({ initialBookings, onRefresh }: { initialBoo
       />
 
       {/* Review Dialog */}
-      <ReviewSubmissionDialog 
+      <ReviewSubmissionDialog
         open={!!reviewingBooking}
         onClose={() => { setReviewingBooking(null); setIsReviewEditing(false); }}
         onSave={handleReviewSubmit}
@@ -176,7 +176,7 @@ export default function BookingList({ initialBookings, onRefresh }: { initialBoo
 
       {/* Review Deletion Confirmation */}
       {bookingToReviewDelete && (
-        <ConfirmDeleteDialog 
+        <ConfirmDeleteDialog
           open={!!bookingToReviewDelete}
           title="Delete Review"
           description="Are you sure you want to delete your review? This action cannot be undone."
