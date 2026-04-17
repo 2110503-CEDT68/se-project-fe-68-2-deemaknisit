@@ -1,8 +1,10 @@
+import Link from "next/link";
 import Image from "next/image";
 import InteractiveCard from "./InteractiveCard";
 import { decodeSafeUrl } from "@/libs/urlUtils";
 
 export default function CarCard({
+  id,
   brand,
   model,
   imgSrc,
@@ -16,6 +18,7 @@ export default function CarCard({
   onEdit,
   onDelete,
 }: {
+  id: string;
   brand: string;
   model: string;
   imgSrc: string;
@@ -30,7 +33,8 @@ export default function CarCard({
   onDelete?: () => void;
 }) {
   return (
-    <InteractiveCard contentName={`${brand} ${model}`} className="w-full h-auto flex-col sm:flex-row shadow-lg">
+    <Link href={`/car/${id}`} className="w-full">
+      <InteractiveCard contentName={`${brand} ${model}`} className="w-full h-auto flex-col sm:flex-row shadow-lg">
       <div className="w-full sm:w-[250px] min-h-[200px] relative overflow-hidden flex-shrink-0 bg-stone-100">
         <Image
           src={decodeSafeUrl(imgSrc) || '/img/logo.png'}
@@ -108,5 +112,6 @@ export default function CarCard({
         </div>
       </div>
     </InteractiveCard>
+    </Link>
   );
 }

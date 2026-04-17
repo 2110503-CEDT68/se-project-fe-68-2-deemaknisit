@@ -1,0 +1,184 @@
+'use client';
+
+import { useEffect, useState } from 'react';
+import Image from 'next/image';
+import { useParams } from 'next/navigation';
+import { getCar } from '@/libs/carService';
+import { getCarReviews } from '@/libs/reviewService';
+import { Car, Review } from '@/../interface';
+import { decodeSafeUrl } from '@/libs/urlUtils';
+import ReviewCard from '@/components/ReviewCard';
+import { CircularProgress, Rating, Typography, Divider } from '@mui/material';
+
+export default function CarDetailPage() {
+    const { id } = useParams<{ id: string }>();
+    const [car, setCar] = useState<Car | null>(null);
+    const [reviews, setReviews] = useState<Review[]>([]);
+    const [loading, setLoading] = useState(true);
+
+    useEffect(() => {
+        if (!id) return;
+
+        const fetchData = async () => {
+            try {
+                const [carData, reviewsData] = await Promise.all([
+                    getCar(id),
+                    getCarReviews(id)
+                ]);
+                setCar(carData.data);
+                setReviews(reviewsData.data);
+            } catch (error) {
+                console.error("Error fetching car details or reviews:", error);
+            } finally {
+                setLoading(false);
+            }
+        };
+
+        fetchData();
+    }, [id]);
+
+    if (loading) {
+        return (
+            <div className="flex justify-center items-center min-h-screen bg-white">
+                <CircularProgress sx={{ color: '#FFD600' }} />
+            </div>
+        );
+    }
+
+    if (!car) {
+        return (
+            <div className="flex flex-col justify-center items-center min-h-screen bg-white">
+                <h1 className="text-2xl font-black text-[#111111] uppercase tracking-widest">Car Not Found</h1>
+            </div>
+        );
+    }
+
+    const averageRating = reviews.length > 0 
+        ? reviews.reduce((acc, r) => acc + r.rating, 0) / reviews.length 
+        : 0;
+
+    return (
+        <main className="bg-white min-h-screen pb-20">
+            {/* Hero Section */}
+            <div className="relative w-full h-[50vh] bg-stone-900 overflow-hidden">
+                <Image
+                    src={decodeSafeUrl(car.picture) || '/img/logo.png'}
+                    alt={`${car.brand} ${car.model}`}
+                    fill
+                    className="object-cover opacity-60"
+                />
+                <div className="absolute inset-0 bg-gradient-to-t from-white via-transparent to-transparent" />
+                
+                <div className="absolute bottom-0 left-0 right-0 max-w-6xl mx-auto px-8 pb-12">
+                    <div className="flex flex-col gap-2">
+                        <div className="flex items-center gap-2">
+                            <span className="bg-[#FFD600] text-[#111111] px-3 py-1 rounded-full text-[10px] font-black uppercase tracking-widest">
+                                {car.year} Model
+                            </span>
+                            <span className="bg-white/20 backdrop-blur-md text-white px-3 py-1 rounded-full text-[10px] font-black uppercase tracking-widest border border-white/20">
+                                {car.transmission}
+                            </span>
+                        </div>
+                        <h1 className="text-white text-6xl md:text-8xl font-black italic uppercase tracking-tighter leading-none">
+                            {car.brand} <span className="text-[#FFD600]">{car.model}</span>
+                        </h1>
+                        <p className="text-white/80 font-bold uppercase tracking-[0.3em] mt-2">{car.licensePlate}</p>
+                    </div>
+                </div>
+            </div>
+
+            <div className="max-w-6xl mx-auto px-8 mt-12 grid grid-cols-1 lg:grid-cols-3 gap-16">
+                {/* Details Section */}
+                <div className="lg:col-span-2 space-y-12">
+                    <section>
+                        <h2 className="text-[10px] font-black text-[#FFD600] uppercase tracking-[0.4em] mb-4">Specifications</h2>
+                        <div className="grid grid-cols-2 md:grid-cols-4 gap-8">
+                            {[
+                                { label: 'Color', value: car.color },
+                                { label: 'Fuel Type', value: car.fuelType },
+                                { label: 'Transmission', value: car.transmission },
+                                { label: 'Daily Rate', value: `฿${car.rentPrice}` }
+                            ].map((spec, i) => (
+                                <div key={i} className="bg-stone-50 p-6 rounded-3xl border border-stone-100">
+                                    <p className="text-[10px] font-black text-stone-400 uppercase tracking-widest mb-1">{spec.label}</p>
+                                    <p className="text-[#111111] font-black text-lg">{spec.value}</p>
+                                </div>
+                            ))}
+                        </div>
+                    </section>
+
+                    <Divider />
+
+                    {/* Reviews Section */}
+                    <section id="reviews">
+                        <div className="flex justify-between items-end mb-8">
+                            <div>
+                                <h2 className="text-[10px] font-black text-[#FFD600] uppercase tracking-[0.4em] mb-2">Guest Experiences</h2>
+                                <h3 className="text-4xl font-black text-[#111111] tracking-tight">Reviews ({reviews.length})</h3>
+                            </div>
+                            {reviews.length > 0 && (
+                                <div className="text-right">
+                                    <div className="flex items-center gap-2 justify-end">
+                                        <Rating value={averageRating} readOnly precision={0.5} />
+                                        <span className="text-2xl font-black text-[#111111]">{averageRating.toFixed(1)}</span>
+                                    </div>
+                                    <p className="text-[10px] font-black text-stone-400 uppercase tracking-widest">Average Rating</p>
+                                </div>
+                            )}
+                        </div>
+
+                        {reviews.length === 0 ? (
+                            <div className="bg-stone-50 border-2 border-dashed border-stone-200 rounded-[32px] p-16 text-center">
+                                <p className="text-stone-400 font-bold italic text-lg uppercase tracking-widest">No reviews yet for this vehicle</p>
+                            </div>
+                        ) : (
+                            <div className="space-y-6">
+                                {reviews.map((review) => (
+                                    <ReviewCard key={review._id} review={review} showUser={true} />
+                                ))}
+                            </div>
+                        )}
+                    </section> section
+                </div>
+
+                {/* Sidebar / Call to Action */}
+                <div className="lg:col-span-1">
+                    <div className="sticky top-24 bg-[#111111] rounded-[40px] p-10 shadow-2xl text-white border border-white/10 overflow-hidden">
+                        <div className="absolute top-0 right-0 w-32 h-32 bg-[#FFD600] rounded-full blur-[80px] opacity-20 -mr-16 -mt-16" />
+                        
+                        <span className="text-[#FFD600] text-[10px] font-black uppercase tracking-[0.3em] mb-2 block">Premium Rental</span>
+                        <div className="mb-8">
+                            <p className="text-4xl font-black italic tracking-tighter">฿{car.rentPrice}<span className="text-sm font-bold uppercase tracking-widest text-[#FFD600] ml-2">/ Day</span></p>
+                        </div>
+
+                        <div className="space-y-4 mb-10">
+                            <div className="flex justify-between items-center py-3 border-b border-white/10">
+                                <span className="text-xs font-bold text-stone-400 uppercase tracking-widest">Availability</span>
+                                <span className={`text-[10px] font-black uppercase px-2 py-0.5 rounded ${car.available ? 'bg-green-500/20 text-green-400' : 'bg-red-500/20 text-red-400'}`}>
+                                    {car.available ? 'Ready to Drive' : 'Reserved'}
+                                </span>
+                            </div>
+                            <div className="flex justify-between items-center py-3 border-b border-white/10">
+                                <span className="text-xs font-bold text-stone-400 uppercase tracking-widest">Provider</span>
+                                <span className="text-xs font-black uppercase text-[#FFD600]">{car.provider?.name || 'Authorized Dealer'}</span>
+                            </div>
+                        </div>
+
+                        <button 
+                            disabled={!car.available}
+                            className={`w-full py-5 rounded-2xl font-black uppercase tracking-[0.2em] transition-all duration-300 ${
+                                car.available 
+                                ? 'bg-[#FFD600] text-[#111111] hover:bg-white hover:scale-[1.02] shadow-[0_20px_40px_-10px_rgba(255,214,0,0.3)]' 
+                                : 'bg-stone-800 text-stone-500 cursor-not-allowed'
+                            }`}
+                        >
+                            {car.available ? 'Book This Car' : 'Currently Unavailable'}
+                        </button>
+
+                        <p className="text-[9px] text-center text-stone-500 font-bold uppercase tracking-widest mt-6 italic">Secure checkout powered by Ratatouille</p>
+                    </div>
+                </div>
+            </div>
+        </main>
+    );
+}
