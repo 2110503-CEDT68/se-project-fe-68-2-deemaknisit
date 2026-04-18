@@ -32,6 +32,7 @@ export default function ReviewSubmissionDialog({
   const [comment, setComment] = useState('');
   const [error, setError] = useState<string | null>(null);
   const [isSubmitting, setIsSubmitting] = useState(false);
+  const [successMessage,setSuccessMessage] = useState<string | null>(null);
 
   useEffect(() => {
     if (open) {
@@ -39,6 +40,7 @@ export default function ReviewSubmissionDialog({
       setComment(initialData?.comment || '');
       setIsSubmitting(false);
       setError(null);
+      setSuccessMessage(null);
     }
   }, [open, initialData]);
 
@@ -56,8 +58,9 @@ export default function ReviewSubmissionDialog({
     setIsSubmitting(true);
     try {
       await onSave(rating, comment);
+      setSuccessMessage('Thank you for your feedback!');
     } catch (err: any) {
-      setError(err.message || 'Failed to save review');
+      setError('error');
     } finally {
       setIsSubmitting(false);
     }
@@ -67,6 +70,17 @@ export default function ReviewSubmissionDialog({
     <Dialog open={open} onClose={!isSubmitting ? onClose : undefined} fullWidth maxWidth="xs">
       <DialogTitle sx={{ fontWeight: 'bold', pt: 3 }}>Submit Your Review</DialogTitle>
       <DialogContent sx={{ display: 'flex', flexDirection: 'column', gap: 3, pt: 2 }}>
+        {successMessage && (
+          <Box sx={{ p: 1.5, bgcolor: '#e8f5e9', color: '#385b3a', borderRadius: 1 }}>
+            <Typography fontWeight="bold" variant="body2">{successMessage}</Typography>
+          </Box>
+        )}
+
+        {error && error !== 'require your comment' && (
+          <Box sx={{ p: 1.5, bgcolor: '#ffebee', color: '#871010', borderRadius: 1 }}>
+            <Typography fontWeight="bold" variant="body2">{error}</Typography>
+          </Box>
+        )}
         <div>
           <Typography variant="body2" className="text-stone-400">
             Reviewing: <span className="text-[#111111] font-bold">{bookingDescription || 'Your completed booking'}</span>
