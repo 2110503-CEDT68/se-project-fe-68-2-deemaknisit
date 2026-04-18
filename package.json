@@ -2,6 +2,18 @@
   "name": "rental-car",
   "version": "0.1.0",
   "private": true,
+  "description": "[![Review Assignment Due Date](https://classroom.github.com/assets/deadline-readme-button-22041afd0340ce965d47ae6ef1cefeee28c7c493a6346c4f15d667ab976d596c.svg)](https://classroom.github.com/a/fpUm_Avi)",
+  "homepage": "https://github.com/2110503-CEDT68/se-project-fe-68-2-deemaknisit#readme",
+  "bugs": {
+    "url": "https://github.com/2110503-CEDT68/se-project-fe-68-2-deemaknisit/issues"
+  },
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/2110503-CEDT68/se-project-fe-68-2-deemaknisit.git"
+  },
+  "license": "ISC",
+  "author": "",
+  "main": "index.js",
   "scripts": {
     "dev": "next dev --turbopack",
     "build": "next build",
