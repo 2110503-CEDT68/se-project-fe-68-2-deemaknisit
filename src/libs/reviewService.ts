@@ -37,12 +37,9 @@ export async function getMyReviews(token: string): Promise<ResponseList<Review>>
   return await response.json();
 }
 
-export async function getAllReviews(token: string): Promise<ResponseList<Review>> {
+export async function getAllReviews(): Promise<ResponseList<Review>> {
   const response = await fetch(`${baseUrl}/reviews?all=true`, {
     method: "GET",
-    headers: {
-      authorization: `Bearer ${token}`,
-    },
   });
 
   if (!response.ok) {

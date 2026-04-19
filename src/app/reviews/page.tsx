@@ -44,7 +44,7 @@ export default function ReviewsPage() {
         try {
           setLoading(true);
           setError(null);
-          const response = await getAllReviews('');
+          const response = await getAllReviews();
           
           if (response.success && response.data) {
             const transformedReviews = response.data.map((review: any) => ({
@@ -53,11 +53,11 @@ export default function ReviewsPage() {
               userName: review.user?.name || review.userName || 'Unknown User',
               rating: review.rating,
               comment: review.comment,
-              carImage: review.car?.picture || '',
-              carBrand: review.car?.brand || '',
-              carModel: review.car?.model || '',
-              carYear: review.car?.year || 0,
-              licensePlate: review.car?.licensePlate || '',
+              carImage: review.bookingId?.car?.picture || '',
+              carBrand: review.bookingId?.car?.brand || '',
+              carModel: review.bookingId?.car?.model || '',
+              carYear: review.bookingId?.car?.year || 0,
+              licensePlate: review.bookingId?.car?.licensePlate || '',
               createdAt: review.createdAt,
             } as ReviewListData));
             setReviews(transformedReviews);
@@ -84,7 +84,7 @@ export default function ReviewsPage() {
         if (tab === 'personal') {
           response = await getMyReviews(session.user.token);
         } else {
-          response = await getAllReviews(session.user.token);
+          response = await getAllReviews();
         }
 
         if (response.success && response.data) {
@@ -94,11 +94,11 @@ export default function ReviewsPage() {
             userName: review.user?.name || review.userName || 'Unknown User',
             rating: review.rating,
             comment: review.comment,
-            carImage: review.car?.picture || '',
-            carBrand: review.car?.brand || '',
-            carModel: review.car?.model || '',
-            carYear: review.car?.year || 0,
-            licensePlate: review.car?.licensePlate || '',
+            carImage: review.bookingId?.car?.picture || '',
+            carBrand: review.bookingId?.car?.brand || '',
+            carModel: review.bookingId?.car?.model || '',
+            carYear: review.bookingId?.car?.year || 0,
+            licensePlate: review.bookingId?.car?.licensePlate || '',
             createdAt: review.createdAt,
           } as ReviewListData));
           setReviews(transformedReviews);
