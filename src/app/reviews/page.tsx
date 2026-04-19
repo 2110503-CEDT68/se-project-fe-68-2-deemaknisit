@@ -39,6 +39,10 @@ export default function ReviewsPage() {
       return;
     }
 
+    // Track the current request to prevent race conditions
+    let isActive = true;
+    const requestTab = tab; // Capture tab at request time
+
     // For all tab, can fetch without authentication
     if (tab === 'all' && status === 'unauthenticated') {
       const fetchPublicReviews = async () => {
@@ -46,6 +50,10 @@ export default function ReviewsPage() {
           setLoading(true);
           setError(null);
           const response = await getAllReviews();
+          
+          // Only update if this request is still active and tab hasn't changed
+          if (!isActive || requestTab !== tab) return;
+          
           if (response.success && response.data) {
             const transformedReviews = response.data.map((review: any) => ({
               reviewId: review._id,
@@ -63,14 +71,20 @@ export default function ReviewsPage() {
             setReviews(transformedReviews);
           }
         } catch (err) {
-          setError(err instanceof Error ? err.message : 'Failed to fetch reviews');
-          console.error('Error fetching reviews:', err);
+          if (isActive && requestTab === tab) {
+            setError(err instanceof Error ? err.message : 'Failed to fetch reviews');
+            console.error('Error fetching reviews:', err);
+          }
         } finally {
-          setLoading(false);
+          if (isActive && requestTab === tab) {
+            setLoading(false);
+          }
         }
       };
       fetchPublicReviews();
-      return;
+      return () => {
+        isActive = false;
+      };
     }
 
     if (!session?.user?.token) return;
@@ -86,6 +100,9 @@ export default function ReviewsPage() {
         } else {
           response = await getAllReviews();
         }
+
+        // Only update if this request is still active and tab hasn't changed
+        if (!isActive || requestTab !== tab) return;
 
         if (response.success && response.data) {
           const transformedReviews = response.data.map((review: any) => ({
@@ -104,14 +121,22 @@ export default function ReviewsPage() {
           setReviews(transformedReviews);
         }
       } catch (err) {
-        setError(err instanceof Error ? err.message : 'Failed to fetch reviews');
-        console.error('Error fetching reviews:', err);
+        if (isActive && requestTab === tab) {
+          setError(err instanceof Error ? err.message : 'Failed to fetch reviews');
+          console.error('Error fetching reviews:', err);
+        }
       } finally {
-        setLoading(false);
+        if (isActive && requestTab === tab) {
+          setLoading(false);
+        }
       }
     };
 
     fetchReviews();
+    
+    return () => {
+      isActive = false;
+    };
   }, [session, status, tab]);
 
   if (status === 'loading') {
