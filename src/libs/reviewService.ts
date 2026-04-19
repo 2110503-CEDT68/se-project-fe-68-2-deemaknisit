@@ -37,6 +37,33 @@ export async function getMyReviews(token: string): Promise<ResponseList<Review>>
   return await response.json();
 }
 
+export async function getAllReviews(token: string): Promise<ResponseList<Review>> {
+  const response = await fetch(`${baseUrl}/reviews?all=true`, {
+    method: "GET",
+    headers: {
+      authorization: `Bearer ${token}`,
+    },
+  });
+
+  if (!response.ok) {
+    const errorData = await response.json();
+    throw new Error(errorData.message || "Failed to fetch all reviews");
+  }
+  return await response.json();
+}
+
+export async function getCarReviews(carId: string): Promise<ResponseList<Review>> {
+  const response = await fetch(`${baseUrl}/cars/${carId}/reviews`, {
+    method: "GET",
+  });
+
+  if (!response.ok) {
+    const errorData = await response.json();
+    throw new Error(errorData.message || "Failed to fetch car reviews");
+  }
+  return await response.json();
+}
+
 export async function getReviewById(token: string, reviewId: string): Promise<ResponseSingle<Review>> {
   const response = await fetch(`${baseUrl}/reviews/${reviewId}`, {
     method: "GET",
