@@ -6,6 +6,7 @@ import { decodeSafeUrl } from "@/libs/urlUtils";
 
 export interface ReviewListData {
   reviewId: string;
+  userId: string;
   userName: string;
   rating: number;
   comment?: string;
@@ -17,7 +18,17 @@ export interface ReviewListData {
   createdAt?: string;
 }
 
-export default function ReviewListCard({ review }: { review: ReviewListData }) {
+export default function ReviewListCard({ 
+  review, 
+  isOwner = false,
+  onEdit,
+  onDelete 
+}: { 
+  review: ReviewListData,
+  isOwner?: boolean,
+  onEdit?: () => void,
+  onDelete?: () => void
+}) {
   const date = review.createdAt
     ? new Date(review.createdAt).toLocaleDateString('en-GB', {
       day: 'numeric',
@@ -43,6 +54,24 @@ export default function ReviewListCard({ review }: { review: ReviewListData }) {
           <div className="flex items-center gap-2">
             <Rating value={review.rating} readOnly size="small" />
             <span className="text-xs font-bold text-[#FFD600]">{review.rating.toFixed(1)}</span>
+            {isOwner && (
+              <div className="flex gap-2 ml-4 pl-4 border-l border-stone-200">
+                <button
+                  onClick={onEdit}
+                  className="p-1.5 text-xs font-bold bg-blue-100 text-blue-700 rounded hover:bg-blue-200 transition-colors"
+                  title="Edit review"
+                >
+                  Edit
+                </button>
+                <button
+                  onClick={onDelete}
+                  className="p-1.5 text-xs font-bold bg-red-100 text-red-700 rounded hover:bg-red-200 transition-colors"
+                  title="Delete review"
+                >
+                  Delete
+                </button>
+              </div>
+            )}
           </div>
         </div>
       </div>

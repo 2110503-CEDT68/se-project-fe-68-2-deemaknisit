@@ -4,7 +4,9 @@ import { useEffect, useState } from 'react';
 import { useSession } from 'next-auth/react';
 import Link from 'next/link';
 import ReviewListCard, { ReviewListData } from '@/components/ReviewListCard';
-import { getMyReviews, getAllReviews } from '@/libs/reviewService';
+import ReviewSubmissionDialog from '@/components/ReviewSubmissionDialog';
+import ConfirmDialog from '@/components/ConfirmDialog';
+import { getMyReviews, getAllReviews, updateReview, deleteReview } from '@/libs/reviewService';
 import { Review, Booking } from '@/../interface';
 
 export default function ReviewsPage() {
@@ -13,6 +15,11 @@ export default function ReviewsPage() {
   const [reviews, setReviews] = useState<ReviewListData[]>([]);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
+  const [editingReviewId, setEditingReviewId] = useState<string | null>(null);
+  const [showEditDialog, setShowEditDialog] = useState(false);
+  const [showDeleteDialog, setShowDeleteDialog] = useState(false);
+  const [deletingReviewId, setDeletingReviewId] = useState<string | null>(null);
+  const [isSubmitting, setIsSubmitting] = useState(false);
 
   useEffect(() => {
     // Allow unauthenticated users to view all reviews
@@ -42,6 +49,7 @@ export default function ReviewsPage() {
           if (response.success && response.data) {
             const transformedReviews = response.data.map((review: any) => ({
               reviewId: review._id,
+              userId: review.userId || review.user?._id || '',
               userName: review.user?.name || review.userName || 'Unknown User',
               rating: review.rating,
               comment: review.comment,
@@ -82,6 +90,7 @@ export default function ReviewsPage() {
         if (response.success && response.data) {
           const transformedReviews = response.data.map((review: any) => ({
             reviewId: review._id,
+            userId: review.userId || review.user?._id || '',
             userName: review.user?.name || review.userName || 'Unknown User',
             rating: review.rating,
             comment: review.comment,
@@ -114,6 +123,63 @@ export default function ReviewsPage() {
   }
 
   const isPersonalTabWithoutAuth = tab === 'personal' && status === 'unauthenticated';
+
+  const currentUserId = session?.user?.id || '';
+  const editingReview = reviews.find(r => r.reviewId === editingReviewId);
+
+  const handleEditReview = (reviewId: string) => {
+    setEditingReviewId(reviewId);
+    setShowEditDialog(true);
+  };
+
+  const handleDeleteReview = (reviewId: string) => {
+    setDeletingReviewId(reviewId);
+    setShowDeleteDialog(true);
+  };
+
+  const handleSaveEdit = async (rating: number, comment: string) => {
+    if (!editingReviewId || !session?.user?.token) return;
+
+    setIsSubmitting(true);
+    try {
+      await updateReview(session.user.token, editingReviewId, { rating, comment });
+      
+      // Update local reviews list
+      setReviews(reviews.map(r =>
+        r.reviewId === editingReviewId
+          ? { ...r, rating, comment }
+          : r
+      ));
+      
+      setShowEditDialog(false);
+      setEditingReviewId(null);
+    } catch (err) {
+      console.error('Error updating review:', err);
+      throw err;
+    } finally {
+      setIsSubmitting(false);
+    }
+  };
+
+  const handleConfirmDelete = async () => {
+    if (!deletingReviewId || !session?.user?.token) return;
+
+    setIsSubmitting(true);
+    try {
+      await deleteReview(session.user.token, deletingReviewId);
+      
+      // Remove deleted review from list
+      setReviews(reviews.filter(r => r.reviewId !== deletingReviewId));
+      
+      setShowDeleteDialog(false);
+      setDeletingReviewId(null);
+    } catch (err) {
+      console.error('Error deleting review:', err);
+      throw err;
+    } finally {
+      setIsSubmitting(false);
+    }
+  };
 
   return (
     <main className="min-h-screen bg-white mt-16">
@@ -178,10 +244,46 @@ export default function ReviewsPage() {
         ) : (
           <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
             {reviews.map((review) => (
-              <ReviewListCard key={review.reviewId} review={review} />
+              <ReviewListCard
+                key={review.reviewId}
+                review={review}
+                isOwner={review.userId === currentUserId}
+                onEdit={() => handleEditReview(review.reviewId)}
+                onDelete={() => handleDeleteReview(review.reviewId)}
+              />
             ))}
           </div>
         )}
+
+        {/* Edit Review Dialog */}
+        {editingReview && (
+          <ReviewSubmissionDialog
+            open={showEditDialog}
+            onClose={() => {
+              setShowEditDialog(false);
+              setEditingReviewId(null);
+            }}
+            onSave={handleSaveEdit}
+            initialData={{ rating: editingReview.rating, comment: editingReview.comment }}
+            bookingDescription={`${editingReview.carBrand} ${editingReview.carModel}`}
+          />
+        )}
+
+        {/* Delete Confirmation Dialog */}
+        <ConfirmDialog
+          open={showDeleteDialog}
+          title="Delete Review"
+          description="Are you sure you want to delete this review? This action cannot be undone."
+          confirmText="Delete"
+          confirmColor="#ef4444"
+          cancelText="Cancel"
+          isSubmitting={isSubmitting}
+          onConfirm={handleConfirmDelete}
+          onClose={() => {
+            setShowDeleteDialog(false);
+            setDeletingReviewId(null);
+          }}
+        />
       </div>
     </main>
   );
