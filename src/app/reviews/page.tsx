@@ -7,6 +7,7 @@ import ReviewListCard, { ReviewListData } from '@/components/ReviewListCard';
 import ReviewSubmissionDialog from '@/components/ReviewSubmissionDialog';
 import ConfirmDialog from '@/components/ConfirmDialog';
 import { getMyReviews, getAllReviews, updateReview, deleteReview } from '@/libs/reviewService';
+import { getPayloadFromToken, getRoleFromToken } from '@/libs/authService';
 import { Review, Booking } from '@/../interface';
 
 export default function ReviewsPage() {
@@ -45,12 +46,11 @@ export default function ReviewsPage() {
           setLoading(true);
           setError(null);
           const response = await getAllReviews();
-          
           if (response.success && response.data) {
             const transformedReviews = response.data.map((review: any) => ({
               reviewId: review._id,
-              userId: review.userId || review.user?._id || '',
-              userName: review.user?.name || review.userName || 'Unknown User',
+              userId: typeof review.userId === 'string' ? review.userId : review.userId?._id || '',
+              userName: review.userId?.name || review.userName || 'Unknown User',
               rating: review.rating,
               comment: review.comment,
               carImage: review.bookingId?.car?.picture || '',
@@ -90,8 +90,8 @@ export default function ReviewsPage() {
         if (response.success && response.data) {
           const transformedReviews = response.data.map((review: any) => ({
             reviewId: review._id,
-            userId: review.userId || review.user?._id || '',
-            userName: review.user?.name || review.userName || 'Unknown User',
+            userId: typeof review.userId === 'string' ? review.userId : review.userId?._id || '',
+            userName: review.userId?.name || review.userName || 'Unknown User',
             rating: review.rating,
             comment: review.comment,
             carImage: review.bookingId?.car?.picture || '',
@@ -124,7 +124,10 @@ export default function ReviewsPage() {
 
   const isPersonalTabWithoutAuth = tab === 'personal' && status === 'unauthenticated';
 
-  const currentUserId = session?.user?.id || '';
+  const payload = session?.user?.token ? getPayloadFromToken(session.user.token) : null;
+  const currentUserId = payload?.id || '';
+  const userRole = session?.user?.token ? getRoleFromToken(session.user.token) : null;
+  const isAdmin = userRole === 'admin';
   const editingReview = reviews.find(r => r.reviewId === editingReviewId);
 
   const handleEditReview = (reviewId: string) => {
@@ -247,7 +250,7 @@ export default function ReviewsPage() {
               <ReviewListCard
                 key={review.reviewId}
                 review={review}
-                isOwner={review.userId === currentUserId}
+                isOwner={review.userId === currentUserId || isAdmin}
                 onEdit={() => handleEditReview(review.reviewId)}
                 onDelete={() => handleDeleteReview(review.reviewId)}
               />

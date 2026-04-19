@@ -52,10 +52,8 @@ export default function ReviewListCard({
             </div>
           </div>
           <div className="flex items-center gap-2">
-            <Rating value={review.rating} readOnly size="small" />
-            <span className="text-xs font-bold text-[#FFD600]">{review.rating.toFixed(1)}</span>
             {isOwner && (
-              <div className="flex gap-2 ml-4 pl-4 border-l border-stone-200">
+              <div className="flex flex-col gap-2 ml-4 pl-4 border-l border-stone-200">
                 <button
                   onClick={onEdit}
                   className="p-1.5 text-xs font-bold bg-blue-100 text-blue-700 rounded hover:bg-blue-200 transition-colors"
@@ -79,6 +77,11 @@ export default function ReviewListCard({
       {/* Comment */}
       {review.comment && (
         <div className="p-4 border-b border-stone-100">
+          <div className="flex items-center gap-3 mb-3">
+            <Rating value={review.rating} readOnly size="small" />
+            <span className="text-xs font-bold text-[#FFD600]">{review.rating.toFixed(1)}</span>
+          </div>
+          <p className="text-xs font-bold text-stone-500 uppercase tracking-wide mb-2">Comment:</p>
           <p className="text-sm text-stone-700 leading-relaxed italic">
             "{review.comment}"
           </p>
@@ -86,17 +89,17 @@ export default function ReviewListCard({
       )}
 
       {/* Car Details */}
-      <div className="p-4 flex gap-4">
-        <div className="w-24 h-24 relative flex-shrink-0 bg-stone-100 rounded-lg overflow-hidden">
+      <div className="p-4 flex gap-4 flex-col sm:flex-row">
+        <div className="w-full sm:w-[150px] h-[120px] relative overflow-hidden flex-shrink-0 bg-stone-100 rounded-lg">
           <Image
             src={decodeSafeUrl(review.carImage) || '/img/logo.png'}
             alt={`${review.carBrand} ${review.carModel}`}
             fill
-            className="object-cover"
+            className="object-cover transition-transform duration-500 hover:scale-105"
           />
         </div>
-        <div className="flex-grow flex flex-col justify-center gap-1">
-          <h4 className="font-bold text-sm text-[#111111]">
+        <div className="flex-grow flex flex-col justify-center gap-2">
+          <h4 className="font-bold text-lg text-[#111111]">
             {review.carBrand} {review.carModel}
           </h4>
           <p className="text-xs text-stone-600">
