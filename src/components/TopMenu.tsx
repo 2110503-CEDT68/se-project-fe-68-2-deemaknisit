@@ -44,6 +44,7 @@ export default async function TopMenu() {
                 <TopMenuItem title='Booking' pageRef='/booking' />
                 <TopMenuItem title='My Booking' pageRef='/mybooking' />
                 <TopMenuItem title='Reviews' pageRef='/reviews' />
+                <TopMenuItem title='Wishlist' pageRef='/wishlist' />
                 {role === 'admin' && (
                     <TopMenuItem title='Admin Dashboard' pageRef='/admin' />
                 )}
