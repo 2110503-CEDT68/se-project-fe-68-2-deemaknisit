@@ -10,7 +10,7 @@ import CarCard from "./CarCard";
 import CarDialog from "./CarDialog";
 import ConfirmDeleteDialog from "./ConfirmDeleteDialog";
 import { createCar, updateCar, deleteCar } from "@/libs/carService";
-import { addToWishlist, removeFromWishlist, checkIfInWishlist } from "@/libs/wishlistService";
+import { addToWishlist, removeFromWishlist, getWishlist } from "@/libs/wishlistService";
 import { Fab, Typography, Rating } from "@mui/material";
 
 const PlusIcon = () => (
@@ -29,9 +29,8 @@ export default function ProviderDetailWithCars({ initialProvider }: { initialPro
   const [isCarDialogOpen, setIsCarDialogOpen] = useState(false);
   const [editingCar, setEditingCar] = useState<Car | null>(null);
   const [carToDelete, setCarToDelete] = useState<Car | null>(null);
-  const [wishlistItem, setWishlistItem] = useState<any>(null);
-  const [isWishlistLoading, setIsWishlistLoading] = useState(false);
-  const [showWishlistMessage, setShowWishlistMessage] = useState<{ type: 'success' | 'error'; message: string } | null>(null);
+  const [wishlistMap, setWishlistMap] = useState<Record<string, any>>({});
+  const [isLoadingWishlist, setIsLoadingWishlist] = useState(false);
 
   const refreshProviderData = useCallback(async () => {
     try {
@@ -45,59 +44,56 @@ export default function ProviderDetailWithCars({ initialProvider }: { initialPro
     }
   }, [initialProvider._id]);
 
+  // Load user's wishlist
   useEffect(() => {
-    if (!token || !provider._id) return;
+    if (!token) return;
 
-    const checkWishlist = async () => {
+    const loadWishlist = async () => {
       try {
-        setIsWishlistLoading(true);
-        const wishlistItem = await checkIfInWishlist(token, provider._id);
-        setWishlistItem(wishlistItem);
+        setIsLoadingWishlist(true);
+        const wishlist = await getWishlist(token);
+
+        const map: Record<string, any> = {};
+        if (wishlist.data) {
+          wishlist.data.forEach((item: any) => {
+            map[item.carId?._id || item.carId] = item;
+          });
+        }
+        setWishlistMap(map);
       } catch (error) {
-        console.error('Error checking wishlist:', error);
+        console.error('Error loading wishlist:', error);
       } finally {
-        setIsWishlistLoading(false);
+        setIsLoadingWishlist(false);
       }
     };
 
-    checkWishlist();
-  }, [token, provider._id]);
+    loadWishlist();
+  }, [token]);
 
-  const handleAddToWishlist = async () => {
-    if (!token) {
-      setShowWishlistMessage({ type: 'error', message: 'Please log in first' });
-      setTimeout(() => setShowWishlistMessage(null), 3000);
-      return;
-    }
-
+  const handleAddCarToWishlist = async (carId: string) => {
+    if (!token) return;
     try {
-      setIsWishlistLoading(true);
-      const response = await addToWishlist(token, provider._id);
-      setWishlistItem(response.data);
-      setShowWishlistMessage({ type: 'success', message: 'Added successfully' });
-      setTimeout(() => setShowWishlistMessage(null), 3000);
-    } catch (error: any) {
-      setShowWishlistMessage({ type: 'error', message: error.message || 'Failed to add to wishlist' });
-      setTimeout(() => setShowWishlistMessage(null), 3000);
-    } finally {
-      setIsWishlistLoading(false);
+      const response = await addToWishlist(token, carId);
+      setWishlistMap(prev => ({ ...prev, [carId]: response.data }));
+    } catch (error) {
+      console.error('Error adding to wishlist:', error);
     }
   };
 
-  const handleRemoveFromWishlist = async () => {
-    if (!token || !wishlistItem?._id) return;
+  const handleRemoveCarFromWishlist = async (carId: string) => {
+    if (!token) return;
+    const wishlistItem = wishlistMap[carId];
+    if (!wishlistItem?._id) return;
 
     try {
-      setIsWishlistLoading(true);
       await removeFromWishlist(token, wishlistItem._id);
-      setWishlistItem(null);
-      setShowWishlistMessage({ type: 'success', message: 'Removed from wishlist' });
-      setTimeout(() => setShowWishlistMessage(null), 3000);
-    } catch (error: any) {
-      setShowWishlistMessage({ type: 'error', message: error.message || 'Failed to remove from wishlist' });
-      setTimeout(() => setShowWishlistMessage(null), 3000);
-    } finally {
-      setIsWishlistLoading(false);
+      setWishlistMap(prev => {
+        const newMap = { ...prev };
+        delete newMap[carId];
+        return newMap;
+      });
+    } catch (error) {
+      console.error('Error removing from wishlist:', error);
     }
   };
 
@@ -151,14 +147,14 @@ export default function ProviderDetailWithCars({ initialProvider }: { initialPro
             
             <div className="flex-grow flex flex-col justify-center">
                 <div className="flex flex-col gap-3">
-                <div className="flex items-center gap-2">
+                  <div className="flex items-center gap-2">
                     <div className="w-10 h-[2px] bg-[#FFD600]" />
                     <span className="text-[#FFD600] text-xs font-black uppercase tracking-[0.3em]">Verified Provider</span>
-                </div>
-                <h1 className="text-white text-5xl md:text-7xl font-black italic tracking-tighter uppercase leading-none">
+                  </div>
+                  <h1 className="text-white text-5xl md:text-7xl font-black italic tracking-tighter uppercase leading-none">
                     {provider.name}
-                </h1>
-            </div>
+                  </h1>
+                </div>
                 <div className="grid grid-cols-2 gap-x-8 gap-y-6 mt-4">
                   <div>
                     <Typography className="text-[10px] font-black text-stone-400 uppercase tracking-widest mb-1">Operations Base</Typography>
@@ -181,36 +177,11 @@ export default function ProviderDetailWithCars({ initialProvider }: { initialPro
                   </div>
                 </div>
                 <div className="flex gap-3 mt-6">
-                  {!isAdminUser && (
-                    <button
-                      onClick={wishlistItem ? handleRemoveFromWishlist : handleAddToWishlist}
-                      disabled={isWishlistLoading}
-                      className={`px-6 py-2.5 rounded-full font-black text-[11px] uppercase tracking-[0.2em] transition-all duration-300 flex items-center gap-2 ${
-                        wishlistItem
-                          ? 'bg-red-500 text-white hover:bg-red-600 shadow-lg shadow-red-500/20'
-                          : 'bg-[#FFD600] text-[#111111] hover:bg-[#e0b400] shadow-lg shadow-yellow-500/10'
-                      } ${isWishlistLoading ? 'opacity-50 cursor-not-allowed' : 'cursor-pointer active:scale-95'}`}
-                      title={wishlistItem ? 'Remove from wishlist' : 'Add to wishlist'}
-                    >
-                      <svg width="16" height="16" viewBox="0 0 24 24" fill={wishlistItem ? 'currentColor' : 'none'} stroke="currentColor" strokeWidth="2.5" strokeLinecap="round" strokeLinejoin="round">
-                        <path d="M20.84 4.61a5.5 5.5 0 0 0-7.78 0L12 5.67l-1.06-1.06a5.5 5.5 0 0 0-7.78 7.78l1.06 1.06L12 21.23l7.78-7.78 1.06-1.06a5.5 5.5 0 0 0 0-7.78z"></path>
-                      </svg>
-                      {wishlistItem ? 'Remove from Wishlist' : 'Add to Wishlist'}
-                    </button>
-                  )}
+                  {/* Wishlist button removed - now on individual car cards */}
                 </div>
             </div>
         </div>
-        {showWishlistMessage && (
-          <div className={`mt-4 px-4 py-3 rounded-full text-sm font-bold uppercase tracking-widest animate-fade-in ${
-            showWishlistMessage.type === 'success'
-              ? 'bg-green-100 text-green-700 border border-green-300'
-              : 'bg-red-100 text-red-700 border border-red-300'
-          }`}>
-            {showWishlistMessage.message}
           </div>
-        )}
-      </div>
 
       {/* Car Inventory Section */}
       <div className="w-full max-w-6xl mt-24 px-8 pb-20">
@@ -245,6 +216,10 @@ export default function ProviderDetailWithCars({ initialProvider }: { initialPro
                 available={car.available}
                 onEdit={isAdminUser ? () => handleEditCar(car) : undefined}
                 onDelete={isAdminUser ? () => setCarToDelete(car) : undefined}
+                onAddToWishlist={!isAdminUser ? () => handleAddCarToWishlist(car._id) : undefined}
+                onRemoveFromWishlist={!isAdminUser ? () => handleRemoveCarFromWishlist(car._id) : undefined}
+                isInWishlist={!!wishlistMap[car._id]}
+                isWishlistLoading={isLoadingWishlist}
               />
             ))
           ) : (

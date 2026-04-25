@@ -1,6 +1,6 @@
 /**
  * Wishlist Service
- * Handles all wishlist-related API calls
+ * Handles all wishlist-related API calls for cars
  */
 
 import { baseUrl } from '../config/api';
@@ -28,7 +28,7 @@ async function parseJsonResponse(response: Response) {
   }
 }
 
-export async function addToWishlist(token: string, providerId: string) {
+export async function addToWishlist(token: string, carId: string) {
   const response = await fetch(`${baseUrl}/wishlist`, {
     method: 'POST',
     headers: {
@@ -36,7 +36,7 @@ export async function addToWishlist(token: string, providerId: string) {
       Accept: 'application/json',
       Authorization: `Bearer ${token}`,
     },
-    body: JSON.stringify({ providerId }),
+    body: JSON.stringify({ carId }),
   });
 
   if (!response.ok) {
@@ -80,11 +80,11 @@ export async function getWishlist(token: string) {
   return await parseJsonResponse(response);
 }
 
-export async function checkIfInWishlist(token: string, providerId: string) {
+export async function checkIfInWishlist(token: string, carId: string) {
   try {
     const data = await getWishlist(token);
     const wishlistItems = data.data || [];
-    return wishlistItems.find((item: any) => item.providerId?._id === providerId || item.providerId === providerId);
+    return wishlistItems.find((item: any) => item.carId?._id === carId || item.carId === carId);
   } catch (error) {
     console.error('Error checking wishlist:', error);
     return null;
