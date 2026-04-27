@@ -253,7 +253,7 @@ export default function CarDetailPage() {
 
                         <div className="flex gap-4">
                             <Link 
-                                href={`/booking?carId=${id}`}
+                                href={`/bookings?tab=new&carId=${id}`}
                                 className={`flex-grow py-5 rounded-2xl font-black uppercase tracking-[0.2em] transition-all duration-300 text-center ${
                                     car.available 
                                     ? 'bg-[#FFD600] text-[#111111] hover:bg-white hover:scale-[1.02] shadow-[0_20px_40px_-10px_rgba(255,214,0,0.3)]' 
@@ -270,7 +270,7 @@ export default function CarDetailPage() {
                                     className={`w-16 h-16 rounded-2xl flex items-center justify-center transition-all duration-300 border-2 ${
                                         wishlistItemId 
                                         ? 'bg-red-500 border-red-500 text-white shadow-lg shadow-red-500/20' 
-                                        : 'bg-transparent border-white/20 text-white hover:border-[#FFD600] hover:text-[#FFD600]'
+                                        : 'bg-transparent border-white/20 text-white hover:border-[#ef4444] hover:text-[#ef4444]'
                                     } ${isWishlistLoading ? 'opacity-50 cursor-not-allowed' : ''}`}
                                 >
                                     <svg width="24" height="24" viewBox="0 0 24 24" fill={wishlistItemId ? "currentColor" : "none"} stroke="currentColor" strokeWidth="2.5" strokeLinecap="round" strokeLinejoin="round">

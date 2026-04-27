@@ -1,48 +1,56 @@
 'use client';
 
-import { useEffect, useState } from 'react';
+import { useEffect, useState, useCallback } from 'react';
 import { useSession } from 'next-auth/react';
-import { getCars } from '@/libs/carService';
+import { getCars, updateCar, deleteCar } from '@/libs/carService';
 import { addToWishlist, removeFromWishlist, getWishlist } from '@/libs/wishlistService';
-import { CarWithProvider } from '@/../interface';
+import { CarWithProvider, Car } from '@/../interface';
 import CarCard from '@/components/CarCard';
+import CarDialog from '@/components/CarDialog';
+import ConfirmDeleteDialog from '@/components/ConfirmDeleteDialog';
 
 export default function CarGalleryPage() {
   const { data: session } = useSession();
   const token = session?.user?.token;
+  const isAdmin = session?.user?.role === 'admin';
   
   const [cars, setCars] = useState<CarWithProvider[]>([]);
   const [wishlistMap, setWishlistMap] = useState<Record<string, string>>({});
   const [loading, setLoading] = useState(true);
   const [wishlistLoading, setWishlistLoading] = useState(false);
 
-  useEffect(() => {
-    const fetchData = async () => {
-      try {
-        setLoading(true);
-        const [carsRes, wishlistRes] = await Promise.all([
-          getCars(),
-          token ? getWishlist(token) : Promise.resolve({ data: [] })
-        ]);
+  // Admin States
+  const [editingCar, setEditingCar] = useState<CarWithProvider | null>(null);
+  const [carToDelete, setCarToDelete] = useState<CarWithProvider | null>(null);
+  const [isDialogOpen, setIsDialogOpen] = useState(false);
 
-        setCars(carsRes.data || []);
-        
-        const map: Record<string, string> = {};
-        if (wishlistRes.data) {
-          wishlistRes.data.forEach((item: any) => {
-            map[item._id] = item.wishlistItemId || item._id;
-          });
-        }
-        setWishlistMap(map);
-      } catch (error) {
-        console.error("Error fetching cars or wishlist:", error);
-      } finally {
-        setLoading(false);
+  const fetchData = useCallback(async () => {
+    try {
+      setLoading(true);
+      const [carsRes, wishlistRes] = await Promise.all([
+        getCars(),
+        token ? getWishlist(token) : Promise.resolve({ data: [] })
+      ]);
+
+      setCars(carsRes.data || []);
+      
+      const map: Record<string, string> = {};
+      if (wishlistRes.data) {
+        wishlistRes.data.forEach((item: any) => {
+          map[item._id] = item.wishlistItemId || item._id;
+        });
       }
-    };
-
-    fetchData();
+      setWishlistMap(map);
+    } catch (error) {
+      console.error("Error fetching cars or wishlist:", error);
+    } finally {
+      setLoading(false);
+    }
   }, [token]);
+
+  useEffect(() => {
+    fetchData();
+  }, [fetchData]);
 
   const handleWishlistToggle = async (carId: string) => {
     if (!token) return;
@@ -67,16 +75,44 @@ export default function CarGalleryPage() {
     }
   };
 
+  const handleEditCar = (car: CarWithProvider) => {
+    setEditingCar(car);
+    setIsDialogOpen(true);
+  };
+
+  const handleSaveCar = async (payload: Partial<Car>) => {
+    if (!token || !editingCar) return;
+    try {
+      await updateCar(token, editingCar._id, payload);
+      setIsDialogOpen(false);
+      setEditingCar(null);
+      await fetchData();
+    } catch (err: any) {
+      alert(err.message || "Failed to update car");
+    }
+  };
+
+  const handleDeleteConfirm = async () => {
+    if (!token || !carToDelete) return;
+    try {
+      await deleteCar(token, carToDelete._id);
+      setCarToDelete(null);
+      await fetchData();
+    } catch (err: any) {
+      alert(err.message || "Failed to delete car");
+    }
+  };
+
   if (loading) {
     return (
-      <main className="min-h-screen bg-white pt-32 px-8">
+      <main className="min-h-screen bg-white pt-24 px-8">
         <div className="max-w-7xl mx-auto space-y-12">
             <div className="space-y-4">
                 <div className="h-4 w-32 bg-stone-100 rounded-full animate-pulse" />
                 <div className="h-16 w-96 bg-stone-100 rounded-2xl animate-pulse" />
             </div>
-            <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-10">
-                {[1,2,3,4,5,6].map(i => (
+            <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-10">
+                {[1,2,3,4,5,6,7,8].map(i => (
                     <div key={i} className="h-[450px] bg-stone-50 rounded-[40px] border border-stone-100 animate-pulse" />
                 ))}
             </div>
@@ -86,7 +122,7 @@ export default function CarGalleryPage() {
   }
 
   return (
-    <main className="min-h-screen bg-white pt-32 pb-24 px-8 relative overflow-hidden">
+    <main className="min-h-screen bg-white pt-24 pb-24 px-8 relative overflow-hidden">
         {/* Aesthetic Background */}
         <div className="absolute top-0 right-0 w-1/2 h-[50vh] bg-[#FFD600]/5 blur-[120px] rounded-full -mr-20 -mt-20 pointer-events-none" />
 
@@ -94,7 +130,7 @@ export default function CarGalleryPage() {
             <header className="mb-16 flex flex-col md:flex-row justify-between items-end gap-8">
                 <div className="space-y-2">
                     <span className="text-[#FFD600] text-xs font-black uppercase tracking-[0.4em]">Our Fleet</span>
-                    <h1 className="text-[#111111] text-6xl md:text-8xl font-black italic uppercase tracking-tighter leading-none">
+                    <h1 className="text-[#111111] text-5xl md:text-7xl font-black italic uppercase tracking-tighter leading-none">
                         Premium <br /> <span className="text-[#FFD600]">Selection</span>
                     </h1>
                 </div>
@@ -106,7 +142,7 @@ export default function CarGalleryPage() {
                 </div>
             </header>
 
-            <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-10">
+            <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-10">
                 {cars.map((car) => (
                     <CarCard 
                         key={car._id}
@@ -125,6 +161,8 @@ export default function CarGalleryPage() {
                         isWishlistLoading={wishlistLoading}
                         onAddToWishlist={() => handleWishlistToggle(car._id)}
                         onRemoveFromWishlist={() => handleWishlistToggle(car._id)}
+                        onEdit={isAdmin ? () => handleEditCar(car) : undefined}
+                        onDelete={isAdmin ? () => setCarToDelete(car) : undefined}
                     />
                 ))}
             </div>
@@ -135,6 +173,22 @@ export default function CarGalleryPage() {
                 </div>
             )}
         </div>
+
+        {/* Dialogs */}
+        <CarDialog 
+            open={isDialogOpen}
+            onClose={() => { setIsDialogOpen(false); setEditingCar(null); }}
+            onSave={handleSaveCar}
+            initialData={editingCar || null}
+        />
+
+        <ConfirmDeleteDialog 
+            open={!!carToDelete}
+            onClose={() => setCarToDelete(null)}
+            onConfirm={handleDeleteConfirm}
+            title="Delete Vehicle"
+            description={`Are you sure you want to remove ${carToDelete?.brand} ${carToDelete?.model} from the fleet? This action cannot be undone.`}
+        />
     </main>
   );
 }
