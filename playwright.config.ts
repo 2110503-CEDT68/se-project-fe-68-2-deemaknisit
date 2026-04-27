@@ -1,33 +1,37 @@
-import { defineConfig, devices } from '@playwright/test';
+import { defineConfig, devices } from "@playwright/test";
+import dotenv from "dotenv";
+import path from "path";
 
-const PORT = process.env.PORT ?? '3000';
-const BASE_URL = process.env.PLAYWRIGHT_BASE_URL ?? `http://127.0.0.1:${PORT}`;
+dotenv.config({ path: path.resolve(__dirname, ".env") });
 
 export default defineConfig({
-  testDir: './tests-e2e',
+  testDir: "./e2e",
+  testMatch: "**/*.spec.ts",
   fullyParallel: true,
   forbidOnly: !!process.env.CI,
   retries: process.env.CI ? 2 : 0,
   workers: process.env.CI ? 1 : undefined,
-  reporter: [['list'], ['html', { open: 'never' }]],
+  reporter: process.env.CI 
+    ? [['github'], ['list']] 
+    : [['html'], ['list']],
   use: {
-    baseURL: BASE_URL,
-    trace: 'on-first-retry',
-    screenshot: 'only-on-failure',
-    video: 'retain-on-failure',
+    baseURL: "http://127.0.0.1:3000",
+    trace: "on-first-retry",
   },
-  webServer: process.env.PLAYWRIGHT_NO_SERVER
-    ? undefined
-    : {
-        command: 'npm run dev',
-        url: BASE_URL,
-        reuseExistingServer: !process.env.CI,
-        timeout: 120_000,
-      },
   projects: [
     {
-      name: 'chromium',
-      use: { ...devices['Desktop Chrome'] },
+      name: "chromium",
+      use: { ...devices["Desktop Chrome"] },
     },
   ],
+  webServer: {
+    command: "npm run build && npm run start",
+    url: "http://127.0.0.1:3000",
+    reuseExistingServer: !process.env.CI,
+    env: {
+      ...process.env,
+      NEXTAUTH_URL: "http://127.0.0.1:3000",
+    },
+    timeout: 300 * 1000,
+  },
 });
