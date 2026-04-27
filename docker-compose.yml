@@ -1,0 +1,17 @@
+version: '3.8'
+
+services:
+  # Frontend Service
+  frontend:
+    build:
+      context: .
+      dockerfile: Dockerfile
+    ports:
+      - "3000:3000"
+    environment:
+      - NODE_ENV=production
+      - NEXT_PUBLIC_BACKEND_URL=http://localhost:5000
+    restart: always
+
+# Note: For full-stack orchestration, place this file in the parent directory 
+# and add the backend service as shown in the previous instructions.

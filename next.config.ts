@@ -4,6 +4,7 @@ const nextConfig: NextConfig = {
   images: {
     domains: ['drive.google.com']
   },
+  output: 'standalone',
   async headers() {
       return [
           {
