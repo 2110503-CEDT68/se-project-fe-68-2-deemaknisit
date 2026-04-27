@@ -40,8 +40,8 @@ export const authOptions: AuthOptions = {
           ...token, 
           ...user,
           _id: payload.id || payload._id,
-          role: payload.role,
-          name: name || (user as any).name || token.name
+          role: payload.role === 'admin' ? 'admin' : 'user',
+          name: name || (user as any).name || token.name || 'User'
         };
       }
       return token;

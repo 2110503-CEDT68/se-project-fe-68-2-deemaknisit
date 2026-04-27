@@ -10,7 +10,7 @@ import { useSession } from 'next-auth/react';
 import { getProviders } from '@/libs/providerService';
 import { addBooking, getBookings } from '@/libs/bookingService';
 import { getUserProfile } from '@/libs/authService';
-import { Provider, Car } from '@/../interface';
+import { Provider, Car, ProviderWithCars } from '@/../interface';
 import { useRouter } from 'next/navigation';
 
 export default function BookingPage() {
@@ -18,7 +18,7 @@ export default function BookingPage() {
   const router = useRouter();
   const token = session?.user?.token;
 
-  const [providers, setProviders] = useState<Provider[]>([]);
+  const [providers, setProviders] = useState<ProviderWithCars[]>([]);
   const [selectedProviderId, setSelectedProviderId] = useState('');
   const [availableCars, setAvailableCars] = useState<Car[]>([]);
   const [selectedCarId, setSelectedCarId] = useState('');
@@ -32,20 +32,24 @@ export default function BookingPage() {
 
   useEffect(() => {
     const fetchInitialData = async () => {
-      try {
-        const providersRes = await getProviders();
-        setProviders(providersRes.data);
+      setIsLoading(true);
+      setError(null);
 
-        if (token) {
-          // Fetch fresh user profile to get the canonical user ID from the backend
-          const profileRes = await getUserProfile(token);
-          const currentUserId = profileRes.data._id;
+      try {
+        // Parallel fetching: Providers and Bookings at the same time
+        const providersPromise = getProviders();
+        const bookingsPromise = token ? getBookings(token) : Promise.resolve({ data: [] });
+
+        const [providersRes, bookingsRes] = await Promise.all([providersPromise, bookingsPromise]);
+
+        setProviders(providersRes.data || []);
+
+        if (token && bookingsRes?.data) {
+          const currentUserId = (session?.user as any)?._id;
           
-          const bookingsRes = await getBookings(token);
-          
-          // Filter to only include bookings belonging to the current user
-          const ownBookings = bookingsRes.data.filter(b => {
-            const bookingUserId = typeof b.user === 'string' ? b.user : (b.user as any)?._id;
+          // Filter own bookings to check the limit
+          const ownBookings = (bookingsRes.data as any[]).filter(b => {
+            const bookingUserId = typeof b.user === 'string' ? b.user : b.user?._id;
             return bookingUserId === currentUserId;
           });
           
@@ -55,16 +59,22 @@ export default function BookingPage() {
         }
       } catch (e) {
         console.error("Failed to load initial booking data", e);
+        setError("Failed to sync data with the server.");
+      } finally {
+        setIsLoading(false);
       }
     };
-    if (session) fetchInitialData();
-  }, [token, session]);
+    
+    if (status !== 'loading') {
+      fetchInitialData();
+    }
+  }, [token, session, status]);
 
   useEffect(() => {
     if (selectedProviderId) {
       const provider = providers.find(p => p._id === selectedProviderId);
       if (provider?.cars) {
-        setAvailableCars(provider.cars.filter(car => car.available));
+        setAvailableCars(provider.cars.filter((car: Car) => car.available));
       } else {
         setAvailableCars([]);
       }
@@ -103,6 +113,47 @@ export default function BookingPage() {
       setIsLoading(false);
     }
   };
+
+  if (isLoading) {
+    return (
+        <LocalizationProvider dateAdapter={AdapterDayjs}>
+            <main className="w-full min-h-screen bg-white px-6 py-20 flex flex-col items-center relative overflow-hidden">
+                <div className="absolute top-0 right-0 w-1/3 h-1 bg-stone-100" />
+                <div className="w-full max-w-xl flex flex-col gap-12">
+                    {/* Header Skeleton */}
+                    <div className="flex flex-col gap-3">
+                        <div className="w-12 h-1 bg-stone-100 rounded-full mb-2" />
+                        <div className="h-12 w-48 bg-stone-100 rounded-2xl animate-pulse" />
+                        <div className="h-4 w-32 bg-stone-50 rounded-full mt-2 animate-pulse" />
+                    </div>
+
+                    {/* Form Skeleton */}
+                    <div className="flex flex-col gap-8">
+                        <div className="flex flex-col gap-2">
+                            <div className="h-3 w-24 bg-stone-50 rounded-full ml-1 mb-1" />
+                            <div className="h-14 w-full bg-stone-100 rounded-[16px] animate-pulse" />
+                        </div>
+                        <div className="flex flex-col gap-2">
+                            <div className="h-3 w-20 bg-stone-50 rounded-full ml-1 mb-1" />
+                            <div className="h-14 w-full bg-stone-100 rounded-[16px] animate-pulse" />
+                        </div>
+                        <div className="flex flex-col sm:flex-row gap-6">
+                            <div className="flex-1 flex flex-col gap-2">
+                                <div className="h-3 w-16 bg-stone-50 rounded-full ml-1 mb-1" />
+                                <div className="h-14 w-full bg-stone-100 rounded-[16px] animate-pulse" />
+                            </div>
+                            <div className="flex-1 flex flex-col gap-2">
+                                <div className="h-3 w-16 bg-stone-50 rounded-full ml-1 mb-1" />
+                                <div className="h-14 w-full bg-stone-100 rounded-[16px] animate-pulse" />
+                            </div>
+                        </div>
+                        <div className="h-16 w-full bg-stone-100 rounded-[20px] mt-6 animate-pulse" />
+                    </div>
+                </div>
+            </main>
+        </LocalizationProvider>
+    );
+  }
 
   return (
     <LocalizationProvider dateAdapter={AdapterDayjs}>

@@ -21,8 +21,8 @@ export default function ProviderPage() {
   const { data: session } = useSession();
   const token = session?.user?.token as string;
 
-  // Utilize the clean utility mapping
-  const isAdminUser = getRoleFromToken(token) === 'admin';
+  // Utilize the session role directly
+  const isAdminUser = session?.user?.role === 'admin';
 
   const [providersData, setProvidersData] = useState<ResponseList<Provider> | null>(null);
   const [isLoading, setIsLoading] = useState(true);
@@ -121,7 +121,21 @@ export default function ProviderPage() {
       </div>
       
       {isLoading && (
-        <div className="text-center text-xl mt-10 text-gray-500">Loading providers...</div>
+        <div className="w-full max-w-6xl px-4 grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-8 mt-10">
+          {[1, 2, 3, 4, 5, 6].map((i) => (
+            <div key={i} className="h-[400px] rounded-[32px] border border-stone-100 bg-white overflow-hidden shadow-sm flex flex-col">
+              <div className="h-[55%] w-full bg-stone-100 animate-pulse" />
+              <div className="p-6 flex flex-col gap-4">
+                <div className="w-24 h-3 bg-stone-50 rounded-full animate-pulse" />
+                <div className="w-48 h-6 bg-stone-100 rounded-lg animate-pulse" />
+                <div className="mt-4 space-y-2">
+                  <div className="w-full h-3 bg-stone-50 rounded-full animate-pulse" />
+                  <div className="w-2/3 h-3 bg-stone-50 rounded-full animate-pulse" />
+                </div>
+              </div>
+            </div>
+          ))}
+        </div>
       )}
 
       {error && (

@@ -240,8 +240,35 @@ export default function ReviewsPage() {
 
         {/* Content */}
         {loading ? (
-          <div className="flex items-center justify-center py-12">
-            <p className="text-stone-600">Loading reviews...</p>
+          <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
+            {[1, 2, 3, 4, 5, 6].map((i) => (
+              <div key={i} className="bg-white border border-stone-100 rounded-lg overflow-hidden shadow-sm flex flex-col h-[350px]">
+                <div className="p-4 bg-stone-50 border-b border-stone-100 flex items-center gap-3">
+                  <div className="w-10 h-10 rounded-full bg-stone-100 animate-pulse" />
+                  <div className="space-y-2">
+                    <div className="w-24 h-3 bg-stone-100 rounded-full animate-pulse" />
+                    <div className="w-16 h-2 bg-stone-100 rounded-full animate-pulse" />
+                  </div>
+                </div>
+                <div className="p-4 flex-grow space-y-4">
+                  <div className="flex gap-1">
+                    {[1,2,3,4,5].map(s => <div key={s} className="w-4 h-4 bg-stone-100 rounded animate-pulse" />)}
+                  </div>
+                  <div className="space-y-2">
+                    <div className="w-full h-3 bg-stone-100 rounded-full animate-pulse" />
+                    <div className="w-full h-3 bg-stone-100 rounded-full animate-pulse" />
+                    <div className="w-2/3 h-3 bg-stone-100 rounded-full animate-pulse" />
+                  </div>
+                </div>
+                <div className="p-4 flex gap-4 bg-stone-50/50">
+                   <div className="w-20 h-16 bg-stone-100 rounded-lg animate-pulse" />
+                   <div className="flex-grow space-y-2">
+                     <div className="w-24 h-4 bg-stone-100 rounded animate-pulse" />
+                     <div className="w-16 h-3 bg-stone-100 rounded animate-pulse" />
+                   </div>
+                </div>
+              </div>
+            ))}
           </div>
         ) : isPersonalTabWithoutAuth ? (
           <div className="bg-blue-50 border border-blue-200 rounded-lg p-8 text-center">

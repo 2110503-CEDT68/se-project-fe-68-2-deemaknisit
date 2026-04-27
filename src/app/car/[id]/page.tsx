@@ -64,9 +64,26 @@ export default function CarDetailPage() {
 
     if (loading) {
         return (
-            <div className="flex justify-center items-center min-h-screen bg-white">
-                <CircularProgress sx={{ color: '#FFD600' }} />
-            </div>
+            <main className="flex flex-col items-center bg-white min-h-screen">
+                <div className="w-full h-80 bg-stone-100 animate-pulse relative" />
+                <div className="w-full max-w-5xl -mt-20 px-8 relative z-10">
+                    <div className="bg-white rounded-[40px] p-10 shadow-xl border border-stone-100 space-y-8">
+                        <div className="flex flex-col md:flex-row gap-12">
+                            <div className="w-full md:w-[400px] h-[300px] bg-stone-100 rounded-[32px] animate-pulse" />
+                            <div className="flex-grow space-y-6 flex flex-col justify-center">
+                                <div className="h-4 w-32 bg-stone-100 rounded-full animate-pulse" />
+                                <div className="h-16 w-full bg-stone-100 rounded-2xl animate-pulse" />
+                                <div className="h-10 w-2/3 bg-stone-100 rounded-2xl animate-pulse" />
+                            </div>
+                        </div>
+                        <div className="grid grid-cols-2 md:grid-cols-4 gap-8">
+                            {[1,2,3,4].map(i => (
+                                <div key={i} className="h-24 bg-stone-50 rounded-3xl border border-stone-100 animate-pulse" />
+                            ))}
+                        </div>
+                    </div>
+                </div>
+            </main>
         );
     }
 

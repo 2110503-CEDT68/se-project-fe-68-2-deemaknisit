@@ -50,7 +50,25 @@ export default function MyBookingPage() {
   }
 
   if (isLoading) {
-    return <div className="text-center text-xl mt-20 text-stone-400 animate-pulse font-bold uppercase tracking-widest">Loading your bookings...</div>;
+    return (
+      <main className="w-full min-h-screen flex flex-col items-center bg-white p-8 mt-20">
+        <div className="w-24 h-1 bg-stone-100 rounded-full mb-6" />
+        <div className="h-10 w-64 bg-stone-100 rounded-2xl animate-pulse mb-12" />
+        
+        <div className="w-full max-w-4xl space-y-6">
+          {[1, 2, 3].map((i) => (
+            <div key={i} className="h-48 w-full bg-stone-50 rounded-[28px] border border-stone-100 animate-pulse flex p-6 gap-6">
+              <div className="w-48 h-full bg-stone-100 rounded-2xl" />
+              <div className="flex-grow space-y-4">
+                <div className="w-1/3 h-6 bg-stone-100 rounded-lg" />
+                <div className="w-full h-4 bg-stone-100 rounded-lg" />
+                <div className="w-2/3 h-4 bg-stone-100 rounded-lg" />
+              </div>
+            </div>
+          ))}
+        </div>
+      </main>
+    );
   }
 
   return (
