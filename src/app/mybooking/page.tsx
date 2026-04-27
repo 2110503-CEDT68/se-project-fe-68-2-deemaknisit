@@ -4,7 +4,7 @@ import BookingList from '@/components/BookingList';
 import { useEffect, useState, useCallback } from 'react';
 import { Typography } from '@mui/material';
 import { getBookings } from '@/libs/bookingService';
-import { Booking } from '@/../interface';
+import { Booking, BookingWithDetails } from '@/../interface';
 import { getPayloadFromToken } from '@/libs/authService';
 import { useSession } from 'next-auth/react';
 
@@ -12,7 +12,7 @@ export default function MyBookingPage() {
   const { data: session } = useSession();
   const token = session?.user?.token;
 
-  const [bookings, setBookings] = useState<Booking[]>([]);
+  const [bookings, setBookings] = useState<BookingWithDetails[]>([]);
   const [isLoading, setIsLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
 

@@ -18,7 +18,7 @@ export default function ProviderDialog({
 }: ProviderDialogProps) {
   const [formData, setFormData] = useState({
     name: '', address: '', district: '', province: '',
-    postalcode: '', tel: '', region: '', picture: '', dailyrate: ''
+    postalcode: '', tel: '', region: '', picture: ''
   });
   const [isSubmitting, setIsSubmitting] = useState(false);
 
@@ -33,13 +33,12 @@ export default function ProviderDialog({
           postalcode: initialData.postalcode || '',
           tel: initialData.tel || '',
           region: initialData.region || '',
-          picture: decodeSafeUrl(initialData.picture || ''),
-          dailyrate: (initialData.dailyrate || '').toString()
+          picture: decodeSafeUrl(initialData.picture || '')
         });
       } else {
         setFormData({
           name: '', address: '', district: '', province: '',
-          postalcode: '', tel: '', region: '', picture: '', dailyrate: ''
+          postalcode: '', tel: '', region: '', picture: ''
         });
       }
     }
@@ -52,8 +51,7 @@ export default function ProviderDialog({
     try {
       const payload: Partial<Provider> = {
         ...formData,
-        picture: encodeSafeUrl(formData.picture),
-        dailyrate: formData.dailyrate ? parseFloat(formData.dailyrate) : 0
+        picture: encodeSafeUrl(formData.picture)
       };
       await onSave(payload);
     } finally {
@@ -107,21 +105,12 @@ export default function ProviderDialog({
             onChange={e => setFormData({...formData, region: e.target.value})} 
           />
         </div>
-        <div className="flex gap-2 w-full">
-          <TextField 
-            label="Telephone" 
-            fullWidth 
-            value={formData.tel} 
-            onChange={e => setFormData({...formData, tel: e.target.value})} 
-          />
-          <TextField 
-            label="Daily Rate" 
-            fullWidth 
-            type="number"
-            value={formData.dailyrate} 
-            onChange={e => setFormData({...formData, dailyrate: e.target.value})} 
-          />
-        </div>
+        <TextField 
+          label="Telephone" 
+          fullWidth 
+          value={formData.tel} 
+          onChange={e => setFormData({...formData, tel: e.target.value})} 
+        />
         <TextField 
           label="Picture URL" 
           fullWidth 

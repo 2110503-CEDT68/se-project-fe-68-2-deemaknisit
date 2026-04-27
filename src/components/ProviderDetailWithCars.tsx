@@ -2,7 +2,7 @@
 
 import { useState, useCallback, useEffect } from "react";
 import Image from "next/image";
-import { Provider, Car } from "@/../interface";
+import { Provider, ProviderWithCars, Car } from "@/../interface";
 import { decodeSafeUrl } from "@/libs/urlUtils";
 import { getRoleFromToken } from "@/libs/authService";
 import { useSession } from "next-auth/react";
@@ -20,12 +20,12 @@ const PlusIcon = () => (
   </svg>
 );
 
-export default function ProviderDetailWithCars({ initialProvider }: { initialProvider: Provider }) {
+export default function ProviderDetailWithCars({ initialProvider }: { initialProvider: ProviderWithCars }) {
   const { data: session } = useSession();
   const token = session?.user?.token as string;
   const isAdminUser = getRoleFromToken(token) === 'admin';
 
-  const [provider, setProvider] = useState<Provider>(initialProvider);
+  const [provider, setProvider] = useState<ProviderWithCars>(initialProvider);
   const [isCarDialogOpen, setIsCarDialogOpen] = useState(false);
   const [editingCar, setEditingCar] = useState<Car | null>(null);
   const [carToDelete, setCarToDelete] = useState<Car | null>(null);

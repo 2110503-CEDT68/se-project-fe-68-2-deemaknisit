@@ -1,13 +1,13 @@
 import { useState, useEffect } from "react";
 import { Dialog, DialogTitle, DialogContent, TextField, DialogActions, Button, MenuItem } from "@mui/material";
-import { Car } from "@/../interface";
+import { Car, CarWithProvider } from "@/../interface";
 import { encodeSafeUrl, decodeSafeUrl } from "@/libs/urlUtils";
 
 interface CarDialogProps {
   open: boolean;
   onClose: () => void;
   onSave: (payload: any) => Promise<void>;
-  initialData: Car | null;
+  initialData: Car | CarWithProvider | null;
   providerId?: string;
 }
 
@@ -64,12 +64,15 @@ export default function CarDialog({
     
     setIsSubmitting(true);
     try {
+      const p = initialData?.provider;
+      const provider = (typeof p === 'object' ? p._id : p) || providerId;
+      
       const payload = {
         ...formData,
         year: formData.year ? parseInt(formData.year) : 0,
         rentPrice: formData.rentPrice ? parseFloat(formData.rentPrice) : 0,
         picture: encodeSafeUrl(formData.picture),
-        provider: initialData?.provider?._id || providerId 
+        provider 
       };
       await onSave(payload);
     } finally {

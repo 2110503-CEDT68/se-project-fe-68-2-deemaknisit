@@ -1,7 +1,7 @@
-import { Car, Provider, ResponseList, ResponseSingle, Review } from "@/../interface";
+import { Car, CarWithProvider, Provider, ResponseList, ResponseSingle, Review } from "@/../interface";
 import { baseUrl } from '../config/api';
 
-export async function getCars(token?: string): Promise<ResponseList<Car>> {
+export async function getCars(token?: string): Promise<ResponseList<CarWithProvider>> {
   const headers: HeadersInit = {};
   if (token) headers.authorization = `Bearer ${token}`;
 
@@ -16,7 +16,7 @@ export async function getCars(token?: string): Promise<ResponseList<Car>> {
   return response.json();
 }
 
-export async function getCar(id: string): Promise<ResponseSingle<Car>> {
+export async function getCar(id: string): Promise<ResponseSingle<CarWithProvider>> {
   const response = await fetch(`${baseUrl}/cars/${id}`);
   if (!response.ok) {
     const errorData = await response.json();

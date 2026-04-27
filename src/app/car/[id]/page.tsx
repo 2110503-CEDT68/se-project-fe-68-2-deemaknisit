@@ -5,7 +5,7 @@ import Image from 'next/image';
 import { useParams } from 'next/navigation';
 import { getCar, getCarReviews } from '@/libs/carService';
 import { getMyReviews } from '@/libs/reviewService';
-import { Car, Review } from '@/../interface';
+import { Car, CarWithProvider, Review } from '@/../interface';
 import { decodeSafeUrl } from '@/libs/urlUtils';
 import ReviewCard from '@/components/ReviewCard';
 import { CircularProgress, Rating, Typography, Divider } from '@mui/material';
@@ -22,7 +22,7 @@ export default function CarDetailPage() {
     const currentUserId = payload?.id || payload?._id;
 
     const { id } = useParams<{ id: string }>();
-    const [car, setCar] = useState<Car | null>(null);
+    const [car, setCar] = useState<CarWithProvider | null>(null);
     const [reviews, setReviews] = useState<Review[]>([]);
     const [loading, setLoading] = useState(true);
 

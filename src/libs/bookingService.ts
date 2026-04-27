@@ -1,7 +1,7 @@
-import { Booking, ResponseList, ResponseSingle } from "@/../interface";
+import { Booking, BookingWithDetails, ResponseList, ResponseSingle } from "@/../interface";
 import { baseUrl } from '../config/api';
 
-export async function getBookings(token: string): Promise<ResponseList<Booking>> {
+export async function getBookings(token: string): Promise<ResponseList<BookingWithDetails>> {
   const response = await fetch(`${baseUrl}/bookings`, {
     method: "GET",
     headers: {
@@ -16,7 +16,7 @@ export async function getBookings(token: string): Promise<ResponseList<Booking>>
   return await response.json();
 }
 
-export async function getBooking(token: string, id: string): Promise<ResponseSingle<Booking>> {
+export async function getBooking(token: string, id: string): Promise<ResponseSingle<BookingWithDetails>> {
   const response = await fetch(`${baseUrl}/bookings/${id}`, {
     method: "GET",
     headers: {

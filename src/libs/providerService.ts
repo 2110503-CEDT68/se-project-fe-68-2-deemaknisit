@@ -1,7 +1,7 @@
-import { Provider, ResponseList, ResponseSingle } from "@/../interface";
+import { Provider, ProviderWithCars, ResponseList, ResponseSingle } from "@/../interface";
 import { baseUrl } from '../config/api';
 
-export async function getProviders(token?: string): Promise<ResponseList<Provider>> {
+export async function getProviders(token?: string): Promise<ResponseList<ProviderWithCars>> {
   const headers: HeadersInit = {};
   if (token) headers.authorization = `Bearer ${token}`;
 
@@ -17,7 +17,7 @@ export async function getProviders(token?: string): Promise<ResponseList<Provide
   return response.json();
 }
 
-export async function getProvider(id: string): Promise<ResponseSingle<Provider>> {
+export async function getProvider(id: string): Promise<ResponseSingle<ProviderWithCars>> {
   const response = await fetch(`${baseUrl}/providers/${id}`);
   if (!response.ok) {
     const errorData = await response.json();

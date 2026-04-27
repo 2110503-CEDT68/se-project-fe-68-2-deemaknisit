@@ -198,20 +198,21 @@ export default function WishlistPage() {
 
   if (!token) {
     return (
-      <main className="min-h-screen bg-white px-6 pt-28 pb-16">
-        <div className="mx-auto max-w-6xl rounded-[32px] border border-blue-100 bg-blue-50 p-10 text-center shadow-[0_20px_60px_-30px_rgba(59,130,246,0.35)]">
-          <p className="mb-3 text-[10px] font-black uppercase tracking-[0.35em] text-blue-500">Wishlist</p>
+      <main className="min-h-screen bg-white flex items-center justify-center px-6">
+        <div className="mx-auto max-w-xl w-full rounded-[32px] border border-blue-100 bg-blue-50 p-12 text-center shadow-[0_20px_60px_-30px_rgba(59,130,246,0.35)] relative overflow-hidden">
+          <div className="absolute top-0 right-0 w-32 h-32 bg-blue-500/10 rounded-full blur-3xl -mr-16 -mt-16" />
+          <p className="mb-3 text-[10px] font-black uppercase tracking-[0.35em] text-blue-500">Authentication Required</p>
           <h1 className="text-4xl font-black italic uppercase tracking-tighter text-[#111111]">
             Please sign in first
           </h1>
-          <p className="mx-auto mt-4 max-w-xl text-sm font-medium leading-relaxed text-blue-700">
-            Your saved cars will appear here after you log in.
+          <p className="mx-auto mt-4 max-w-xl text-sm font-medium leading-relaxed text-blue-700/70">
+            Your saved cars will appear here after you log in to your account.
           </p>
           <Link
-            href="/login"
-            className="mt-8 inline-flex items-center justify-center rounded-full bg-[#111111] px-6 py-3 text-[11px] font-black uppercase tracking-[0.25em] text-white transition-all duration-300 hover:bg-[#FFD600] hover:text-[#111111]"
+            href="/api/auth/signin"
+            className="mt-8 inline-flex items-center justify-center rounded-full bg-[#111111] px-8 py-4 text-[11px] font-black uppercase tracking-[0.25em] text-white transition-all duration-300 hover:bg-[#FFD600] hover:text-[#111111] hover:scale-105 active:scale-95 shadow-lg"
           >
-            Sign In
+            Sign In to Continue
           </Link>
         </div>
       </main>

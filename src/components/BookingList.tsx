@@ -1,7 +1,7 @@
 'use client';
 
 import { useState } from 'react';
-import { Booking } from '@/../interface';
+import { Booking, BookingWithDetails } from '@/../interface';
 import { updateBooking, deleteBooking, completeBooking } from '@/libs/bookingService';
 import { useSession } from 'next-auth/react';
 import BookingCard from './BookingCard';
@@ -12,18 +12,18 @@ import SuccessDialog from './SuccessDialog';
 import ReviewSubmissionDialog from './ReviewSubmissionDialog';
 import { addBookingReview, updateReview, deleteReview } from '@/libs/reviewService';
 
-export default function BookingList({ initialBookings, onRefresh }: { initialBookings: Booking[], onRefresh: () => void }) {
+export default function BookingList({ initialBookings, onRefresh }: { initialBookings: BookingWithDetails[], onRefresh: () => void }) {
   const { data: session } = useSession();
   const token = session?.user?.token;
 
-  const [editingBooking, setEditingBooking] = useState<Booking | null>(null);
-  const [bookingToDelete, setBookingToDelete] = useState<Booking | null>(null);
-  const [bookingToReturn, setBookingToReturn] = useState<Booking | null>(null);
+  const [editingBooking, setEditingBooking] = useState<BookingWithDetails | null>(null);
+  const [bookingToDelete, setBookingToDelete] = useState<BookingWithDetails | null>(null);
+  const [bookingToReturn, setBookingToReturn] = useState<BookingWithDetails | null>(null);
   const [returnSubmitting, setReturnSubmitting] = useState(false);
   const [successMessage, setSuccessMessage] = useState('');
-  const [reviewingBooking, setReviewingBooking] = useState<Booking | null>(null);
+  const [reviewingBooking, setReviewingBooking] = useState<BookingWithDetails | null>(null);
   const [isReviewEditing, setIsReviewEditing] = useState(false);
-  const [bookingToReviewDelete, setBookingToReviewDelete] = useState<Booking | null>(null);
+  const [bookingToReviewDelete, setBookingToReviewDelete] = useState<BookingWithDetails | null>(null);
 
   const handleUpdate = async (payload: { bookingDate: string; returnDate: string }) => {
     if (!token || !editingBooking) return;
@@ -47,7 +47,7 @@ export default function BookingList({ initialBookings, onRefresh }: { initialBoo
     }
   };
 
-  const handleComplete = (booking: Booking) => {
+  const handleComplete = (booking: BookingWithDetails) => {
     setBookingToReturn(booking);
   };
 

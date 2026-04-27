@@ -6,13 +6,13 @@ import { LocalizationProvider } from '@mui/x-date-pickers/LocalizationProvider';
 import { AdapterDayjs } from '@mui/x-date-pickers/AdapterDayjs';
 import { DatePicker } from '@mui/x-date-pickers/DatePicker';
 import dayjs, { Dayjs } from 'dayjs';
-import { Booking } from "@/../interface";
+import { Booking, BookingWithDetails } from "@/../interface";
 
 interface BookingDialogProps {
   open: boolean;
   onClose: () => void;
   onSave: (payload: { bookingDate: string; returnDate: string }) => Promise<void>;
-  initialData: Booking | null;
+  initialData: BookingWithDetails | null;
 }
 
 export default function BookingDialog({

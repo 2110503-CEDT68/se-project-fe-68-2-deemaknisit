@@ -1,6 +1,6 @@
 'use client';
 
-import { Booking } from "@/../interface";
+import { BookingWithDetails } from "@/../interface";
 import { Button, Rating } from "@mui/material";
 
 export default function BookingCard({
@@ -12,7 +12,7 @@ export default function BookingCard({
   onReviewEdit,
   onReviewDelete
 }: {
-  booking: Booking;
+  booking: BookingWithDetails;
   onEdit?: () => void;
   onDelete?: () => void;
   onComplete?: () => void;
