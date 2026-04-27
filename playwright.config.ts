@@ -31,6 +31,13 @@ export default defineConfig({
     env: {
       ...process.env,
       NEXTAUTH_URL: "http://127.0.0.1:3000",
+      // Required for next.config.ts rewrites() to produce a valid URL during build.
+      // Tests mock all /api/* calls via Playwright's page.route(), so the real backend
+      // URL is irrelevant — but it must be defined or `next build` fails with
+      // "Invalid rewrite found".
+      NEXT_PUBLIC_BACKEND_URL:
+        process.env.NEXT_PUBLIC_BACKEND_URL || "http://localhost:5001",
+      NEXTAUTH_SECRET: process.env.NEXTAUTH_SECRET || "test-secret-for-e2e",
     },
     timeout: 300 * 1000,
   },
