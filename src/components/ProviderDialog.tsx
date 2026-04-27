@@ -64,7 +64,8 @@ export default function ProviderDialog({
       <DialogTitle id="provider-dialog-title" sx={{ fontWeight: 'bold' }}>
         {initialData ? 'Edit Provider' : 'Add New Provider'}
       </DialogTitle>
-      <DialogContent id="provider-form" component="form" sx={{ display: 'flex', flexDirection: 'column', gap: 2, pt: '20px !important' }}>
+      <form id="provider-form">
+        <DialogContent sx={{ display: 'flex', flexDirection: 'column', gap: 2, pt: '20px !important' }}>
         <TextField 
           id="provider-name-input"
           label="Provider Name" 
@@ -126,6 +127,7 @@ export default function ProviderDialog({
           onChange={e => setFormData({...formData, picture: e.target.value})} 
         />
       </DialogContent>
+      </form>
       <DialogActions id="provider-dialog-actions" sx={{ p: 2 }}>
         <Button id="provider-cancel-button" onClick={onClose} disabled={isSubmitting} sx={{ color: '#666' }}>Cancel</Button>
         <Button 

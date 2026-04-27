@@ -85,7 +85,8 @@ export default function CarDialog({
       <DialogTitle id="car-dialog-title" sx={{ fontWeight: 'bold' }}>
         {initialData ? 'Edit Car' : 'Add New Car'}
       </DialogTitle>
-      <DialogContent id="car-form" component="form" sx={{ display: 'flex', flexDirection: 'column', gap: 2, pt: '20px !important' }}>
+      <form id="car-form">
+        <DialogContent sx={{ display: 'flex', flexDirection: 'column', gap: 2, pt: '20px !important' }}>
         <TextField 
           id="car-license-plate-input"
           label="License Plate" 
@@ -181,6 +182,7 @@ export default function CarDialog({
           onChange={e => setFormData({...formData, picture: e.target.value})} 
         />
       </DialogContent>
+      </form>
       <DialogActions id="car-dialog-actions" sx={{ p: 2 }}>
         <Button id="car-cancel-button" onClick={onClose} disabled={isSubmitting} sx={{ color: '#666' }}>Cancel</Button>
         <Button 

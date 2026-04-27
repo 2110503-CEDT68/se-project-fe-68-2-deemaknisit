@@ -55,7 +55,8 @@ export default function BookingDialog({
     <LocalizationProvider dateAdapter={AdapterDayjs}>
       <Dialog id="booking-dialog" open={open} onClose={!isSubmitting ? onClose : undefined} fullWidth maxWidth="xs" sx={{ '& .MuiDialog-paper': { borderRadius: '24px' } }}>
         <DialogTitle id="booking-dialog-title" sx={{ fontWeight: 'bold', pt: 3 }}>Update Reservation</DialogTitle>
-        <DialogContent id="booking-form" component="form" sx={{ display: 'flex', flexDirection: 'column', gap: 3, pt: '10px !important' }}>
+        <form id="booking-form">
+          <DialogContent sx={{ display: 'flex', flexDirection: 'column', gap: 3, pt: '10px !important' }}>
           <Typography variant="body2" className="text-stone-400 mb-2">
             Modifying dates for: <span className="text-[#111111] font-bold">{initialData?.car?.brand} {initialData?.car?.model}</span>
           </Typography>
@@ -73,6 +74,7 @@ export default function BookingDialog({
             onChange={(newValue) => setReturnDate(newValue)}
           />
         </DialogContent>
+        </form>
         <DialogActions id="booking-dialog-actions" sx={{ p: 3 }}>
           <Button id="booking-cancel-button" onClick={onClose} disabled={isSubmitting} sx={{ color: '#666' }}>Cancel</Button>
           <Button 
