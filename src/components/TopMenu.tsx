@@ -1,30 +1,14 @@
-import Image from "next/image";
 import TopMenuItem from "./TopMenuItem";
 import { getServerSession } from "next-auth";
 import { authOptions } from "@/app/api/auth/[...nextauth]/authOptions";
 import Link from "next/link";
-import { getRoleFromToken, getUserProfile } from "@/libs/authService";
 
 import AuthLinks from "./AuthLinks";
 
 export default async function TopMenu() {
     const session = await getServerSession(authOptions);
-    let role = null;
-    let name = null;
-    
-    if (session?.user?.token) {
-        const token = session.user.token as string;
-        try {
-            const profileResponse = await getUserProfile(token);
-            name = profileResponse.data.name;
-            role = profileResponse.data.role;
-        } catch (error) {
-            console.error("Failed to fetch profile in TopMenu:", error);
-            // Fallback to session data if profile fetch fails
-            name = session.user.name;
-            role = getRoleFromToken(token);
-        }
-    }
+    const role = session?.user?.role || null;
+    const name = session?.user?.name || null;
 
     return (
         <nav className="fixed top-0 left-0 right-0 h-16 bg-white backdrop-blur-xl border-b border-stone-100 flex items-center px-8 z-[50] transition-all duration-300">

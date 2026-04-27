@@ -4,7 +4,6 @@ import { useState, useCallback, useEffect } from "react";
 import Image from "next/image";
 import { Provider, ProviderWithCars, Car } from "@/../interface";
 import { decodeSafeUrl } from "@/libs/urlUtils";
-import { getRoleFromToken } from "@/libs/authService";
 import { useSession } from "next-auth/react";
 import CarCard from "./CarCard";
 import CarDialog from "./CarDialog";
@@ -23,7 +22,7 @@ const PlusIcon = () => (
 export default function ProviderDetailWithCars({ initialProvider }: { initialProvider: ProviderWithCars }) {
   const { data: session } = useSession();
   const token = session?.user?.token as string;
-  const isAdminUser = getRoleFromToken(token) === 'admin';
+  const isAdminUser = session?.user?.role === 'admin';
 
   const [provider, setProvider] = useState<ProviderWithCars>(initialProvider);
   const [isCarDialogOpen, setIsCarDialogOpen] = useState(false);
@@ -223,8 +222,8 @@ export default function ProviderDetailWithCars({ initialProvider }: { initialPro
                 available={car.available}
                 onEdit={isAdminUser ? () => handleEditCar(car) : undefined}
                 onDelete={isAdminUser ? () => setCarToDelete(car) : undefined}
-                onAddToWishlist={!isAdminUser ? () => handleAddCarToWishlist(car._id) : undefined}
-                onRemoveFromWishlist={!isAdminUser ? () => handleRemoveCarFromWishlist(car._id) : undefined}
+                onAddToWishlist={(token && !isAdminUser) ? () => handleAddCarToWishlist(car._id) : undefined}
+                onRemoveFromWishlist={(token && !isAdminUser) ? () => handleRemoveCarFromWishlist(car._id) : undefined}
                 isInWishlist={!!wishlistMap[car._id]}
                 isWishlistLoading={isLoadingWishlist}
               />

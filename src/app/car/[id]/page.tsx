@@ -8,18 +8,16 @@ import { getMyReviews } from '@/libs/reviewService';
 import { Car, CarWithProvider, Review } from '@/../interface';
 import { decodeSafeUrl } from '@/libs/urlUtils';
 import ReviewCard from '@/components/ReviewCard';
-import { CircularProgress, Rating, Typography, Divider } from '@mui/material';
+import { CircularProgress, Rating, Divider } from '@mui/material';
 import { useSession } from 'next-auth/react';
 import ConfirmDeleteDialog from '@/components/ConfirmDeleteDialog';
 import ReviewSubmissionDialog from '@/components/ReviewSubmissionDialog';
 import { updateReview, deleteReview } from '@/libs/reviewService';
-import { getPayloadFromToken } from '@/libs/authService';
 
 export default function CarDetailPage() {
     const { data: session } = useSession();
     const token = session?.user?.token;
-    const payload = token ? getPayloadFromToken(token) : null;
-    const currentUserId = payload?.id || payload?._id;
+    const currentUserId = session?.user?._id;
 
     const { id } = useParams<{ id: string }>();
     const [car, setCar] = useState<CarWithProvider | null>(null);

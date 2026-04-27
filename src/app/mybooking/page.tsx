@@ -5,7 +5,6 @@ import { useEffect, useState, useCallback } from 'react';
 import { Typography } from '@mui/material';
 import { getBookings } from '@/libs/bookingService';
 import { Booking, BookingWithDetails } from '@/../interface';
-import { getPayloadFromToken } from '@/libs/authService';
 import { useSession } from 'next-auth/react';
 
 export default function MyBookingPage() {
@@ -23,11 +22,8 @@ export default function MyBookingPage() {
     try {
       const bookingsResponse = await getBookings(token);
       
-      // Get the current user ID - we need this to filter if the user is an admin
-      const payload = getPayloadFromToken(token);
-      const currentUserId = payload?.id || payload?._id;
-
       // Filter: only show bookings belonging to the current user
+      const currentUserId = (session?.user as any)?._id;
       const filtered = bookingsResponse.data.filter((b: any) => {
           // Some backends return user as a string ID, some as an object
           const bUserId = b.user?._id || b.user;

@@ -105,6 +105,7 @@ export default function WishlistPage() {
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
   const [removingId, setRemovingId] = useState<string | null>(null);
+  const [isUnauthorized, setIsUnauthorized] = useState(false);
 
   const loadWishlist = useCallback(async () => {
     if (!token) {
@@ -120,7 +121,14 @@ export default function WishlistPage() {
       setItems((response?.data || []) as WishlistItem[]);
     } catch (err) {
       const message = err instanceof Error ? err.message : 'Failed to load wishlist';
-      setError(message);
+      
+      // If it looks like an auth issue or a fetch failure (often CORS-related 401),
+      // force the "Sign In" UI instead of showing a technical error.
+      if (message.toLowerCase().includes('authorized') || message.includes('401') || message.includes('fetch')) {
+        setIsUnauthorized(true);
+      } else {
+        setError(message);
+      }
     } finally {
       setLoading(false);
     }
@@ -162,7 +170,7 @@ export default function WishlistPage() {
     );
   }
 
-  if (!token) {
+  if (!token || status === 'unauthenticated' || isUnauthorized) {
     return (
       <main className="min-h-screen bg-white flex items-center justify-center px-6">
         <div className="mx-auto max-w-xl w-full rounded-[32px] border border-blue-100 bg-blue-50 p-12 text-center shadow-[0_20px_60px_-30px_rgba(59,130,246,0.35)] relative overflow-hidden">

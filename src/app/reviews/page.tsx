@@ -7,8 +7,7 @@ import ReviewListCard, { ReviewListData } from '@/components/ReviewListCard';
 import ReviewSubmissionDialog from '@/components/ReviewSubmissionDialog';
 import ConfirmDialog from '@/components/ConfirmDialog';
 import { getMyReviews, getAllReviews, updateReview, deleteReview } from '@/libs/reviewService';
-import { getPayloadFromToken, getRoleFromToken } from '@/libs/authService';
-import { Review, Booking } from '@/../interface';
+import { Review } from '@/../interface';
 
 export default function ReviewsPage() {
   const { data: session, status } = useSession();
@@ -148,11 +147,8 @@ export default function ReviewsPage() {
   }
 
   const isPersonalTabWithoutAuth = tab === 'personal' && status === 'unauthenticated';
-
-  const payload = session?.user?.token ? getPayloadFromToken(session.user.token) : null;
-  const currentUserId = payload?.id || '';
-  const userRole = session?.user?.token ? getRoleFromToken(session.user.token) : null;
-  const isAdmin = userRole === 'admin';
+  const currentUserId = session?.user?._id || '';
+  const isAdmin = session?.user?.role === 'admin';
   const editingReview = reviews.find(r => r.reviewId === editingReviewId);
 
   const handleEditReview = (reviewId: string) => {
