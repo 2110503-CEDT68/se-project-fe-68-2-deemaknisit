@@ -23,15 +23,14 @@ export default async function TopMenu() {
             </Link>
             
             {/* Centered Navigation */}
-            <div className="flex-grow flex justify-center gap-1">
+            <div className="flex-grow flex justify-center items-center gap-1">
+                <TopMenuItem title='Fleet' pageRef='/car' />
                 <TopMenuItem title='Providers' pageRef='/provider' />
-                <TopMenuItem title='Cars' pageRef='/car' />
-                <TopMenuItem title='Booking' pageRef='/booking' />
-                <TopMenuItem title='My Booking' pageRef='/mybooking' />
+                <TopMenuItem title='Bookings' pageRef='/bookings' />
                 <TopMenuItem title='Reviews' pageRef='/reviews' />
                 <TopMenuItem title='Wishlist' pageRef='/wishlist' />
                 {role === 'admin' && (
-                    <TopMenuItem title='Admin Dashboard' pageRef='/admin' />
+                    <TopMenuItem title='Admin' pageRef='/admin' />
                 )}
             </div>
 

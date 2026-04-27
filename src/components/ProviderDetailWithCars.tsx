@@ -174,13 +174,6 @@ export default function ProviderDetailWithCars({ initialProvider }: { initialPro
                     <Typography className="text-[10px] font-black text-stone-400 uppercase tracking-widest mb-1">Service Region</Typography>
                     <span className="inline-block bg-[#111111] text-white px-4 py-1.5 rounded-full text-[10px] font-black uppercase tracking-widest mt-1">{provider.region}</span>
                   </div>
-                  <div>
-                    <Typography className="text-[10px] font-black text-stone-400 uppercase tracking-widest mb-1">Service Quality</Typography>
-                    <div className="flex items-center gap-2">
-                        <Rating value={5} readOnly size="small" sx={{ color: '#FFD600' }} />
-                        <span className="text-[#111111] font-black text-xs uppercase tracking-widest">Excellent</span>
-                    </div>
-                  </div>
                 </div>
                 <div className="flex gap-3 mt-6">
                   {/* Wishlist button removed - now on individual car cards */}
@@ -204,7 +197,7 @@ export default function ProviderDetailWithCars({ initialProvider }: { initialPro
             </div>
         </div>
 
-        <div className="grid grid-cols-1 md:grid-cols-2 gap-10">
+        <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-10">
           {provider.cars && provider.cars.length > 0 ? (
             provider.cars.map((car) => (
               <CarCard 
@@ -222,8 +215,8 @@ export default function ProviderDetailWithCars({ initialProvider }: { initialPro
                 available={car.available}
                 onEdit={isAdminUser ? () => handleEditCar(car) : undefined}
                 onDelete={isAdminUser ? () => setCarToDelete(car) : undefined}
-                onAddToWishlist={(token && !isAdminUser) ? () => handleAddCarToWishlist(car._id) : undefined}
-                onRemoveFromWishlist={(token && !isAdminUser) ? () => handleRemoveCarFromWishlist(car._id) : undefined}
+                onAddToWishlist={token ? () => handleAddCarToWishlist(car._id) : undefined}
+                onRemoveFromWishlist={token ? () => handleRemoveCarFromWishlist(car._id) : undefined}
                 isInWishlist={!!wishlistMap[car._id]}
                 isWishlistLoading={isLoadingWishlist}
               />

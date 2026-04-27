@@ -1,11 +1,10 @@
-"use client";
+'use client';
 
 import Link from "next/link";
 import Image from "next/image";
 import InteractiveCard from "./InteractiveCard";
 import { decodeSafeUrl } from "@/libs/urlUtils";
 import { useState, type MouseEvent } from "react";
-
 import { Rating } from "@mui/material";
 
 export default function CarCard({
@@ -58,141 +57,114 @@ export default function CarCard({
     try {
       if (isInWishlist && onRemoveFromWishlist) {
         await onRemoveFromWishlist();
-        setShowWishlistMessage({ type: 'success', message: 'Removed from wishlist' });
       } else if (!isInWishlist && onAddToWishlist) {
         await onAddToWishlist();
-        setShowWishlistMessage({ type: 'success', message: 'Added to wishlist' });
       }
-      setTimeout(() => setShowWishlistMessage(null), 2000);
     } catch (error) {
-      setShowWishlistMessage({ type: 'error', message: 'Failed to update wishlist' });
-      setTimeout(() => setShowWishlistMessage(null), 2000);
+      console.error("Wishlist error", error);
     }
   };
 
   return (
-    <Link href={`/car/${id}`} className="w-full">
-      <InteractiveCard contentName={`${brand} ${model}`} className="w-full h-auto flex-col sm:flex-row shadow-lg">
-      <div className="w-full sm:w-[250px] min-h-[200px] relative overflow-hidden flex-shrink-0 bg-stone-100">
-        <Image
-          src={decodeSafeUrl(imgSrc) || '/img/logo.png'}
-          alt={`${brand} ${model}`}
-          fill={true}
-          className="object-cover transition-transform duration-500 hover:scale-105"
-        />
-        <div className={`absolute top-4 left-4 px-3 py-1 rounded-full text-[10px] font-bold uppercase tracking-widest shadow-lg ${available ? 'bg-green-500 text-white' : 'bg-red-500 text-white'}`}>
-          {available ? 'Available' : 'Reserved'}
-        </div>
-        {(onAddToWishlist || onRemoveFromWishlist) && (
-          <button
-            onClick={handleWishlistClick}
-            disabled={isWishlistLoading}
-            className="absolute top-4 right-4 w-9 h-9 flex items-center justify-center rounded-full bg-white shadow-lg transition-all duration-300 hover:scale-110 active:scale-95 disabled:opacity-50 disabled:cursor-not-allowed"
-            title={isInWishlist ? 'Remove from wishlist' : 'Add to wishlist'}
-          >
-            <svg 
-              width="18" 
-              height="18" 
-              viewBox="0 0 24 24" 
-              fill={isInWishlist ? 'currentColor' : 'none'} 
-              stroke="currentColor" 
-              strokeWidth="2.5" 
-              strokeLinecap="round" 
-              strokeLinejoin="round"
-              className={isInWishlist ? 'text-red-500' : 'text-[#111111]'}
-            >
-              <path d="M20.84 4.61a5.5 5.5 0 0 0-7.78 0L12 5.67l-1.06-1.06a5.5 5.5 0 0 0-7.78 7.78l1.06 1.06L12 21.23l7.78-7.78 1.06-1.06a5.5 5.5 0 0 0 0-7.78z"></path>
-            </svg>
-          </button>
-        )}
-      </div>
-      
-      <div className="flex-grow p-6 flex flex-col justify-between bg-white">
-        <div className="space-y-4">
-          <div className="flex justify-between items-start">
-            <div>
-              <h3 className="text-[#111111] font-bold text-xl">{brand} {model}</h3>
-              <div className="flex items-center gap-2 mt-1">
-                <p className="text-[#111111] text-xs font-bold uppercase tracking-widest opacity-50">{licensePlate}</p>
-                {reviewCount !== undefined && reviewCount > 0 && (
-                  <>
-                    <span className="text-stone-300">•</span>
-                    <div className="flex items-center gap-1">
-                      <Rating value={rating} readOnly precision={0.5} size="small" sx={{ color: '#FFD600', fontSize: '14px' }} />
-                      <span className="text-[10px] font-black text-[#111111]">{rating?.toFixed(1)}</span>
-                      <span className="text-[10px] font-bold text-stone-400">({reviewCount})</span>
-                    </div>
-                  </>
-                )}
+    <Link href={`/car/${id}`} className="group block w-full">
+      <article className="overflow-hidden rounded-[28px] border border-stone-100 bg-white shadow-[0_20px_60px_-24px_rgba(0,0,0,0.12)] transition-all duration-500 hover:-translate-y-2 hover:shadow-[0_40px_80px_-24px_rgba(0,0,0,0.18)]">
+        {/* Visual Header */}
+        <div className="relative h-64 overflow-hidden bg-stone-100">
+          <Image
+            src={decodeSafeUrl(imgSrc) || '/img/logo.png'}
+            alt={`${brand} ${model}`}
+            fill
+            className="object-cover transition-transform duration-700 group-hover:scale-110"
+          />
+          
+          {/* Gradients */}
+          <div className="absolute inset-0 bg-gradient-to-t from-black/80 via-black/20 to-transparent" />
+          
+          {/* Top Badges */}
+          <div className="absolute top-5 left-5 right-5 flex justify-between items-center z-10">
+            <div className={`px-3 py-1 rounded-full text-[10px] font-black uppercase tracking-widest backdrop-blur-md shadow-lg border ${available ? 'bg-green-500/20 text-green-400 border-green-500/20' : 'bg-red-500/20 text-red-400 border-red-500/20'}`}>
+              {available ? 'Available' : 'Reserved'}
+            </div>
+            
+            {(onAddToWishlist || onRemoveFromWishlist) && (
+              <button
+                onClick={handleWishlistClick}
+                disabled={isWishlistLoading}
+                className="w-10 h-10 flex items-center justify-center rounded-full bg-white/10 backdrop-blur-md border border-white/20 transition-all duration-300 hover:bg-white hover:scale-110 active:scale-95 disabled:opacity-50 group/heart"
+              >
+                <svg 
+                  width="20" 
+                  height="20" 
+                  viewBox="0 0 24 24" 
+                  fill={isInWishlist ? '#ef4444' : 'none'} 
+                  stroke={isInWishlist ? '#ef4444' : 'white'} 
+                  strokeWidth="2.5" 
+                  className={`transition-colors duration-300 ${!isInWishlist && 'group-hover/heart:stroke-[#ef4444]'}`}
+                >
+                  <path d="M20.84 4.61a5.5 5.5 0 0 0-7.78 0L12 5.67l-1.06-1.06a5.5 5.5 0 0 0-7.78 7.78l1.06 1.06L12 21.23l7.78-7.78 1.06-1.06a5.5 5.5 0 0 0 0-7.78z"></path>
+                </svg>
+              </button>
+            )}
+          </div>
+
+          {/* Title Overlay */}
+          <div className="absolute bottom-6 left-6 right-6">
+            <div className="flex justify-between items-end gap-4">
+              <div>
+                <p className="text-[#FFD600] text-[10px] font-black uppercase tracking-[0.4em] mb-1">{brand}</p>
+                <h3 className="text-white text-3xl font-black italic uppercase tracking-tighter leading-none">{model}</h3>
+              </div>
+              <div className="bg-white/10 backdrop-blur-md px-3 py-1.5 rounded-xl border border-white/10 text-right">
+                <p className="text-[8px] font-bold text-white/40 uppercase tracking-widest">Year</p>
+                <p className="text-white text-xs font-black">{year}</p>
               </div>
             </div>
-            <span className="bg-[#FFD600]/10 text-[#111111] px-2 py-1 rounded text-[10px] font-bold uppercase border border-[#FFD600]/20">
-              {year}
-            </span>
-          </div>
-
-          <div className="grid grid-cols-2 gap-y-2 gap-x-4 text-sm">
-            <div>
-              <p className="text-[10px] font-bold text-stone-400 uppercase tracking-tighter">Color</p>
-              <p className="text-[#111111] font-medium">{color}</p>
-            </div>
-            <div>
-              <p className="text-[10px] font-bold text-stone-400 uppercase tracking-tighter">Transmission</p>
-              <p className="text-[#111111] font-medium">{transmission}</p>
-            </div>
-            <div>
-              <p className="text-[10px] font-bold text-stone-400 uppercase tracking-tighter">Fuel</p>
-              <p className="text-[#111111] font-medium">{fuelType}</p>
-            </div>
-            <div>
-              <p className="text-[10px] font-bold text-stone-400 uppercase tracking-tighter">Rate</p>
-              <p className="text-[#111111] font-bold">฿{rentPrice}/day</p>
-            </div>
           </div>
         </div>
 
-        <div className="flex justify-end gap-3 mt-6 pt-4 border-t border-stone-50">
-          {/* Admin Action Buttons */}
+        {/* Details Section */}
+        <div className="p-6 space-y-6">
+          <div className="grid grid-cols-2 gap-4">
+             <div className="space-y-1">
+                <p className="text-[10px] font-black text-stone-400 uppercase tracking-widest">Daily Rate</p>
+                <p className="text-[#111111] text-xl font-black italic uppercase tracking-tighter">฿{rentPrice}</p>
+             </div>
+             <div className="space-y-1 text-right">
+                <p className="text-[10px] font-black text-stone-400 uppercase tracking-widest">Plate</p>
+                <p className="text-[#111111] font-bold text-sm uppercase">{licensePlate}</p>
+             </div>
+          </div>
+
+          <div className="h-px bg-stone-100 w-full" />
+
+          <div className="grid grid-cols-2 gap-y-4 gap-x-6">
+            <div className="space-y-0.5">
+              <p className="text-[9px] font-black text-stone-300 uppercase tracking-widest">Transmission</p>
+              <p className="text-[#111111] text-[11px] font-bold uppercase">{transmission}</p>
+            </div>
+            <div className="space-y-0.5">
+              <p className="text-[9px] font-black text-stone-300 uppercase tracking-widest">Fuel Type</p>
+              <p className="text-[#111111] text-[11px] font-bold uppercase">{fuelType}</p>
+            </div>
+            <div className="space-y-0.5">
+              <p className="text-[9px] font-black text-stone-300 uppercase tracking-widest">Color</p>
+              <p className="text-[#111111] text-[11px] font-bold uppercase">{color}</p>
+            </div>
+          </div>
+
+          {/* Admin Actions */}
           {(onEdit || onDelete) && (
-            <div 
-              className="flex gap-2"
-              onClick={(e) => {
-                e.preventDefault(); 
-                e.stopPropagation();
-              }}
-            >
-              {onEdit && (
-                <button 
-                  onClick={onEdit} 
-                  className="w-9 h-9 flex items-center justify-center bg-blue-500 text-white rounded-xl hover:bg-blue-600 transition-all shadow-md active:scale-90"
-                  title="Edit"
-                >
-                  <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.5" strokeLinecap="round" strokeLinejoin="round"><path d="M12 20h9"></path><path d="M16.5 3.5a2.121 2.121 0 0 1 3 3L7 19l-4 1 1-4L16.5 3.5z"></path></svg>
-                </button>
-              )}
-              {onDelete && (
-                <button 
-                  onClick={onDelete} 
-                  className="w-9 h-9 flex items-center justify-center bg-red-500 text-white rounded-xl hover:bg-red-600 transition-all shadow-md active:scale-90"
-                  title="Delete"
-                >
-                  <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.5" strokeLinecap="round" strokeLinejoin="round"><polyline points="3 6 5 6 21 6"></polyline><path d="M19 6v14a2 2 0 0 1-2 2H7a2 2 0 0 1-2-2V6m3 0V4a2 2 0 0 1 2-2h4a2 2 0 0 1 2 2v2"></path><line x1="10" y1="11" x2="10" y2="17"></line><line x1="14" y1="11" x2="14" y2="17"></line></svg>
-                </button>
-              )}
+            <div className="flex gap-2 pt-2 border-t border-stone-100">
+               {onEdit && (
+                 <button onClick={(e) => { e.preventDefault(); e.stopPropagation(); onEdit(); }} className="flex-1 py-3 bg-stone-100 text-[#111111] text-[10px] font-black uppercase tracking-widest rounded-xl hover:bg-[#111111] hover:text-white transition-all">Edit</button>
+               )}
+               {onDelete && (
+                 <button onClick={(e) => { e.preventDefault(); e.stopPropagation(); onDelete(); }} className="flex-1 py-3 bg-red-50 text-red-600 text-[10px] font-black uppercase tracking-widest rounded-xl hover:bg-red-600 hover:text-white transition-all">Delete</button>
+               )}
             </div>
           )}
         </div>
-        {showWishlistMessage && (
-          <div className={`mt-3 px-3 py-2 rounded-full text-[11px] font-bold uppercase tracking-widest text-center ${
-            showWishlistMessage.type === 'success'
-              ? 'bg-green-100 text-green-700'
-              : 'bg-red-100 text-red-700'
-          }`}>
-            {showWishlistMessage.message}
-          </div>
-        )}
-      </div>
-    </InteractiveCard>
+      </article>
     </Link>
   );
 }
