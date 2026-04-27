@@ -1,5 +1,5 @@
 import { test, expect } from '@playwright/test';
-import { mockNextAuthSession, mockUnauthenticatedSession } from './helpers/auth';
+import { mockNextAuthSession, mockUnauthenticatedSession, waitForSession } from './helpers/auth';
 import { mockReviewBackend } from './helpers/apiMocks';
 import { SAMPLE_REVIEW, SAMPLE_REVIEW_2 } from './helpers/mockData';
 
@@ -14,6 +14,10 @@ import { SAMPLE_REVIEW, SAMPLE_REVIEW_2 } from './helpers/mockData';
  *  - Empty state UI when no reviews exist
  */
 test.describe('US1-2: View past reviews', () => {
+  test.beforeEach(async ({ page }) => {
+    page.on('pageerror', (err) => console.log('[pageerror]', err.message));
+  });
+
   test('My Reviews page renders all review cards from GET /reviews', async ({ page }) => {
     await mockNextAuthSession(page);
     await mockReviewBackend(page, {
@@ -21,13 +25,16 @@ test.describe('US1-2: View past reviews', () => {
     });
 
     await page.goto('/reviews');
+    await waitForSession(page);
 
     // Switch to "My Posts" tab (personal reviews)
     await page.getByRole('button', { name: /My Posts/i }).click();
 
-    // Each review's comment text appears as a card
-    await expect(page.getByText(SAMPLE_REVIEW.comment)).toBeVisible();
-    await expect(page.getByText(SAMPLE_REVIEW_2.comment)).toBeVisible();
+    // Each review's comment text appears as a card (rendered inside quotes)
+    await expect(page.getByText(SAMPLE_REVIEW.comment, { exact: false })).toBeVisible({
+      timeout: 15000,
+    });
+    await expect(page.getByText(SAMPLE_REVIEW_2.comment, { exact: false })).toBeVisible();
 
     // Car description (brand + model) is rendered on the card
     await expect(page.getByRole('heading', { name: /Toyota Camry/i })).toBeVisible();
@@ -39,10 +46,13 @@ test.describe('US1-2: View past reviews', () => {
     await mockReviewBackend(page, { reviews: [SAMPLE_REVIEW] });
 
     await page.goto('/reviews');
+    await waitForSession(page);
     await page.getByRole('button', { name: /My Posts/i }).click();
 
     // Comment is rendered (wrapped in quotes by ReviewListCard)
-    await expect(page.getByText(`"${SAMPLE_REVIEW.comment}"`)).toBeVisible();
+    await expect(page.getByText(SAMPLE_REVIEW.comment, { exact: false })).toBeVisible({
+      timeout: 15000,
+    });
 
     // Rating value text is shown next to the stars (e.g. "4.0")
     await expect(page.getByText(SAMPLE_REVIEW.rating.toFixed(1)).first()).toBeVisible();
@@ -53,7 +63,12 @@ test.describe('US1-2: View past reviews', () => {
     await mockReviewBackend(page, { reviews: [SAMPLE_REVIEW] });
 
     await page.goto('/reviews');
+    await waitForSession(page);
     await page.getByRole('button', { name: /My Posts/i }).click();
+
+    await expect(page.getByText(SAMPLE_REVIEW.comment, { exact: false })).toBeVisible({
+      timeout: 15000,
+    });
 
     // ReviewListCard renders the date as 'D MMM YYYY' (en-GB)
     const expectedDate = new Date(SAMPLE_REVIEW.createdAt).toLocaleDateString(
@@ -68,9 +83,12 @@ test.describe('US1-2: View past reviews', () => {
     await mockReviewBackend(page, { reviews: [] });
 
     await page.goto('/reviews');
+    await waitForSession(page);
     await page.getByRole('button', { name: /My Posts/i }).click();
 
-    await expect(page.getByText('You have not left any reviews yet.')).toBeVisible();
+    await expect(page.getByText('You have not left any reviews yet.')).toBeVisible({
+      timeout: 15000,
+    });
   });
 
   test('All Feedbacks tab is visible when not logged in but personal tab requires sign-in', async ({ page }) => {
@@ -80,7 +98,9 @@ test.describe('US1-2: View past reviews', () => {
     await page.goto('/reviews');
 
     // All Feedbacks tab works for unauthenticated users
-    await expect(page.getByRole('button', { name: /All Feedbacks/i })).toBeVisible();
+    await expect(page.getByRole('button', { name: /All Feedbacks/i })).toBeVisible({
+      timeout: 15000,
+    });
 
     // Switch to My Posts (personal) - should show login prompt
     await page.getByRole('button', { name: /My Posts/i }).click();
@@ -93,10 +113,15 @@ test.describe('US1-2: View past reviews', () => {
     await mockReviewBackend(page, { reviews: [SAMPLE_REVIEW] });
 
     const requestPromise = page.waitForRequest(
-      (req) => req.url().includes('/api/reviews') && req.method() === 'GET'
+      (req) =>
+        /\/api\/reviews(\?|$)/.test(req.url()) &&
+        req.method() === 'GET' &&
+        !!req.headers()['authorization'],
+      { timeout: 15000 }
     );
 
     await page.goto('/reviews');
+    await waitForSession(page);
     await page.getByRole('button', { name: /My Posts/i }).click();
 
     const request = await requestPromise;

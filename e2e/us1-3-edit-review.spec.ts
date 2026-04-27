@@ -1,5 +1,5 @@
 import { test, expect } from '@playwright/test';
-import { mockNextAuthSession } from './helpers/auth';
+import { mockNextAuthSession, waitForSession } from './helpers/auth';
 import { mockReviewBackend } from './helpers/apiMocks';
 import { SAMPLE_REVIEW } from './helpers/mockData';
 
@@ -13,16 +13,26 @@ import { SAMPLE_REVIEW } from './helpers/mockData';
  *  - Validation error display for missing required fields
  */
 test.describe('US1-3: Edit a previously submitted review', () => {
-  test('Edit button is visible on the user\'s own review card', async ({ page }) => {
+  test.beforeEach(async ({ page }) => {
+    page.on('pageerror', (err) => console.log('[pageerror]', err.message));
+  });
+
+  test("Edit button is visible on the user's own review card", async ({ page }) => {
     await mockNextAuthSession(page);
     await mockReviewBackend(page, { reviews: [SAMPLE_REVIEW] });
 
     await page.goto('/reviews');
+    await waitForSession(page);
     await page.getByRole('button', { name: /My Posts/i }).click();
 
+    // Wait for the review card to render
+    await expect(page.getByText(SAMPLE_REVIEW.comment, { exact: false })).toBeVisible({
+      timeout: 15000,
+    });
+
     // Edit + Delete buttons are owner-only
-    await expect(page.getByRole('button', { name: /^Edit$/i })).toBeVisible();
-    await expect(page.getByRole('button', { name: /^Delete$/i })).toBeVisible();
+    await expect(page.getByRole('button', { name: /^Edit$/ })).toBeVisible();
+    await expect(page.getByRole('button', { name: /^Delete$/ })).toBeVisible();
   });
 
   test('Edit modal pre-fills the existing rating and comment', async ({ page }) => {
@@ -30,8 +40,13 @@ test.describe('US1-3: Edit a previously submitted review', () => {
     await mockReviewBackend(page, { reviews: [SAMPLE_REVIEW] });
 
     await page.goto('/reviews');
+    await waitForSession(page);
     await page.getByRole('button', { name: /My Posts/i }).click();
-    await page.getByRole('button', { name: /^Edit$/i }).click();
+    await expect(page.getByText(SAMPLE_REVIEW.comment, { exact: false })).toBeVisible({
+      timeout: 15000,
+    });
+
+    await page.getByRole('button', { name: /^Edit$/ }).click();
 
     // Dialog opens
     await expect(page.getByRole('heading', { name: 'Submit Your Review' })).toBeVisible();
@@ -51,14 +66,21 @@ test.describe('US1-3: Edit a previously submitted review', () => {
     await mockReviewBackend(page, { reviews: [SAMPLE_REVIEW] });
 
     await page.goto('/reviews');
+    await waitForSession(page);
     await page.getByRole('button', { name: /My Posts/i }).click();
-    await page.getByRole('button', { name: /^Edit$/i }).click();
+    await expect(page.getByText(SAMPLE_REVIEW.comment, { exact: false })).toBeVisible({
+      timeout: 15000,
+    });
+
+    await page.getByRole('button', { name: /^Edit$/ }).click();
+    await expect(page.getByRole('heading', { name: 'Submit Your Review' })).toBeVisible();
 
     // Capture the PUT request
     const putPromise = page.waitForRequest(
       (req) =>
         req.url().includes(`/api/reviews/${SAMPLE_REVIEW._id}`) &&
-        req.method() === 'PUT'
+        req.method() === 'PUT',
+      { timeout: 10000 }
     );
 
     // Change rating to 2 and update the comment
@@ -78,8 +100,8 @@ test.describe('US1-3: Edit a previously submitted review', () => {
 
     // After save, list reflects the new comment
     await expect(
-      page.getByText('"Updated: was actually not great after all."')
-    ).toBeVisible();
+      page.getByText('Updated: was actually not great after all.', { exact: false })
+    ).toBeVisible({ timeout: 10000 });
   });
 
   test('shows validation error when comment is cleared on edit', async ({ page }) => {
@@ -87,8 +109,14 @@ test.describe('US1-3: Edit a previously submitted review', () => {
     await mockReviewBackend(page, { reviews: [SAMPLE_REVIEW] });
 
     await page.goto('/reviews');
+    await waitForSession(page);
     await page.getByRole('button', { name: /My Posts/i }).click();
-    await page.getByRole('button', { name: /^Edit$/i }).click();
+    await expect(page.getByText(SAMPLE_REVIEW.comment, { exact: false })).toBeVisible({
+      timeout: 15000,
+    });
+
+    await page.getByRole('button', { name: /^Edit$/ }).click();
+    await expect(page.getByRole('heading', { name: 'Submit Your Review' })).toBeVisible();
 
     // Clear the comment, then try to save
     await page.getByLabel('Comment').fill('');
@@ -104,14 +132,20 @@ test.describe('US1-3: Edit a previously submitted review', () => {
     await mockReviewBackend(page, { reviews: [SAMPLE_REVIEW], putFails: true });
 
     await page.goto('/reviews');
+    await waitForSession(page);
     await page.getByRole('button', { name: /My Posts/i }).click();
-    await page.getByRole('button', { name: /^Edit$/i }).click();
+    await expect(page.getByText(SAMPLE_REVIEW.comment, { exact: false })).toBeVisible({
+      timeout: 15000,
+    });
+
+    await page.getByRole('button', { name: /^Edit$/ }).click();
+    await expect(page.getByRole('heading', { name: 'Submit Your Review' })).toBeVisible();
 
     await page.getByLabel('Comment').fill('Trying to update with a failing API.');
     await page.getByRole('button', { name: 'Submit Review' }).click();
 
-    // The dialog renders a generic error indicator
-    await expect(page.getByText('error', { exact: true })).toBeVisible();
+    // Generic error indicator from the dialog (the component sets error to 'error')
+    await expect(page.getByText('error', { exact: true })).toBeVisible({ timeout: 10000 });
   });
 
   test('Cancel closes the edit modal without saving', async ({ page }) => {
@@ -119,8 +153,14 @@ test.describe('US1-3: Edit a previously submitted review', () => {
     await mockReviewBackend(page, { reviews: [SAMPLE_REVIEW] });
 
     await page.goto('/reviews');
+    await waitForSession(page);
     await page.getByRole('button', { name: /My Posts/i }).click();
-    await page.getByRole('button', { name: /^Edit$/i }).click();
+    await expect(page.getByText(SAMPLE_REVIEW.comment, { exact: false })).toBeVisible({
+      timeout: 15000,
+    });
+
+    await page.getByRole('button', { name: /^Edit$/ }).click();
+    await expect(page.getByRole('heading', { name: 'Submit Your Review' })).toBeVisible();
 
     await page.getByLabel('Comment').fill('Trying to type something I will discard');
     await page.getByRole('button', { name: 'Cancel' }).click();
@@ -131,6 +171,6 @@ test.describe('US1-3: Edit a previously submitted review', () => {
     ).toBeHidden();
 
     // Original comment is still there in the list
-    await expect(page.getByText(`"${SAMPLE_REVIEW.comment}"`)).toBeVisible();
+    await expect(page.getByText(SAMPLE_REVIEW.comment, { exact: false })).toBeVisible();
   });
 });

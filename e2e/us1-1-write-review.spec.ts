@@ -1,5 +1,5 @@
 import { test, expect } from '@playwright/test';
-import { mockNextAuthSession, mockUnauthenticatedSession } from './helpers/auth';
+import { mockNextAuthSession, mockUnauthenticatedSession, waitForSession } from './helpers/auth';
 import { mockReviewBackend } from './helpers/apiMocks';
 import { COMPLETED_BOOKING, PENDING_BOOKING } from './helpers/mockData';
 
@@ -14,6 +14,10 @@ import { COMPLETED_BOOKING, PENDING_BOOKING } from './helpers/mockData';
  *  - POST /reviews endpoint validation (booking must be completed)
  */
 test.describe('US1-1: Write a review for a completed booking', () => {
+  test.beforeEach(async ({ page }) => {
+    page.on('pageerror', (err) => console.log('[pageerror]', err.message));
+  });
+
   test('shows the Review button only for completed bookings', async ({ page }) => {
     await mockNextAuthSession(page);
     await mockReviewBackend(page, {
@@ -22,11 +26,16 @@ test.describe('US1-1: Write a review for a completed booking', () => {
     });
 
     await page.goto('/bookings');
+    await waitForSession(page);
 
-    // Completed booking shows a Review button
-    await expect(
-      page.getByRole('button', { name: /^Review$/i }).first()
-    ).toBeVisible();
+    // Wait for booking cards to render: the completed booking has the brand visible
+    await expect(page.getByRole('heading', { name: /Toyota Camry/i }).first()).toBeVisible({
+      timeout: 15000,
+    });
+
+    // Completed booking shows a Review button (yellow CTA)
+    const reviewBtn = page.getByRole('button', { name: /^Review$/ });
+    await expect(reviewBtn).toBeVisible();
 
     // Pending booking shows the Return Car button (NOT a Review button)
     await expect(page.getByRole('button', { name: /Return Car/i })).toBeVisible();
@@ -37,12 +46,19 @@ test.describe('US1-1: Write a review for a completed booking', () => {
     await mockReviewBackend(page, { bookings: [COMPLETED_BOOKING], reviews: [] });
 
     await page.goto('/bookings');
-    await page.getByRole('button', { name: /^Review$/i }).first().click();
+    await waitForSession(page);
+
+    // Wait for the bookings list to render
+    await expect(page.getByRole('heading', { name: /Toyota Camry/i }).first()).toBeVisible({
+      timeout: 15000,
+    });
+
+    await page.getByRole('button', { name: /^Review$/ }).first().click();
 
     // Dialog header
     await expect(page.getByRole('heading', { name: 'Submit Your Review' })).toBeVisible();
 
-    // Star rating component (MUI Rating renders 5 radio inputs labelled 1-5 stars)
+    // Star rating inputs (1-5)
     const stars = page.locator('input[name="review-rating"]');
     await expect(stars).toHaveCount(5);
 
@@ -59,7 +75,11 @@ test.describe('US1-1: Write a review for a completed booking', () => {
     await mockReviewBackend(page, { bookings: [COMPLETED_BOOKING], reviews: [] });
 
     await page.goto('/bookings');
-    await page.getByRole('button', { name: /^Review$/i }).first().click();
+    await waitForSession(page);
+    await expect(page.getByRole('heading', { name: /Toyota Camry/i }).first()).toBeVisible({
+      timeout: 15000,
+    });
+    await page.getByRole('button', { name: /^Review$/ }).first().click();
 
     // Click on the 5-star option
     const fiveStar = page.locator('input[name="review-rating"][value="5"]');
@@ -76,15 +96,21 @@ test.describe('US1-1: Write a review for a completed booking', () => {
     await mockNextAuthSession(page);
     await mockReviewBackend(page, { bookings: [COMPLETED_BOOKING], reviews: [] });
 
+    await page.goto('/bookings');
+    await waitForSession(page);
+    await expect(page.getByRole('heading', { name: /Toyota Camry/i }).first()).toBeVisible({
+      timeout: 15000,
+    });
+
     // Capture the POST request to assert correct payload
     const postPromise = page.waitForRequest(
       (req) =>
-        req.url().includes('/api/reviews') &&
-        req.method() === 'POST'
+        /\/api\/reviews(\?|$)/.test(req.url()) && req.method() === 'POST',
+      { timeout: 10000 }
     );
 
-    await page.goto('/bookings');
-    await page.getByRole('button', { name: /^Review$/i }).first().click();
+    await page.getByRole('button', { name: /^Review$/ }).first().click();
+    await expect(page.getByRole('heading', { name: 'Submit Your Review' })).toBeVisible();
 
     // Pick rating = 4
     await page.locator('input[name="review-rating"][value="4"]').check({ force: true });
@@ -92,7 +118,8 @@ test.describe('US1-1: Write a review for a completed booking', () => {
     // Fill comment
     await page.getByLabel('Comment').fill('Loved the car! Would book again.');
 
-    // Submit
+    // Submit (alert may appear after success)
+    page.on('dialog', (d) => d.accept());
     await page.getByRole('button', { name: 'Submit Review' }).click();
 
     const request = await postPromise;
@@ -107,9 +134,15 @@ test.describe('US1-1: Write a review for a completed booking', () => {
     await mockReviewBackend(page, { bookings: [COMPLETED_BOOKING], reviews: [] });
 
     await page.goto('/bookings');
-    await page.getByRole('button', { name: /^Review$/i }).first().click();
+    await waitForSession(page);
+    await expect(page.getByRole('heading', { name: /Toyota Camry/i }).first()).toBeVisible({
+      timeout: 15000,
+    });
 
-    // Leave rating at default (3) and comment blank, then click submit
+    await page.getByRole('button', { name: /^Review$/ }).first().click();
+    await expect(page.getByRole('heading', { name: 'Submit Your Review' })).toBeVisible();
+
+    // Default rating is 3, leave comment empty, click submit
     await page.getByRole('button', { name: 'Submit Review' }).click();
 
     // Required-field helper text appears
@@ -127,27 +160,35 @@ test.describe('US1-1: Write a review for a completed booking', () => {
     });
 
     await page.goto('/bookings');
-    await page.getByRole('button', { name: /^Review$/i }).first().click();
+    await waitForSession(page);
+    await expect(page.getByRole('heading', { name: /Toyota Camry/i }).first()).toBeVisible({
+      timeout: 15000,
+    });
+
+    // BookingList uses alert() to surface errors. Capture the alert.
+    const dialogPromise = page.waitForEvent('dialog', { timeout: 10000 });
+
+    await page.getByRole('button', { name: /^Review$/ }).first().click();
+    await expect(page.getByRole('heading', { name: 'Submit Your Review' })).toBeVisible();
 
     await page.locator('input[name="review-rating"][value="3"]').check({ force: true });
     await page.getByLabel('Comment').fill('This should fail.');
 
-    // The component uses alert() on failure when called from BookingList
-    page.once('dialog', async (dialog) => {
-      expect(dialog.message().toLowerCase()).toContain('failed');
-      await dialog.accept();
-    });
-
     await page.getByRole('button', { name: 'Submit Review' }).click();
+
+    const dialog = await dialogPromise;
+    expect(dialog.message().toLowerCase()).toContain('fail');
+    await dialog.accept();
   });
 
-  test('cannot submit review when not authenticated (redirected to login)', async ({ page }) => {
+  test('cannot submit review when not authenticated (Access Denied)', async ({ page }) => {
     await mockUnauthenticatedSession(page);
+    await mockReviewBackend(page, { bookings: [], reviews: [] });
 
     await page.goto('/bookings');
 
     // The /bookings page renders an "Access Denied" gate for unauthenticated users
-    await expect(page.getByText(/Access Denied/i)).toBeVisible();
+    await expect(page.getByText(/Access Denied/i)).toBeVisible({ timeout: 15000 });
     await expect(page.getByRole('button', { name: /Sign In/i })).toBeVisible();
   });
 });

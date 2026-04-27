@@ -1,4 +1,4 @@
-import { Page } from '@playwright/test';
+import { Page, Route } from '@playwright/test';
 import {
   COMPLETED_BOOKING,
   PENDING_BOOKING,
@@ -9,79 +9,191 @@ import {
 } from './mockData';
 
 /**
- * Mocks the backend API endpoints for the review system EPIC.
- * Pass overrides to customize specific endpoint behavior per test.
+ * Helpers for mocking the review system backend in Playwright tests.
+ *
+ * Strategy:
+ *  - Intercept ALL requests that touch /api/* on any host so the real backend
+ *    is never reached.
+ *  - Always answer with permissive CORS headers + 204 for OPTIONS preflight.
+ *  - Route specific endpoints (reviews / bookings / providers) to mock data.
+ *  - Anything else under /api/* falls through to a default 200 stub so we
+ *    don't fail on incidental requests.
  */
+
+const CORS_HEADERS: Record<string, string> = {
+  'access-control-allow-origin': '*',
+  'access-control-allow-credentials': 'true',
+  'access-control-allow-methods': 'GET,POST,PUT,DELETE,OPTIONS,PATCH',
+  'access-control-allow-headers':
+    'Content-Type,Authorization,X-Requested-With,Accept',
+};
+
+async function fulfillJson(
+  route: Route,
+  status: number,
+  body: unknown
+): Promise<void> {
+  await route.fulfill({
+    status,
+    contentType: 'application/json',
+    headers: CORS_HEADERS,
+    body: JSON.stringify(body),
+  });
+}
+
 export interface ReviewApiMocks {
-  reviews?: any[]; // initial reviews returned by GET /reviews
-  bookings?: any[]; // initial bookings returned by GET /bookings
-  postFails?: boolean; // POST /reviews returns error
-  putFails?: boolean; // PUT /reviews/:id returns error
-  deleteFails?: boolean; // DELETE /reviews/:id returns error
+  reviews?: any[];
+  bookings?: any[];
+  postFails?: boolean;
+  putFails?: boolean;
+  deleteFails?: boolean;
 }
 
 export async function mockReviewBackend(page: Page, opts: ReviewApiMocks = {}) {
   const reviewsStore: any[] = [...(opts.reviews ?? [])];
   const bookingsStore: any[] = [...(opts.bookings ?? [COMPLETED_BOOKING])];
 
-  // ---- Providers (used by bookings page when navigating to "new" tab) ----
+  // ---------- Catch-all: handle CORS preflight + fall-through stub ----------
+  // This must be registered FIRST. Playwright matches the LAST-registered
+  // route first, so later routes override this one for specific paths.
+  await page.route('**/api/**', async (route) => {
+    // Let earlier-registered handlers (e.g. mockNextAuthSession) process
+    // NextAuth endpoints like /api/auth/session — otherwise this catch-all
+    // would shadow them and the page would never see a valid session.
+    if (/\/api\/auth\//.test(route.request().url())) {
+      await route.fallback();
+      return;
+    }
+    if (route.request().method() === 'OPTIONS') {
+      await route.fulfill({
+        status: 204,
+        headers: CORS_HEADERS,
+        body: '',
+      });
+      return;
+    }
+    // Default fallthrough: empty success
+    await fulfillJson(route, 200, { success: true, count: 0, data: [] });
+  });
+
+  // ---------- Providers ----------
   await page.route('**/api/providers**', async (route) => {
-    await route.fulfill({
-      status: 200,
-      contentType: 'application/json',
-      body: JSON.stringify({
-        success: true,
-        count: 1,
-        data: [{ ...TEST_PROVIDER, cars: [TEST_CAR] }],
-      }),
+    if (route.request().method() === 'OPTIONS') {
+      await route.fulfill({ status: 204, headers: CORS_HEADERS, body: '' });
+      return;
+    }
+    await fulfillJson(route, 200, {
+      success: true,
+      count: 1,
+      data: [{ ...TEST_PROVIDER, cars: [TEST_CAR] }],
     });
   });
 
-  // ---- Bookings ----
+  // ---------- Bookings ----------
   await page.route('**/api/bookings**', async (route) => {
     const method = route.request().method();
-    if (method === 'GET') {
-      await route.fulfill({
-        status: 200,
-        contentType: 'application/json',
-        body: JSON.stringify({ success: true, count: bookingsStore.length, data: bookingsStore }),
-      });
-    } else {
-      await route.fulfill({
-        status: 200,
-        contentType: 'application/json',
-        body: JSON.stringify({ success: true, data: {} }),
-      });
+    if (method === 'OPTIONS') {
+      await route.fulfill({ status: 204, headers: CORS_HEADERS, body: '' });
+      return;
     }
+    if (method === 'GET') {
+      await fulfillJson(route, 200, {
+        success: true,
+        count: bookingsStore.length,
+        data: bookingsStore,
+      });
+      return;
+    }
+    await fulfillJson(route, 200, { success: true, data: {} });
   });
 
-  // ---- Reviews collection: GET (list) and POST (create) ----
-  // Use a regex so that /reviews and /reviews?all=true both match here, but /reviews/<id> goes to next handler
-  await page.route(/\/api\/reviews(\?.*)?$/, async (route) => {
+  // ---------- Single review: PUT/DELETE/GET on /api/reviews/:id ----------
+  // Register BEFORE the collection route so the more specific pattern wins
+  // when multiple routes match.
+  await page.route('**/api/reviews/*', async (route) => {
     const method = route.request().method();
+    if (method === 'OPTIONS') {
+      await route.fulfill({ status: 204, headers: CORS_HEADERS, body: '' });
+      return;
+    }
     const url = route.request().url();
+    const id = url.split('/api/reviews/')[1]?.split('?')[0]?.split('/')[0] ?? '';
+
+    if (method === 'PUT') {
+      if (opts.putFails) {
+        await fulfillJson(route, 400, {
+          success: false,
+          message: 'Failed to update review',
+        });
+        return;
+      }
+      const body = JSON.parse(route.request().postData() ?? '{}');
+      const idx = reviewsStore.findIndex((r) => r._id === id);
+      if (idx >= 0) {
+        reviewsStore[idx] = {
+          ...reviewsStore[idx],
+          rating: body.rating,
+          comment: body.comment,
+        };
+      }
+      await fulfillJson(route, 200, {
+        success: true,
+        data: reviewsStore[idx] ?? { _id: id, ...body },
+      });
+      return;
+    }
+
+    if (method === 'DELETE') {
+      if (opts.deleteFails) {
+        await fulfillJson(route, 400, {
+          success: false,
+          message: 'Failed to delete review',
+        });
+        return;
+      }
+      const idx = reviewsStore.findIndex((r) => r._id === id);
+      if (idx >= 0) reviewsStore.splice(idx, 1);
+      await fulfillJson(route, 200, {
+        success: true,
+        message: 'Review deleted',
+      });
+      return;
+    }
 
     if (method === 'GET') {
-      // /reviews?all=true is "all reviews"; /reviews is "my reviews".
-      // For tests we just return the same store.
-      await route.fulfill({
-        status: 200,
-        contentType: 'application/json',
-        body: JSON.stringify({
-          success: true,
-          count: reviewsStore.length,
-          data: reviewsStore,
-        }),
+      const found = reviewsStore.find((r) => r._id === id);
+      await fulfillJson(route, found ? 200 : 404, {
+        success: !!found,
+        data: found,
+      });
+      return;
+    }
+
+    await fulfillJson(route, 200, { success: true });
+  });
+
+  // ---------- Reviews collection: GET (list) and POST (create) ----------
+  await page.route('**/api/reviews', async (route) => {
+    const method = route.request().method();
+    if (method === 'OPTIONS') {
+      await route.fulfill({ status: 204, headers: CORS_HEADERS, body: '' });
+      return;
+    }
+
+    if (method === 'GET') {
+      await fulfillJson(route, 200, {
+        success: true,
+        count: reviewsStore.length,
+        data: reviewsStore,
       });
       return;
     }
 
     if (method === 'POST') {
       if (opts.postFails) {
-        await route.fulfill({
-          status: 400,
-          contentType: 'application/json',
-          body: JSON.stringify({ success: false, message: 'Failed to submit review' }),
+        await fulfillJson(route, 400, {
+          success: false,
+          message: 'Failed to submit review',
         });
         return;
       }
@@ -97,75 +209,27 @@ export async function mockReviewBackend(page: Page, opts: ReviewApiMocks = {}) {
         updatedAt: new Date().toISOString(),
       };
       reviewsStore.push(newReview);
-      await route.fulfill({
-        status: 201,
-        contentType: 'application/json',
-        body: JSON.stringify({ success: true, data: newReview }),
-      });
+      await fulfillJson(route, 201, { success: true, data: newReview });
       return;
     }
 
-    await route.continue();
+    await fulfillJson(route, 200, { success: true });
   });
 
-  // ---- Single review: PUT and DELETE /reviews/:id ----
-  await page.route(/\/api\/reviews\/[^/?]+$/, async (route) => {
+  // Same handler for the ?all=true variant — Playwright route patterns
+  // already match query strings under the same path, but the explicit
+  // pattern below makes intent obvious.
+  await page.route(/\/api\/reviews\?.*$/, async (route) => {
     const method = route.request().method();
-    const url = route.request().url();
-    const id = url.split('/').pop()?.split('?')[0] ?? '';
-
-    if (method === 'PUT') {
-      if (opts.putFails) {
-        await route.fulfill({
-          status: 400,
-          contentType: 'application/json',
-          body: JSON.stringify({ success: false, message: 'Failed to update review' }),
-        });
-        return;
-      }
-      const body = JSON.parse(route.request().postData() ?? '{}');
-      const idx = reviewsStore.findIndex((r) => r._id === id);
-      if (idx >= 0) {
-        reviewsStore[idx] = { ...reviewsStore[idx], rating: body.rating, comment: body.comment };
-      }
-      await route.fulfill({
-        status: 200,
-        contentType: 'application/json',
-        body: JSON.stringify({ success: true, data: reviewsStore[idx] }),
-      });
+    if (method === 'OPTIONS') {
+      await route.fulfill({ status: 204, headers: CORS_HEADERS, body: '' });
       return;
     }
-
-    if (method === 'DELETE') {
-      if (opts.deleteFails) {
-        await route.fulfill({
-          status: 400,
-          contentType: 'application/json',
-          body: JSON.stringify({ success: false, message: 'Failed to delete review' }),
-        });
-        return;
-      }
-      const idx = reviewsStore.findIndex((r) => r._id === id);
-      if (idx >= 0) reviewsStore.splice(idx, 1);
-      await route.fulfill({
-        status: 200,
-        contentType: 'application/json',
-        body: JSON.stringify({ success: true, message: 'Review deleted' }),
-      });
-      return;
-    }
-
-    if (method === 'GET') {
-      const found = reviewsStore.find((r) => r._id === id);
-      await route.fulfill({
-        status: found ? 200 : 404,
-        contentType: 'application/json',
-        body: JSON.stringify({ success: !!found, data: found }),
-      });
-      return;
-    }
-
-    await route.continue();
+    await fulfillJson(route, 200, {
+      success: true,
+      count: reviewsStore.length,
+      data: reviewsStore,
+    });
   });
 
   return {
