@@ -7,19 +7,29 @@ import { useSession } from 'next-auth/react';
 import { getWishlist, removeFromWishlist } from '@/libs/wishlistService';
 import { decodeSafeUrl } from '@/libs/urlUtils';
 
-type WishlistProvider = {
+type WishlistCar = {
   _id: string;
-  name: string;
-  address?: string;
-  district?: string;
-  province?: string;
-  tel?: string;
+  brand: string;
+  model: string;
+  year: number;
+  licensePlate: string;
+  color?: string;
+  transmission?: string;
+  fuelType?: string;
+  rentPrice: number;
   picture?: string;
+  provider?: {
+    _id: string;
+    name: string;
+    address?: string;
+    district?: string;
+    province?: string;
+  } | string;
 };
 
 type WishlistItem = {
   _id: string;
-  providerId: WishlistProvider | string;
+  carId: WishlistCar | string;
   createdAt?: string;
 };
 
@@ -32,26 +42,26 @@ function WishlistCard({
   onRemove: (id: string) => void;
   removing: boolean;
 }) {
-  const provider = typeof item.providerId === 'string' ? null : item.providerId;
-  const providerId = provider?._id || (typeof item.providerId === 'string' ? item.providerId : '');
-  const location = [provider?.address, provider?.district, provider?.province].filter(Boolean).join(', ');
-  const imageSrc = decodeSafeUrl(provider?.picture || '/img/logo.png');
+  const car = typeof item.carId === 'string' ? null : item.carId;
+  const carId = car?._id || (typeof item.carId === 'string' ? item.carId : '');
+  const imageSrc = decodeSafeUrl(car?.picture || '/img/logo.png');
+  const provider = typeof car?.provider === 'string' ? null : car?.provider;
 
   return (
     <article className="group overflow-hidden rounded-[28px] border border-stone-100 bg-white shadow-[0_20px_60px_-24px_rgba(0,0,0,0.18)] transition-all duration-300 hover:-translate-y-1 hover:shadow-[0_28px_80px_-24px_rgba(0,0,0,0.24)]">
       <div className="relative h-56 overflow-hidden bg-stone-100">
         <Image
           src={imageSrc}
-          alt={provider?.name || 'Wishlist provider'}
+          alt={car ? `${car.brand} ${car.model}` : 'Wishlist car'}
           fill
           className="object-cover transition-transform duration-700 group-hover:scale-105"
         />
         <div className="absolute inset-0 bg-gradient-to-t from-black/55 via-black/10 to-transparent" />
         <div className="absolute bottom-4 left-4 right-4 flex items-end justify-between gap-3">
           <div>
-            <p className="text-[10px] font-black uppercase tracking-[0.35em] text-[#FFD600]">Saved Provider</p>
+            <p className="text-[10px] font-black uppercase tracking-[0.35em] text-[#FFD600]">Saved Car</p>
             <h2 className="mt-1 text-2xl font-black italic uppercase leading-none text-white">
-              {provider?.name || 'Unknown Provider'}
+              {car ? `${car.brand} ${car.model}` : 'Unknown Car'}
             </h2>
           </div>
           <div className="rounded-full border border-white/20 bg-black/40 px-3 py-1 text-[10px] font-black uppercase tracking-[0.25em] text-white backdrop-blur-md">
@@ -62,16 +72,38 @@ function WishlistCard({
 
       <div className="flex flex-col gap-5 p-6">
         <div className="space-y-2">
-          {location && (
-            <p className="text-sm font-medium leading-relaxed text-stone-600">{location}</p>
-          )}
-          {provider?.tel && (
-            <p className="text-xs font-bold uppercase tracking-[0.2em] text-stone-400">
-              Tel: {provider.tel}
-            </p>
+          {car && (
+            <>
+              <p className="text-sm font-bold uppercase tracking-[0.2em] text-stone-600">
+                {car.licensePlate} • {car.year}
+              </p>
+              <div className="grid grid-cols-2 gap-2 text-xs">
+                <div>
+                  <p className="font-bold text-stone-400">Color</p>
+                  <p className="text-stone-600">{car.color || 'N/A'}</p>
+                </div>
+                <div>
+                  <p className="font-bold text-stone-400">Transmission</p>
+                  <p className="text-stone-600">{car.transmission || 'N/A'}</p>
+                </div>
+                <div>
+                  <p className="font-bold text-stone-400">Fuel</p>
+                  <p className="text-stone-600">{car.fuelType || 'N/A'}</p>
+                </div>
+                <div>
+                  <p className="font-bold text-stone-400">Daily Rate</p>
+                  <p className="text-[#111111] font-black">฿{car.rentPrice}</p>
+                </div>
+              </div>
+              {provider && (
+                <p className="text-[10px] font-bold uppercase tracking-[0.2em] text-stone-400 mt-2">
+                  Provider: {provider.name}
+                </p>
+              )}
+            </>
           )}
           {item.createdAt && (
-            <p className="text-[10px] font-black uppercase tracking-[0.3em] text-stone-300">
+            <p className="text-[10px] font-black uppercase tracking-[0.3em] text-stone-300 mt-2">
               Saved on {new Date(item.createdAt).toLocaleDateString()}
             </p>
           )}
@@ -79,10 +111,10 @@ function WishlistCard({
 
         <div className="flex flex-wrap items-center gap-3">
           <Link
-            href={providerId ? `/provider/${providerId}` : '/provider'}
+            href={carId ? `/car/${carId}` : '/booking'}
             className="inline-flex items-center justify-center rounded-full bg-[#111111] px-5 py-2.5 text-[11px] font-black uppercase tracking-[0.25em] text-white transition-all duration-300 hover:bg-[#FFD600] hover:text-[#111111]"
           >
-            View Provider
+            View Car
           </Link>
 
           <button
@@ -173,7 +205,7 @@ export default function WishlistPage() {
             Please sign in first
           </h1>
           <p className="mx-auto mt-4 max-w-xl text-sm font-medium leading-relaxed text-blue-700">
-            Your saved providers will appear here after you log in.
+            Your saved cars will appear here after you log in.
           </p>
           <Link
             href="/login"
@@ -202,12 +234,12 @@ export default function WishlistPage() {
               My <span className="text-[#FFD600]">Wishlist</span>
             </h1>
             <p className="max-w-2xl text-sm font-medium leading-relaxed text-stone-500">
-              Save providers you like and come back to them anytime.
+              Save cars you like and come back to them anytime.
             </p>
           </div>
 
           <div className="rounded-[24px] border border-stone-100 bg-white px-6 py-4 shadow-[0_18px_50px_-28px_rgba(0,0,0,0.22)]">
-            <p className="text-[10px] font-black uppercase tracking-[0.35em] text-stone-400">Saved Providers</p>
+            <p className="text-[10px] font-black uppercase tracking-[0.35em] text-stone-400">Saved Cars</p>
             <p className="mt-2 text-3xl font-black text-[#111111]">{items.length}</p>
           </div>
         </div>
@@ -225,13 +257,13 @@ export default function WishlistPage() {
               Your wishlist is empty
             </h2>
             <p className="mx-auto mt-4 max-w-lg text-sm font-medium leading-relaxed text-stone-500">
-              Browse providers and tap the wishlist button on a provider page to save it here.
+              Browse cars and tap the wishlist button on a car card to save it here.
             </p>
             <Link
-              href="/provider"
+              href="/booking"
               className="mt-8 inline-flex items-center justify-center rounded-full bg-[#111111] px-6 py-3 text-[11px] font-black uppercase tracking-[0.25em] text-white transition-all duration-300 hover:bg-[#FFD600] hover:text-[#111111]"
             >
-              Browse Providers
+              Browse Cars
             </Link>
           </div>
         ) : (
