@@ -24,26 +24,27 @@ function WishlistCard({
 
   return (
     <article className="group overflow-hidden rounded-[28px] border border-stone-100 bg-white shadow-[0_20px_60px_-24px_rgba(0,0,0,0.18)] transition-all duration-300 hover:-translate-y-1 hover:shadow-[0_28px_80px_-24px_rgba(0,0,0,0.24)]">
-      <div className="relative h-56 overflow-hidden bg-stone-100">
-        <Image
-          src={imageSrc}
-          alt={`${item.brand} ${item.model}`}
-          fill
-          className="object-cover transition-transform duration-700 group-hover:scale-105"
-        />
-        <div className="absolute inset-0 bg-gradient-to-t from-black/55 via-black/10 to-transparent" />
-        <div className="absolute bottom-4 left-4 right-4 flex items-end justify-between gap-3">
-          <div>
-            <p className="text-[10px] font-black uppercase tracking-[0.35em] text-[#FFD600]">Saved Car</p>
-            <h2 className="mt-1 text-2xl font-black italic uppercase leading-none text-white">
-              {item.brand} {item.model}
-            </h2>
-          </div>
-          <div className="rounded-full border border-white/20 bg-black/40 px-3 py-1 text-[10px] font-black uppercase tracking-[0.25em] text-white backdrop-blur-md">
-            Wishlist
+      <Link href={`/car/${item._id}`} className="block">
+        <div className="relative h-56 overflow-hidden bg-stone-100">
+          <Image
+            src={imageSrc}
+            alt={`${item.brand} ${item.model}`}
+            fill
+            className="object-cover transition-transform duration-700 group-hover:scale-105"
+          />
+          <div className="absolute inset-0 bg-gradient-to-t from-black/55 via-black/10 to-transparent" />
+          <div className="absolute bottom-4 left-4 right-4 flex items-end justify-between gap-3">
+            <div>
+              <h2 className="mt-1 text-2xl font-black italic uppercase leading-none text-white">
+                {item.brand} {item.model}
+              </h2>
+            </div>
+            <div className="rounded-full border border-white/20 bg-black/40 px-3 py-1 text-[10px] font-black uppercase tracking-[0.25em] text-white backdrop-blur-md">
+              Wishlist
+            </div>
           </div>
         </div>
-      </div>
+      </Link>
 
       <div className="flex flex-col gap-5 p-6">
         <div className="space-y-2">
@@ -76,14 +77,12 @@ function WishlistCard({
         </div>
 
         <div className="flex flex-wrap items-center gap-3">
-          {provider && (
-            <Link
-              href={`/provider/${provider._id}`}
-              className="inline-flex items-center justify-center rounded-full bg-[#111111] px-5 py-2.5 text-[11px] font-black uppercase tracking-[0.25em] text-white transition-all duration-300 hover:bg-[#FFD600] hover:text-[#111111]"
-            >
-              View Provider
-            </Link>
-          )}
+          <Link
+            href={`/car/${item._id}`}
+            className="inline-flex items-center justify-center rounded-full bg-[#FFD600] px-5 py-2.5 text-[11px] font-black uppercase tracking-[0.25em] text-[#111111] transition-all duration-300 hover:bg-[#111111] hover:!text-[#FFD600]"
+          >
+            View Car
+          </Link>
 
           <button
             type="button"
@@ -186,7 +185,7 @@ export default function WishlistPage() {
           </p>
           <Link
             href="/api/auth/signin"
-            className="mt-8 inline-flex items-center justify-center rounded-full bg-[#111111] px-8 py-4 text-[11px] font-black uppercase tracking-[0.25em] text-white transition-all duration-300 hover:bg-[#FFD600] hover:text-[#111111] hover:scale-105 active:scale-95 shadow-lg"
+            className="mt-8 inline-flex items-center justify-center rounded-full bg-[#FFD600] px-8 py-4 text-[11px] font-black uppercase tracking-[0.25em] text-[#111111] transition-all duration-300 hover:bg-[#111111] hover:!text-[#FFD600] hover:scale-105 active:scale-95 shadow-xl"
           >
             Sign In to Continue
           </Link>
@@ -196,7 +195,7 @@ export default function WishlistPage() {
   }
 
   return (
-    <main className="min-h-screen bg-white px-6 pt-28 pb-16 relative overflow-hidden">
+    <main className="min-h-screen bg-white px-6 pt-24 pb-16 relative overflow-hidden">
       <div className="absolute right-0 top-0 h-1 w-1/3 bg-[#FFD600]" />
       <div className="absolute -left-32 top-24 h-96 w-96 rounded-full bg-stone-50 blur-3xl opacity-60" />
 
@@ -237,8 +236,8 @@ export default function WishlistPage() {
               Browse cars and tap the wishlist button on a car card to save it here.
             </p>
             <Link
-              href="/booking"
-              className="mt-8 inline-flex items-center justify-center rounded-full bg-[#111111] px-6 py-3 text-[11px] font-black uppercase tracking-[0.25em] text-white transition-all duration-300 hover:bg-[#FFD600] hover:text-[#111111]"
+              href="/car"
+              className="mt-8 inline-flex items-center justify-center rounded-full bg-[#FFD600] px-6 py-3 text-[11px] font-black uppercase tracking-[0.25em] text-[#111111] transition-all duration-300 hover:bg-[#111111] hover:!text-[#FFD600]"
             >
               Browse Cars
             </Link>

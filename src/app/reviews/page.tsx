@@ -206,37 +206,39 @@ export default function ReviewsPage() {
   };
 
   return (
-    <main className="min-h-screen bg-white mt-16">
-      <div className="max-w-6xl mx-auto px-4 py-8">
-        {/* Page Title */}
-        <div className="mb-8">
-          <h1 className="text-4xl font-bold text-[#111111] mb-2">Reviews</h1>
-          <p className="text-stone-600">Browse car rental reviews from our community</p>
-        </div>
-
-        {/* Tab Bar */}
-        <div className="flex gap-2 mb-8 border-b border-stone-200">
-          <button
-            onClick={() => setTab('all')}
-            className={`px-6 py-3 font-semibold text-sm uppercase tracking-wide transition-all duration-300 border-b-2 ${
-              tab === 'all'
-                ? 'text-[#FFD600] border-[#FFD600]'
-                : 'text-stone-600 border-transparent hover:text-[#111111]'
-            }`}
-          >
-            All Reviews
-          </button>
-          <button
-            onClick={() => setTab('personal')}
-            className={`px-6 py-3 font-semibold text-sm uppercase tracking-wide transition-all duration-300 border-b-2 ${
-              tab === 'personal'
-                ? 'text-[#FFD600] border-[#FFD600]'
-                : 'text-stone-600 border-transparent hover:text-[#111111]'
-            }`}
-          >
-            My Reviews
-          </button>
-        </div>
+    <main className="min-h-screen bg-white pt-24 pb-20 px-8 relative overflow-hidden">
+        <div className="max-w-6xl mx-auto">
+            {/* Header */}
+            <header className="mb-16 flex flex-col md:flex-row justify-between items-end gap-8">
+                <div className="flex flex-col gap-3">
+                    <span className="text-[#FFD600] text-xs font-black uppercase tracking-[0.4em]">Community Feedback</span>
+                    <h1 className="text-[#111111] text-5xl md:text-7xl font-black italic uppercase tracking-tighter leading-none">
+                        Customer <span className="text-[#FFD600]">Reviews</span>
+                    </h1>
+                </div>
+                <div className="bg-stone-50 p-1.5 rounded-[24px] flex gap-1 border border-stone-100 shadow-sm h-fit">
+                    <button
+                        onClick={() => setTab('all')}
+                        className={`px-8 py-3 rounded-[18px] text-[10px] font-black uppercase tracking-widest transition-all duration-300 ${
+                            tab === 'all'
+                            ? 'bg-white text-[#111111] shadow-sm'
+                            : 'text-stone-400 hover:text-stone-600'
+                        }`}
+                    >
+                        All Feedbacks
+                    </button>
+                    <button
+                        onClick={() => setTab('personal')}
+                        className={`px-8 py-3 rounded-[18px] text-[10px] font-black uppercase tracking-widest transition-all duration-300 ${
+                            tab === 'personal'
+                            ? 'bg-white text-[#111111] shadow-sm'
+                            : 'text-stone-400 hover:text-stone-600'
+                        }`}
+                    >
+                        My Posts
+                    </button>
+                </div>
+            </header>
 
         {/* Content */}
         {loading ? (

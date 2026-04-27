@@ -98,8 +98,11 @@ export default function ProviderPage() {
   };
 
   return (
-    <main className="flex flex-col items-center bg-white p-8 relative min-h-screen"> 
-      <div className="flex flex-col md:flex-row justify-between items-center w-full max-w-6xl mt-12 mb-8 px-4">
+    <main className="min-h-screen bg-white pt-24 pb-20 px-8 relative overflow-hidden flex flex-col items-center"> 
+        {/* Aesthetic Accents */}
+        <div className="absolute top-0 right-0 w-1/3 h-[40vh] bg-[#FFD600]/5 blur-[120px] rounded-full -mr-20 -mt-20 pointer-events-none" />
+
+      <div className="flex flex-col md:flex-row justify-between items-end w-full max-w-6xl mb-16 px-4">
         <div className="flex flex-col gap-2">
             <div className="flex items-center gap-2">
                 <div className="w-8 h-[2px] bg-[#FFD600]" />
