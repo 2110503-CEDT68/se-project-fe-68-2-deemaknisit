@@ -4,34 +4,11 @@ import Image from 'next/image';
 import Link from 'next/link';
 import { useCallback, useEffect, useState } from 'react';
 import { useSession } from 'next-auth/react';
+import { CarWithProvider } from '@/../interface';
 import { getWishlist, removeFromWishlist } from '@/libs/wishlistService';
 import { decodeSafeUrl } from '@/libs/urlUtils';
 
-type WishlistCar = {
-  _id: string;
-  brand: string;
-  model: string;
-  year: number;
-  licensePlate: string;
-  color?: string;
-  transmission?: string;
-  fuelType?: string;
-  rentPrice: number;
-  picture?: string;
-  provider?: {
-    _id: string;
-    name: string;
-    address?: string;
-    district?: string;
-    province?: string;
-  } | string;
-};
-
-type WishlistItem = {
-  _id: string;
-  carId: WishlistCar | string;
-  createdAt?: string;
-};
+type WishlistItem = CarWithProvider & { wishlistItemId: string };
 
 function WishlistCard({
   item,
@@ -39,20 +16,18 @@ function WishlistCard({
   removing,
 }: {
   item: WishlistItem;
-  onRemove: (id: string) => void;
+  onRemove: (wishlistItemId: string) => void;
   removing: boolean;
 }) {
-  const car = typeof item.carId === 'string' ? null : item.carId;
-  const carId = car?._id || (typeof item.carId === 'string' ? item.carId : '');
-  const imageSrc = decodeSafeUrl(car?.picture || '/img/logo.png');
-  const provider = typeof car?.provider === 'string' ? null : car?.provider;
+  const imageSrc = decodeSafeUrl(item.picture || '/img/logo.png');
+  const provider = typeof item.provider === 'string' ? null : item.provider;
 
   return (
     <article className="group overflow-hidden rounded-[28px] border border-stone-100 bg-white shadow-[0_20px_60px_-24px_rgba(0,0,0,0.18)] transition-all duration-300 hover:-translate-y-1 hover:shadow-[0_28px_80px_-24px_rgba(0,0,0,0.24)]">
       <div className="relative h-56 overflow-hidden bg-stone-100">
         <Image
           src={imageSrc}
-          alt={car ? `${car.brand} ${car.model}` : 'Wishlist car'}
+          alt={`${item.brand} ${item.model}`}
           fill
           className="object-cover transition-transform duration-700 group-hover:scale-105"
         />
@@ -61,7 +36,7 @@ function WishlistCard({
           <div>
             <p className="text-[10px] font-black uppercase tracking-[0.35em] text-[#FFD600]">Saved Car</p>
             <h2 className="mt-1 text-2xl font-black italic uppercase leading-none text-white">
-              {car ? `${car.brand} ${car.model}` : 'Unknown Car'}
+              {item.brand} {item.model}
             </h2>
           </div>
           <div className="rounded-full border border-white/20 bg-black/40 px-3 py-1 text-[10px] font-black uppercase tracking-[0.25em] text-white backdrop-blur-md">
@@ -72,46 +47,37 @@ function WishlistCard({
 
       <div className="flex flex-col gap-5 p-6">
         <div className="space-y-2">
-          {car && (
-            <>
-              <p className="text-sm font-bold uppercase tracking-[0.2em] text-stone-600">
-                {car.licensePlate} • {car.year}
-              </p>
-              <div className="grid grid-cols-2 gap-2 text-xs">
-                <div>
-                  <p className="font-bold text-stone-400">Color</p>
-                  <p className="text-stone-600">{car.color || 'N/A'}</p>
-                </div>
-                <div>
-                  <p className="font-bold text-stone-400">Transmission</p>
-                  <p className="text-stone-600">{car.transmission || 'N/A'}</p>
-                </div>
-                <div>
-                  <p className="font-bold text-stone-400">Fuel</p>
-                  <p className="text-stone-600">{car.fuelType || 'N/A'}</p>
-                </div>
-                <div>
-                  <p className="font-bold text-stone-400">Daily Rate</p>
-                  <p className="text-[#111111] font-black">฿{car.rentPrice}</p>
-                </div>
-              </div>
-              {provider && (
-                <p className="text-[10px] font-bold uppercase tracking-[0.2em] text-stone-400 mt-2">
-                  Provider: {provider.name}
-                </p>
-              )}
-            </>
-          )}
-          {item.createdAt && (
-            <p className="text-[10px] font-black uppercase tracking-[0.3em] text-stone-300 mt-2">
-              Saved on {new Date(item.createdAt).toLocaleDateString()}
+          <p className="text-sm font-bold uppercase tracking-[0.2em] text-stone-600">
+            {item.licensePlate} • {item.year}
+          </p>
+          <div className="grid grid-cols-2 gap-2 text-xs">
+            <div>
+              <p className="font-bold text-stone-400">Color</p>
+              <p className="text-stone-600">{item.color || 'N/A'}</p>
+            </div>
+            <div>
+              <p className="font-bold text-stone-400">Transmission</p>
+              <p className="text-stone-600">{item.transmission || 'N/A'}</p>
+            </div>
+            <div>
+              <p className="font-bold text-stone-400">Fuel</p>
+              <p className="text-stone-600">{item.fuelType || 'N/A'}</p>
+            </div>
+            <div>
+              <p className="font-bold text-stone-400">Daily Rate</p>
+              <p className="text-[#111111] font-black">฿{item.rentPrice}</p>
+            </div>
+          </div>
+          {provider && (
+            <p className="text-[10px] font-bold uppercase tracking-[0.2em] text-stone-400 mt-2">
+              Provider: {provider.name}
             </p>
           )}
         </div>
 
         <div className="flex flex-wrap items-center gap-3">
           <Link
-            href={carId ? `/car/${carId}` : '/booking'}
+            href={`/car/${item._id}`}
             className="inline-flex items-center justify-center rounded-full bg-[#111111] px-5 py-2.5 text-[11px] font-black uppercase tracking-[0.25em] text-white transition-all duration-300 hover:bg-[#FFD600] hover:text-[#111111]"
           >
             View Car
@@ -119,7 +85,7 @@ function WishlistCard({
 
           <button
             type="button"
-            onClick={() => onRemove(item._id)}
+            onClick={() => onRemove(item.wishlistItemId)}
             disabled={removing}
             className="inline-flex items-center justify-center rounded-full border border-red-200 bg-red-50 px-5 py-2.5 text-[11px] font-black uppercase tracking-[0.25em] text-red-600 transition-all duration-300 hover:bg-red-100 disabled:cursor-not-allowed disabled:opacity-50"
           >
@@ -165,13 +131,13 @@ export default function WishlistPage() {
     void loadWishlist();
   }, [status, loadWishlist]);
 
-  const handleRemove = async (itemId: string) => {
+  const handleRemove = async (wishlistItemId: string) => {
     if (!token) return;
 
     try {
-      setRemovingId(itemId);
-      await removeFromWishlist(token, itemId);
-      setItems((prev) => prev.filter((item) => item._id !== itemId));
+      setRemovingId(wishlistItemId);
+      await removeFromWishlist(token, wishlistItemId);
+      setItems((prev) => prev.filter((item) => item.wishlistItemId !== wishlistItemId));
     } catch (err) {
       const message = err instanceof Error ? err.message : 'Failed to remove item';
       setError(message);

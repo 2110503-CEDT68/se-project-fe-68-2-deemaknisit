@@ -56,7 +56,7 @@ export default function ProviderDetailWithCars({ initialProvider }: { initialPro
         const map: Record<string, any> = {};
         if (wishlist.data) {
           wishlist.data.forEach((item: any) => {
-            map[item.carId?._id || item.carId] = item;
+            map[item._id] = item;
           });
         }
         setWishlistMap(map);
@@ -74,7 +74,13 @@ export default function ProviderDetailWithCars({ initialProvider }: { initialPro
     if (!token) return;
     try {
       const response = await addToWishlist(token, carId);
-      setWishlistMap(prev => ({ ...prev, [carId]: response.data }));
+      // Response from add is the Wishlist object: { _id, carId, ... }
+      // We need to map it back to what getWishlist returns if possible, 
+      // or just enough for it to work.
+      setWishlistMap(prev => ({ 
+        ...prev, 
+        [carId]: { _id: carId, wishlistItemId: response.data._id } 
+      }));
     } catch (error) {
       console.error('Error adding to wishlist:', error);
     }
@@ -83,10 +89,11 @@ export default function ProviderDetailWithCars({ initialProvider }: { initialPro
   const handleRemoveCarFromWishlist = async (carId: string) => {
     if (!token) return;
     const wishlistItem = wishlistMap[carId];
-    if (!wishlistItem?._id) return;
+    const wishlistItemId = wishlistItem?.wishlistItemId || wishlistItem?._id;
+    if (!wishlistItemId) return;
 
     try {
-      await removeFromWishlist(token, wishlistItem._id);
+      await removeFromWishlist(token, wishlistItemId);
       setWishlistMap(prev => {
         const newMap = { ...prev };
         delete newMap[carId];
