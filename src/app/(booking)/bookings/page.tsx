@@ -9,7 +9,7 @@ import { AdapterDayjs } from '@mui/x-date-pickers/AdapterDayjs';
 import dayjs, { Dayjs } from 'dayjs';
 import { getProviders } from '@/libs/providerService';
 import { addBooking, getBookings, deleteBooking, updateBooking } from '@/libs/bookingService';
-import { Provider, Car, ProviderWithCars, BookingWithDetails } from '@/../interface';
+import { Provider, Car, ProviderWithCars, BookingWithDetails } from '@/types/interface';
 import BookingList from '@/components/BookingList';
 
 export default function BookingsHubPage() {

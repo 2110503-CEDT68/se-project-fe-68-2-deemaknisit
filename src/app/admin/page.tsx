@@ -6,7 +6,7 @@ import { getBookings, updateBooking, deleteBooking } from '@/libs/bookingService
 import { useSession } from 'next-auth/react';
 import BookingDialog from '@/components/BookingDialog';
 import ConfirmDeleteDialog from '@/components/ConfirmDeleteDialog';
-import { BookingWithDetails } from '@/../interface';
+import { BookingWithDetails } from '@/types/interface';
 
 export default function AdminDashboardPage() {
   const { data: session } = useSession();

@@ -93,6 +93,7 @@ export default function ReviewSubmissionDialog({
             name="review-rating"
             value={rating}
             precision={1}
+            data-testid="review-rating"
             onChange={(_, value) => setRating(value)}
           />
         </Box>
@@ -115,6 +116,7 @@ export default function ReviewSubmissionDialog({
           FormHelperTextProps={{
             sx: { fontWeight: 'bold', fontSize: '0.75rem' }
           }}
+          inputProps={{ "data-testid": "review-comment" }}
         />
       </DialogContent>
       <DialogActions sx={{ p: 3, display: 'flex', justifyContent: 'space-between' }}>
@@ -125,6 +127,7 @@ export default function ReviewSubmissionDialog({
           onClick={handleSave}
           variant="contained"
           disabled={isSubmitting}
+          data-testid="review-submit-button"
           sx={{
             backgroundColor: '#FFD600',
             color: '#111111',

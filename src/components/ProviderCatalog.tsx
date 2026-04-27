@@ -1,7 +1,7 @@
 import ProviderCard from "./ProviderCard";
 import Link from "next/link";
 // Updated import to use ResponseList and Provider from the interface
-import { Provider, ResponseList } from "@/../interface"; 
+import { Provider, ResponseList } from "@/types/interface";
 
 export default function ProviderCatalog({
   providersList, // Renamed prop for clarity

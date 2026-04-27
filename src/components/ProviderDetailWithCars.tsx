@@ -2,7 +2,7 @@
 
 import { useState, useCallback, useEffect } from "react";
 import Image from "next/image";
-import { Provider, ProviderWithCars, Car } from "@/../interface";
+import { Provider, ProviderWithCars, Car } from "@/types/interface";
 import { decodeSafeUrl } from "@/libs/urlUtils";
 import { useSession } from "next-auth/react";
 import CarCard from "./CarCard";

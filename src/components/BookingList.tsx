@@ -1,7 +1,7 @@
 'use client';
 
 import { useState } from 'react';
-import { Booking, BookingWithDetails } from '@/../interface';
+import { Booking, BookingWithDetails } from '@/types/interface';
 import { updateBooking, deleteBooking, completeBooking } from '@/libs/bookingService';
 import { useSession } from 'next-auth/react';
 import BookingCard from './BookingCard';

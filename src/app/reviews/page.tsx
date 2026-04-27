@@ -7,7 +7,7 @@ import ReviewListCard, { ReviewListData } from '@/components/ReviewListCard';
 import ReviewSubmissionDialog from '@/components/ReviewSubmissionDialog';
 import ConfirmDialog from '@/components/ConfirmDialog';
 import { getMyReviews, getAllReviews, updateReview, deleteReview } from '@/libs/reviewService';
-import { Review } from '@/../interface';
+import { Review } from '@/types/interface';
 
 export default function ReviewsPage() {
   const { data: session, status } = useSession();

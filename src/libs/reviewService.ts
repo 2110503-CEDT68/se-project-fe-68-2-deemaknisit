@@ -1,4 +1,4 @@
-import { ResponseList, ResponseSingle, Review, ReviewPayload } from "@/../interface";
+import { ResponseList, ResponseSingle, Review, ReviewPayload } from "@/types/interface";
 import { baseUrl } from '../config/api';
 
 // Submit a new review for a completed booking.

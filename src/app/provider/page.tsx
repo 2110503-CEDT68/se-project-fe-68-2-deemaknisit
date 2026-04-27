@@ -5,7 +5,7 @@ import { getProviders, createProvider, updateProvider, deleteProvider } from "@/
 import { getRoleFromToken } from "@/libs/authService";
 import { useSession } from "next-auth/react";
 import { useState, useEffect, useCallback } from 'react'; 
-import { ResponseList, Provider } from "@/../interface"; 
+import { ResponseList, Provider } from "@/types/interface";
 import { Fab, Typography } from "@mui/material";
 import ProviderDialog from "@/components/ProviderDialog";
 import ConfirmDeleteDialog from "@/components/ConfirmDeleteDialog";

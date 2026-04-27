@@ -4,7 +4,7 @@ import Image from 'next/image';
 import Link from 'next/link';
 import { useCallback, useEffect, useState } from 'react';
 import { useSession } from 'next-auth/react';
-import { CarWithProvider } from '@/../interface';
+import { CarWithProvider } from '@/types/interface';
 import { getWishlist, removeFromWishlist } from '@/libs/wishlistService';
 import { decodeSafeUrl } from '@/libs/urlUtils';
 

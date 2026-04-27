@@ -1,7 +1,7 @@
 'use client';
 
 import { Rating } from "@mui/material";
-import { Review } from "@/../interface";
+import { Review } from "@/types/interface";
 
 export default function ReviewCard({ 
   review, 

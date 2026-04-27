@@ -3,7 +3,7 @@
  * Handles all wishlist-related API calls for cars
  */
 
-import { ResponseList, ResponseSingle, Wishlist, CarWithProvider } from "@/../interface";
+import { ResponseList, ResponseSingle, Wishlist, CarWithProvider } from "@/types/interface";
 import { baseUrl } from '../config/api';
 
 export async function addToWishlist(token: string, carId: string): Promise<ResponseSingle<Wishlist>> {

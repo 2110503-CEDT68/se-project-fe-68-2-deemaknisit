@@ -5,7 +5,7 @@ import Image from 'next/image';
 import { useParams } from 'next/navigation';
 import { getCar, getCarReviews } from '@/libs/carService';
 import { getMyReviews } from '@/libs/reviewService';
-import { Car, CarWithProvider, Review } from '@/../interface';
+import { Car, CarWithProvider, Review } from '@/types/interface';
 import { decodeSafeUrl } from '@/libs/urlUtils';
 import ReviewCard from '@/components/ReviewCard';
 import { CircularProgress, Rating, Divider } from '@mui/material';

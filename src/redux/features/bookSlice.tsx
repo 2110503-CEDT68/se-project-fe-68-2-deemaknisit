@@ -1,5 +1,5 @@
 import { createSlice, PayloadAction } from '@reduxjs/toolkit';
-import { Booking } from '@/../interface'; // Assuming Booking interface is defined here
+import { Booking } from '@/types/interface'; // Assuming Booking interface is defined here
 
 // Define the shape of the state managed by this slice
 interface BookState {

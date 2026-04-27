@@ -1,6 +1,6 @@
 'use client';
 
-import { BookingWithDetails } from "@/../interface";
+import { BookingWithDetails } from "@/types/interface";
 import { Button, Rating } from "@mui/material";
 
 export default function BookingCard({

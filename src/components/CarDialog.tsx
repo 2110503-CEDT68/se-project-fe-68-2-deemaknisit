@@ -1,6 +1,6 @@
 import { useState, useEffect } from "react";
 import { Dialog, DialogTitle, DialogContent, TextField, DialogActions, Button, MenuItem } from "@mui/material";
-import { Car, CarWithProvider } from "@/../interface";
+import { Car, CarWithProvider } from "@/types/interface";
 import { encodeSafeUrl, decodeSafeUrl } from "@/libs/urlUtils";
 
 interface CarDialogProps {

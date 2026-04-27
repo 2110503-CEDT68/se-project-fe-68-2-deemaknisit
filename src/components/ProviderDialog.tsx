@@ -1,6 +1,6 @@
 import { useState, useEffect } from "react";
 import { Dialog, DialogTitle, DialogContent, TextField, DialogActions, Button } from "@mui/material";
-import { Provider } from "@/../interface";
+import { Provider } from "@/types/interface";
 import { encodeSafeUrl, decodeSafeUrl } from "@/libs/urlUtils";
 
 interface ProviderDialogProps {

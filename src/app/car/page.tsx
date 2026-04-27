@@ -4,7 +4,7 @@ import { useEffect, useState, useCallback } from 'react';
 import { useSession } from 'next-auth/react';
 import { getCars, updateCar, deleteCar } from '@/libs/carService';
 import { addToWishlist, removeFromWishlist, getWishlist } from '@/libs/wishlistService';
-import { CarWithProvider, Car } from '@/../interface';
+import { CarWithProvider, Car } from '@/types/interface';
 import CarCard from '@/components/CarCard';
 import CarDialog from '@/components/CarDialog';
 import ConfirmDeleteDialog from '@/components/ConfirmDeleteDialog';
