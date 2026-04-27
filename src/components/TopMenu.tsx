@@ -25,6 +25,7 @@ export default async function TopMenu() {
             {/* Centered Navigation */}
             <div className="flex-grow flex justify-center gap-1">
                 <TopMenuItem title='Providers' pageRef='/provider' />
+                <TopMenuItem title='Cars' pageRef='/car' />
                 <TopMenuItem title='Booking' pageRef='/booking' />
                 <TopMenuItem title='My Booking' pageRef='/mybooking' />
                 <TopMenuItem title='Reviews' pageRef='/reviews' />

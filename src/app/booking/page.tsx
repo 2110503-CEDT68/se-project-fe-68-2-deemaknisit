@@ -11,11 +11,13 @@ import { getProviders } from '@/libs/providerService';
 import { addBooking, getBookings } from '@/libs/bookingService';
 import { getUserProfile } from '@/libs/authService';
 import { Provider, Car, ProviderWithCars } from '@/../interface';
-import { useRouter } from 'next/navigation';
+import { useRouter, useSearchParams } from 'next/navigation';
 
 export default function BookingPage() {
   const { data: session } = useSession();
   const router = useRouter();
+  const searchParams = useSearchParams();
+  const carIdParam = searchParams.get('carId');
   const token = session?.user?.token;
 
   const [providers, setProviders] = useState<ProviderWithCars[]>([]);
@@ -46,15 +48,21 @@ export default function BookingPage() {
 
         if (token && bookingsRes?.data) {
           const currentUserId = (session?.user as any)?._id;
-          
-          // Filter own bookings to check the limit
           const ownBookings = (bookingsRes.data as any[]).filter(b => {
             const bookingUserId = typeof b.user === 'string' ? b.user : b.user?._id;
             return bookingUserId === currentUserId;
           });
-          
-          if (ownBookings.length >= 3) {
-            setIsLimitReached(true);
+          if (ownBookings.length >= 3) setIsLimitReached(true);
+        }
+
+        // Smart Auto-select from URL (Inside try block)
+        if (carIdParam && providersRes.data) {
+          const foundProvider = providersRes.data.find((p: any) => 
+            p.cars?.some((c: any) => c._id === carIdParam)
+          );
+          if (foundProvider) {
+            setSelectedProviderId(foundProvider._id);
+            setSelectedCarId(carIdParam);
           }
         }
       } catch (e) {
@@ -68,7 +76,7 @@ export default function BookingPage() {
     if (status !== 'loading') {
       fetchInitialData();
     }
-  }, [token, session, status]);
+  }, [token, session, status, carIdParam]);
 
   useEffect(() => {
     if (selectedProviderId) {

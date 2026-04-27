@@ -13,6 +13,8 @@ import { useSession } from 'next-auth/react';
 import ConfirmDeleteDialog from '@/components/ConfirmDeleteDialog';
 import ReviewSubmissionDialog from '@/components/ReviewSubmissionDialog';
 import { updateReview, deleteReview } from '@/libs/reviewService';
+import { addToWishlist, removeFromWishlist, getWishlist } from '@/libs/wishlistService';
+import Link from 'next/link';
 
 export default function CarDetailPage() {
     const { data: session } = useSession();
@@ -26,6 +28,8 @@ export default function CarDetailPage() {
 
     const [reviewToEdit, setReviewToEdit] = useState<Review | null>(null);
     const [reviewToDelete, setReviewToDelete] = useState<Review | null>(null);
+    const [wishlistItemId, setWishlistItemId] = useState<string | null>(null);
+    const [isWishlistLoading, setIsWishlistLoading] = useState(false);
 
     const refreshData = async () => {
         if (!id) return;
@@ -59,8 +63,38 @@ export default function CarDetailPage() {
             }
         };
 
+        const checkWishlist = async () => {
+            if (!token || !id) return;
+            try {
+                const wishlist = await getWishlist(token);
+                const item = wishlist.data.find((i: any) => i._id === id);
+                if (item) setWishlistItemId(item.wishlistItemId || item._id);
+            } catch (e) {
+                console.error("Error checking wishlist status:", e);
+            }
+        };
+
         fetchData();
-    }, [id]);
+        checkWishlist();
+    }, [id, token]);
+
+    const handleWishlistToggle = async () => {
+        if (!token || !id) return;
+        setIsWishlistLoading(true);
+        try {
+            if (wishlistItemId) {
+                await removeFromWishlist(token, wishlistItemId);
+                setWishlistItemId(null);
+            } else {
+                const res = await addToWishlist(token, id);
+                setWishlistItemId(res.data._id);
+            }
+        } catch (e) {
+            console.error("Wishlist toggle error:", e);
+        } finally {
+            setIsWishlistLoading(false);
+        }
+    };
 
     if (loading) {
         return (
@@ -217,16 +251,34 @@ export default function CarDetailPage() {
                             </div>
                         </div>
 
-                        <button 
-                            disabled={!car.available}
-                            className={`w-full py-5 rounded-2xl font-black uppercase tracking-[0.2em] transition-all duration-300 ${
-                                car.available 
-                                ? 'bg-[#FFD600] text-[#111111] hover:bg-white hover:scale-[1.02] shadow-[0_20px_40px_-10px_rgba(255,214,0,0.3)]' 
-                                : 'bg-stone-800 text-stone-500 cursor-not-allowed'
-                            }`}
-                        >
-                            {car.available ? 'Book This Car' : 'Currently Unavailable'}
-                        </button>
+                        <div className="flex gap-4">
+                            <Link 
+                                href={`/booking?carId=${id}`}
+                                className={`flex-grow py-5 rounded-2xl font-black uppercase tracking-[0.2em] transition-all duration-300 text-center ${
+                                    car.available 
+                                    ? 'bg-[#FFD600] text-[#111111] hover:bg-white hover:scale-[1.02] shadow-[0_20px_40px_-10px_rgba(255,214,0,0.3)]' 
+                                    : 'bg-stone-800 text-stone-500 cursor-not-allowed pointer-events-none'
+                                }`}
+                            >
+                                {car.available ? 'Book This Car' : 'Currently Unavailable'}
+                            </Link>
+
+                            {token && (
+                                <button 
+                                    onClick={handleWishlistToggle}
+                                    disabled={isWishlistLoading}
+                                    className={`w-16 h-16 rounded-2xl flex items-center justify-center transition-all duration-300 border-2 ${
+                                        wishlistItemId 
+                                        ? 'bg-red-500 border-red-500 text-white shadow-lg shadow-red-500/20' 
+                                        : 'bg-transparent border-white/20 text-white hover:border-[#FFD600] hover:text-[#FFD600]'
+                                    } ${isWishlistLoading ? 'opacity-50 cursor-not-allowed' : ''}`}
+                                >
+                                    <svg width="24" height="24" viewBox="0 0 24 24" fill={wishlistItemId ? "currentColor" : "none"} stroke="currentColor" strokeWidth="2.5" strokeLinecap="round" strokeLinejoin="round">
+                                        <path d="M20.84 4.61a5.5 5.5 0 0 0-7.78 0L12 5.67l-1.06-1.06a5.5 5.5 0 0 0-7.78 7.78l1.06 1.06L12 21.23l7.78-7.78 1.06-1.06a5.5 5.5 0 0 0 0-7.78z"></path>
+                                    </svg>
+                                </button>
+                            )}
+                        </div>
 
                         <p className="text-[9px] text-center text-stone-500 font-bold uppercase tracking-widest mt-6 italic">Secure checkout powered by Ratatouille</p>
                     </div>

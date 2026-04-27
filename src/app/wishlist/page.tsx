@@ -76,12 +76,14 @@ function WishlistCard({
         </div>
 
         <div className="flex flex-wrap items-center gap-3">
-          <Link
-            href={`/car/${item._id}`}
-            className="inline-flex items-center justify-center rounded-full bg-[#111111] px-5 py-2.5 text-[11px] font-black uppercase tracking-[0.25em] text-white transition-all duration-300 hover:bg-[#FFD600] hover:text-[#111111]"
-          >
-            View Car
-          </Link>
+          {provider && (
+            <Link
+              href={`/provider/${provider._id}`}
+              className="inline-flex items-center justify-center rounded-full bg-[#111111] px-5 py-2.5 text-[11px] font-black uppercase tracking-[0.25em] text-white transition-all duration-300 hover:bg-[#FFD600] hover:text-[#111111]"
+            >
+              View Provider
+            </Link>
+          )}
 
           <button
             type="button"
