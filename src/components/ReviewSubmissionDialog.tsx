@@ -52,7 +52,7 @@ export default function ReviewSubmissionDialog({
     }
 
     if (!comment || comment.trim() === '') {
-      return setError('require your comment');
+      return setError('Please share your thoughts - we require your comment!');
     }
 
     setIsSubmitting(true);
@@ -76,7 +76,7 @@ export default function ReviewSubmissionDialog({
           </Box>
         )}
 
-        {error && error !== 'require your comment' && (
+        {error && error !== 'Please share your thoughts - we require your comment!' && (
           <Box sx={{ p: 1.5, bgcolor: '#ffebee', color: '#871010', borderRadius: 1 }}>
             <Typography fontWeight="bold" variant="body2">{error}</Typography>
           </Box>
@@ -104,14 +104,14 @@ export default function ReviewSubmissionDialog({
           value={comment}
           onChange={(event) => {
             setComment(event.target.value);
-            if (error === 'require your comment' && event.target.value.trim() !== '') {
+            if (error === 'Please share your thoughts - we require your comment!' && event.target.value.trim() !== '') {
               setError(null);
             }
           }}
           placeholder="Share your experience with the provider or car..."
           fullWidth
-          error={error === 'require your comment'}
-          helperText={error === 'require your comment' ? 'Please share your thoughts - we require your comment!' : ''}
+          error={error === 'Please share your thoughts - we require your comment!'}
+          helperText={error === 'Please share your thoughts - we require your comment!' ? 'Please share your thoughts - we require your comment!' : ''}
           FormHelperTextProps={{
             sx: { fontWeight: 'bold', fontSize: '0.75rem' }
           }}

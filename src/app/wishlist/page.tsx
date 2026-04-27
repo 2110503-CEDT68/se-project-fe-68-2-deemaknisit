@@ -230,7 +230,7 @@ export default function WishlistPage() {
           <div className="rounded-[32px] border border-dashed border-stone-200 bg-stone-50 px-8 py-16 text-center">
             <p className="text-[10px] font-black uppercase tracking-[0.35em] text-stone-400">Nothing here yet</p>
             <h2 className="mt-4 text-3xl font-black italic uppercase tracking-tighter text-[#111111]">
-              Your wishlist is empty
+              Your wishlist is currently empty.
             </h2>
             <p className="mx-auto mt-4 max-w-lg text-sm font-medium leading-relaxed text-stone-500">
               Browse cars and tap the wishlist button on a car card to save it here.

@@ -70,7 +70,10 @@ export default function ProviderDetailWithCars({ initialProvider }: { initialPro
   }, [token]);
 
   const handleAddCarToWishlist = async (carId: string) => {
-    if (!token) return;
+    if (!token) {
+        alert("please log in first");
+        return;
+    }
     try {
       const response = await addToWishlist(token, carId);
       // Response from add is the Wishlist object: { _id, carId, ... }
@@ -80,13 +83,17 @@ export default function ProviderDetailWithCars({ initialProvider }: { initialPro
         ...prev, 
         [carId]: { _id: carId, wishlistItemId: response.data._id } 
       }));
+      alert("Added successfully");
     } catch (error) {
       console.error('Error adding to wishlist:', error);
     }
   };
 
   const handleRemoveCarFromWishlist = async (carId: string) => {
-    if (!token) return;
+    if (!token) {
+        alert("please log in first");
+        return;
+    }
     const wishlistItem = wishlistMap[carId];
     const wishlistItemId = wishlistItem?.wishlistItemId || wishlistItem?._id;
     if (!wishlistItemId) return;
@@ -215,8 +222,8 @@ export default function ProviderDetailWithCars({ initialProvider }: { initialPro
                 available={car.available}
                 onEdit={isAdminUser ? () => handleEditCar(car) : undefined}
                 onDelete={isAdminUser ? () => setCarToDelete(car) : undefined}
-                onAddToWishlist={token ? () => handleAddCarToWishlist(car._id) : undefined}
-                onRemoveFromWishlist={token ? () => handleRemoveCarFromWishlist(car._id) : undefined}
+                onAddToWishlist={() => handleAddCarToWishlist(car._id)}
+                onRemoveFromWishlist={() => handleRemoveCarFromWishlist(car._id)}
                 isInWishlist={!!wishlistMap[car._id]}
                 isWishlistLoading={isLoadingWishlist}
               />

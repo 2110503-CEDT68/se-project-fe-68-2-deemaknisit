@@ -53,7 +53,10 @@ export default function CarGalleryPage() {
   }, [fetchData]);
 
   const handleWishlistToggle = async (carId: string) => {
-    if (!token) return;
+    if (!token) {
+        alert("please log in first");
+        return;
+    }
     setWishlistLoading(true);
     try {
       const wishlistItemId = wishlistMap[carId];
@@ -67,6 +70,7 @@ export default function CarGalleryPage() {
       } else {
         const res = await addToWishlist(token, carId);
         setWishlistMap(prev => ({ ...prev, [carId]: res.data._id }));
+        alert("Added successfully");
       }
     } catch (e) {
       console.error("Wishlist toggle error:", e);

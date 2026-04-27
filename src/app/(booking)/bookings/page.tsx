@@ -212,7 +212,7 @@ export default function BookingsHubPage() {
                     <div className="animate-in fade-in slide-in-from-bottom-4 duration-500 w-full">
                         {bookings.length === 0 ? (
                             <div className="py-32 text-center bg-stone-50 rounded-[40px] border-2 border-dashed border-stone-200">
-                                <p className="text-stone-400 font-bold italic text-xl uppercase tracking-widest mb-6">You have no active bookings</p>
+                                <p className="text-stone-400 font-bold italic text-xl uppercase tracking-widest mb-6">Booking not complete yet. Review will appear here after return</p>
                                 <button onClick={() => setActiveTab('new')} className="bg-[#111111] text-white px-8 py-4 rounded-full text-xs font-black uppercase tracking-widest hover:bg-[#FFD600] hover:text-[#111111] transition-all">Make Your First Booking</button>
                             </div>
                         ) : (
