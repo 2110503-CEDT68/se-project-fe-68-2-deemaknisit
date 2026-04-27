@@ -24,7 +24,7 @@ function WishlistCard({
 
   return (
     <article className="group overflow-hidden rounded-[28px] border border-stone-100 bg-white shadow-[0_20px_60px_-24px_rgba(0,0,0,0.18)] transition-all duration-300 hover:-translate-y-1 hover:shadow-[0_28px_80px_-24px_rgba(0,0,0,0.24)]">
-      <Link href={`/car/${item._id}`} className="block">
+      <Link id={`wishlist-card-link-${item._id}`} href={`/car/${item._id}`} className="block">
         <div className="relative h-56 overflow-hidden bg-stone-100">
           <Image
             src={imageSrc}
@@ -78,6 +78,7 @@ function WishlistCard({
 
         <div className="flex flex-wrap items-center gap-3">
           <Link
+            id={`wishlist-view-car-link-${item._id}`}
             href={`/car/${item._id}`}
             className="inline-flex items-center justify-center rounded-full bg-[#FFD600] px-5 py-2.5 text-[11px] font-black uppercase tracking-[0.25em] text-[#111111] transition-all duration-300 hover:bg-[#111111] hover:!text-[#FFD600]"
           >
@@ -85,6 +86,7 @@ function WishlistCard({
           </Link>
 
           <button
+            id={`wishlist-remove-button-${item._id}`}
             type="button"
             onClick={() => onRemove(item.wishlistItemId)}
             disabled={removing}
@@ -184,6 +186,7 @@ export default function WishlistPage() {
             Your saved cars will appear here after you log in to your account.
           </p>
           <Link
+            id="wishlist-auth-signin-link"
             href="/api/auth/signin"
             className="mt-8 inline-flex items-center justify-center rounded-full bg-[#FFD600] px-8 py-4 text-[11px] font-black uppercase tracking-[0.25em] text-[#111111] transition-all duration-300 hover:bg-[#111111] hover:!text-[#FFD600] hover:scale-105 active:scale-95 shadow-xl"
           >
@@ -236,6 +239,7 @@ export default function WishlistPage() {
               Browse cars and tap the wishlist button on a car card to save it here.
             </p>
             <Link
+              id="wishlist-browse-cars-link"
               href="/car"
               className="mt-8 inline-flex items-center justify-center rounded-full bg-[#FFD600] px-6 py-3 text-[11px] font-black uppercase tracking-[0.25em] text-[#111111] transition-all duration-300 hover:bg-[#111111] hover:!text-[#FFD600]"
             >

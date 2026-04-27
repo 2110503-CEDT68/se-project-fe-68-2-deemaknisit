@@ -218,6 +218,7 @@ export default function ReviewsPage() {
                 </div>
                 <div className="bg-stone-50 p-1.5 rounded-[24px] flex gap-1 border border-stone-100 shadow-sm h-fit">
                     <button
+                        id="reviews-tab-all-button"
                         onClick={() => setTab('all')}
                         className={`px-8 py-3 rounded-[18px] text-[10px] font-black uppercase tracking-widest transition-all duration-300 ${
                             tab === 'all'
@@ -228,6 +229,7 @@ export default function ReviewsPage() {
                         All Feedbacks
                     </button>
                     <button
+                        id="reviews-tab-personal-button"
                         onClick={() => setTab('personal')}
                         className={`px-8 py-3 rounded-[18px] text-[10px] font-black uppercase tracking-widest transition-all duration-300 ${
                             tab === 'personal'
@@ -277,6 +279,7 @@ export default function ReviewsPage() {
             <p className="text-blue-700 font-semibold mb-4 text-lg">Sign in to view your reviews</p>
             <p className="text-blue-600 text-sm mb-6">You need to be logged in to view your personal reviews.</p>
             <Link
+              id="reviews-signin-link"
               href="/login"
               className="inline-block px-6 py-2 bg-[#FFD600] text-[#111111] font-bold rounded-lg hover:bg-yellow-500 transition-colors duration-300"
             >

@@ -67,14 +67,15 @@ export default function BookingCard({
                 <div className="flex items-center justify-between gap-4 mb-2">
                   <span className="text-sm font-bold uppercase tracking-widest text-stone-500">Your Review</span>
                   <div className="flex items-center gap-1.5">
-                    <Rating value={booking.review.rating} readOnly size="small" sx={{ color: '#FFD600' }} />
+                    <Rating id={`booking-review-rating-${booking._id}`} value={booking.review.rating} readOnly size="small" sx={{ color: '#FFD600' }} />
                     <span className="text-xs font-black text-[#111111]">{booking.review.rating}/5</span>
                   </div>
                 </div>
-                <p className="text-sm text-stone-600 mb-4">{booking.review.comment || 'No comment provided.'}</p>
+                <p id={`booking-review-comment-${booking._id}`} className="text-sm text-stone-600 mb-4">{booking.review.comment || 'No comment provided.'}</p>
                 <div className="flex justify-end gap-2 pt-3 border-t border-stone-200">
                   {onReviewEdit && (
                     <button 
+                      id={`booking-review-edit-button-${booking._id}`}
                       onClick={onReviewEdit} 
                       className="w-7 h-7 flex items-center justify-center bg-blue-500 text-white rounded-lg hover:bg-blue-600 transition-all shadow-sm active:scale-90"
                       title="Edit Review"
@@ -84,6 +85,7 @@ export default function BookingCard({
                   )}
                   {onReviewDelete && (
                     <button 
+                      id={`booking-review-delete-button-${booking._id}`}
                       onClick={onReviewDelete} 
                       className="w-7 h-7 flex items-center justify-center bg-red-500 text-white rounded-lg hover:bg-red-600 transition-all shadow-sm active:scale-90"
                       title="Delete Review"
@@ -105,6 +107,7 @@ export default function BookingCard({
       <div className="flex flex-row sm:flex-col gap-3 w-full sm:w-auto mt-6 sm:mt-0 pt-6 sm:pt-0 border-t sm:border-t-0 sm:border-l border-stone-200 sm:pl-8">
         {isComplete && onReview && (
           <Button 
+            id={`booking-review-button-${booking._id}`}
             onClick={onReview} 
             variant="contained" 
             fullWidth
@@ -115,6 +118,7 @@ export default function BookingCard({
         )}
         {!isComplete && onComplete && (
           <Button 
+            id={`booking-return-button-${booking._id}`}
             onClick={onComplete} 
             variant="contained" 
             sx={{ backgroundColor: '#111111', color: '#FFD600', fontWeight: 'bold', borderRadius: '12px', '&:hover': { backgroundColor: '#333333' } }}
@@ -125,6 +129,7 @@ export default function BookingCard({
         )}
         {!isComplete && onEdit && (
           <Button 
+            id={`booking-edit-button-${booking._id}`}
             onClick={onEdit} 
             variant="contained" 
             sx={{ backgroundColor: '#FFD600', color: '#111111', fontWeight: 'bold', borderRadius: '12px', '&:hover': { backgroundColor: '#e0b400' } }}
@@ -135,6 +140,7 @@ export default function BookingCard({
         )}
         {onDelete && (
           <Button 
+            id={`booking-delete-button-${booking._id}`}
             onClick={onDelete} 
             variant="outlined" 
             sx={{ borderColor: '#f87171', color: '#f87171', fontWeight: 'bold', borderRadius: '12px', '&:hover': { backgroundColor: '#fef2f2', borderColor: '#ef4444' } }}

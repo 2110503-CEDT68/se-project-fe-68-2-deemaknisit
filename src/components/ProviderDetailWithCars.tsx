@@ -240,6 +240,7 @@ export default function ProviderDetailWithCars({ initialProvider }: { initialPro
       {/* Admin Quick Action */}
       {isAdminUser && (
         <Fab 
+          id="provider-add-car-button"
           color="primary" 
           aria-label="add-car" 
           onClick={() => setIsCarDialogOpen(true)}

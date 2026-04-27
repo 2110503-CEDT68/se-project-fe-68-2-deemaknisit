@@ -60,18 +60,20 @@ export default function ProviderDialog({
   };
 
   return (
-    <Dialog open={open} onClose={!isSubmitting ? onClose : undefined} fullWidth maxWidth="sm">
-      <DialogTitle sx={{ fontWeight: 'bold' }}>
+    <Dialog id="provider-dialog" open={open} onClose={!isSubmitting ? onClose : undefined} fullWidth maxWidth="sm">
+      <DialogTitle id="provider-dialog-title" sx={{ fontWeight: 'bold' }}>
         {initialData ? 'Edit Provider' : 'Add New Provider'}
       </DialogTitle>
-      <DialogContent sx={{ display: 'flex', flexDirection: 'column', gap: 2, pt: '20px !important' }}>
+      <DialogContent id="provider-form" component="form" sx={{ display: 'flex', flexDirection: 'column', gap: 2, pt: '20px !important' }}>
         <TextField 
+          id="provider-name-input"
           label="Provider Name" 
           fullWidth 
           value={formData.name} 
           onChange={e => setFormData({...formData, name: e.target.value})} 
         />
         <TextField 
+          id="provider-address-input"
           label="Address" 
           fullWidth 
           value={formData.address} 
@@ -79,12 +81,14 @@ export default function ProviderDialog({
         />
         <div className="flex gap-2 w-full">
           <TextField 
+            id="provider-district-input"
             label="District" 
             fullWidth 
             value={formData.district} 
             onChange={e => setFormData({...formData, district: e.target.value})} 
           />
           <TextField 
+            id="provider-province-input"
             label="Province" 
             fullWidth 
             value={formData.province} 
@@ -93,12 +97,14 @@ export default function ProviderDialog({
         </div>
         <div className="flex gap-2 w-full">
           <TextField 
+            id="provider-postalcode-input"
             label="Postal Code" 
             fullWidth 
             value={formData.postalcode} 
             onChange={e => setFormData({...formData, postalcode: e.target.value})} 
           />
           <TextField 
+            id="provider-region-input"
             label="Region" 
             fullWidth 
             value={formData.region} 
@@ -106,21 +112,24 @@ export default function ProviderDialog({
           />
         </div>
         <TextField 
+          id="provider-tel-input"
           label="Telephone" 
           fullWidth 
           value={formData.tel} 
           onChange={e => setFormData({...formData, tel: e.target.value})} 
         />
         <TextField 
+          id="provider-picture-input"
           label="Picture URL" 
           fullWidth 
           value={formData.picture} 
           onChange={e => setFormData({...formData, picture: e.target.value})} 
         />
       </DialogContent>
-      <DialogActions sx={{ p: 2 }}>
-        <Button onClick={onClose} disabled={isSubmitting} sx={{ color: '#666' }}>Cancel</Button>
+      <DialogActions id="provider-dialog-actions" sx={{ p: 2 }}>
+        <Button id="provider-cancel-button" onClick={onClose} disabled={isSubmitting} sx={{ color: '#666' }}>Cancel</Button>
         <Button 
+          id="provider-save-button"
           onClick={handleSave} 
           variant="contained" 
           disabled={isSubmitting || !formData.name}

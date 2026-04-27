@@ -66,7 +66,7 @@ export default function CarCard({
   };
 
   return (
-    <Link href={`/car/${id}`} className="group block w-full">
+    <Link id={`car-card-link-${id}`} href={`/car/${id}`} className="group block w-full">
       <article className="overflow-hidden rounded-[28px] border border-stone-100 bg-white shadow-[0_20px_60px_-24px_rgba(0,0,0,0.12)] transition-all duration-500 hover:-translate-y-2 hover:shadow-[0_40px_80px_-24px_rgba(0,0,0,0.18)]">
         {/* Visual Header */}
         <div className="relative h-64 overflow-hidden bg-stone-100">
@@ -88,6 +88,7 @@ export default function CarCard({
             
             {(onAddToWishlist || onRemoveFromWishlist) && (
               <button
+                id={`car-card-wishlist-button-${id}`}
                 onClick={handleWishlistClick}
                 disabled={isWishlistLoading}
                 className="w-10 h-10 flex items-center justify-center rounded-full bg-white/10 backdrop-blur-md border border-white/20 transition-all duration-300 hover:bg-white hover:scale-110 active:scale-95 disabled:opacity-50 group/heart"
@@ -156,10 +157,10 @@ export default function CarCard({
           {(onEdit || onDelete) && (
             <div className="flex gap-2 pt-2 border-t border-stone-100">
                {onEdit && (
-                 <button onClick={(e) => { e.preventDefault(); e.stopPropagation(); onEdit(); }} className="flex-1 py-3 bg-stone-100 text-[#111111] text-[10px] font-black uppercase tracking-widest rounded-xl hover:bg-[#111111] hover:text-white transition-all">Edit</button>
+                 <button id={`car-card-edit-button-${id}`} onClick={(e) => { e.preventDefault(); e.stopPropagation(); onEdit(); }} className="flex-1 py-3 bg-stone-100 text-[#111111] text-[10px] font-black uppercase tracking-widest rounded-xl hover:bg-[#111111] hover:text-white transition-all">Edit</button>
                )}
                {onDelete && (
-                 <button onClick={(e) => { e.preventDefault(); e.stopPropagation(); onDelete(); }} className="flex-1 py-3 bg-red-50 text-red-600 text-[10px] font-black uppercase tracking-widest rounded-xl hover:bg-red-600 hover:text-white transition-all">Delete</button>
+                 <button id={`car-card-delete-button-${id}`} onClick={(e) => { e.preventDefault(); e.stopPropagation(); onDelete(); }} className="flex-1 py-3 bg-red-50 text-red-600 text-[10px] font-black uppercase tracking-widest rounded-xl hover:bg-red-600 hover:text-white transition-all">Delete</button>
                )}
             </div>
           )}

@@ -26,7 +26,7 @@ export default function ProviderCatalog({
         </div>
       ) : (
         providersData.data.map((provider: Provider) => (
-          <Link key={provider._id} href={`/provider/${provider._id}`}>
+          <Link id={`provider-catalog-item-${provider._id}`} key={provider._id} href={`/provider/${provider._id}`}>
             {/* Pass new props: address and telephone */}
             <ProviderCard 
               providerName={provider.name} 

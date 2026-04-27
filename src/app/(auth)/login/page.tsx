@@ -51,9 +51,9 @@ export default function LoginPage() {
            <p className="text-stone-400 text-sm font-bold uppercase tracking-[0.2em] text-center">Enter your details</p>
         </div>
 
-        <form onSubmit={handleSubmit} className="flex flex-col gap-6">
+        <form id="login-form" onSubmit={handleSubmit} className="flex flex-col gap-6">
           {error && (
-            <div className="text-white text-[10px] font-black uppercase tracking-widest bg-[#f87171] p-4 rounded-xl text-center animate-in fade-in slide-in-from-top-2">
+            <div id="login-error-message" className="text-white text-[10px] font-black uppercase tracking-widest bg-[#f87171] p-4 rounded-xl text-center animate-in fade-in slide-in-from-top-2">
               {error}
             </div>
           )}
@@ -63,6 +63,7 @@ export default function LoginPage() {
               Email
             </label>
             <input
+              id="login-email-input"
               type="email"
               value={email}
               onChange={(e) => setEmail(e.target.value)}
@@ -77,6 +78,7 @@ export default function LoginPage() {
               Password
             </label>
             <input
+              id="login-password-input"
               type="password"
               value={password}
               onChange={(e) => setPassword(e.target.value)}
@@ -87,6 +89,7 @@ export default function LoginPage() {
           </div>
 
           <button
+            id="login-submit-button"
             type="submit"
             disabled={isLoading}
             className="w-full py-5 px-4 bg-[#111111] text-white rounded-2xl text-xs font-black uppercase tracking-[0.3em] shadow-2xl hover:bg-[#FFD600] hover:text-[#111111] transition-all duration-500 mt-4 disabled:opacity-50 disabled:cursor-not-allowed group"
@@ -97,7 +100,7 @@ export default function LoginPage() {
 
         <div className="pt-10 border-t border-stone-100 flex flex-col sm:flex-row justify-center items-center gap-4">
           <span className="text-stone-400 text-[10px] font-bold uppercase tracking-widest">Need an account?</span>
-          <Link href="/register" className="bg-[#FFD600] text-[#111111] text-[10px] font-black px-6 py-2.5 rounded-full hover:bg-[#111111] hover:text-white transition-all duration-300 uppercase tracking-widest shadow-lg shadow-yellow-400/20">
+          <Link id="login-register-link" href="/register" className="bg-[#FFD600] text-[#111111] text-[10px] font-black px-6 py-2.5 rounded-full hover:bg-[#111111] hover:text-white transition-all duration-300 uppercase tracking-widest shadow-lg shadow-yellow-400/20">
             Register
           </Link>
         </div>

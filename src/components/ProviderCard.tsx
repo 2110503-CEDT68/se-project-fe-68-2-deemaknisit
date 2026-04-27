@@ -65,6 +65,7 @@ export default function ProviderCard({
             >
               {onEdit && (
                 <button 
+                  id={`provider-card-edit-button-${providerName.toLowerCase().replace(/\s+/g, '-')}`}
                   onClick={onEdit} 
                   className="w-8 h-8 flex items-center justify-center bg-[#FFD600] text-[#111111] rounded-lg hover:bg-black hover:text-white transition-all duration-300 shadow-sm"
                   title="Edit Provider Info"
@@ -74,6 +75,7 @@ export default function ProviderCard({
               )}
               {onDelete && (
                 <button 
+                  id={`provider-card-delete-button-${providerName.toLowerCase().replace(/\s+/g, '-')}`}
                   onClick={onDelete} 
                   className="w-8 h-8 flex items-center justify-center bg-[#f87171] text-white rounded-lg hover:bg-black transition-all duration-300 shadow-sm"
                   title="Delete Provider"

@@ -253,6 +253,7 @@ export default function CarDetailPage() {
 
                         <div className="flex gap-4">
                             <Link 
+                                id={`car-detail-book-button-${id}`}
                                 href={`/bookings?tab=new&carId=${id}`}
                                 className={`flex-grow py-5 rounded-2xl font-black uppercase tracking-[0.2em] transition-all duration-300 text-center ${
                                     car.available 
@@ -265,6 +266,7 @@ export default function CarDetailPage() {
 
                             {token && (
                                 <button 
+                                    id={`car-detail-wishlist-button-${id}`}
                                     onClick={handleWishlistToggle}
                                     disabled={isWishlistLoading}
                                     className={`w-16 h-16 rounded-2xl flex items-center justify-center transition-all duration-300 border-2 ${

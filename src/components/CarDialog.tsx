@@ -81,12 +81,13 @@ export default function CarDialog({
   };
 
   return (
-    <Dialog open={open} onClose={!isSubmitting ? onClose : undefined} fullWidth maxWidth="sm">
-      <DialogTitle sx={{ fontWeight: 'bold' }}>
+    <Dialog id="car-dialog" open={open} onClose={!isSubmitting ? onClose : undefined} fullWidth maxWidth="sm">
+      <DialogTitle id="car-dialog-title" sx={{ fontWeight: 'bold' }}>
         {initialData ? 'Edit Car' : 'Add New Car'}
       </DialogTitle>
-      <DialogContent sx={{ display: 'flex', flexDirection: 'column', gap: 2, pt: '20px !important' }}>
+      <DialogContent id="car-form" component="form" sx={{ display: 'flex', flexDirection: 'column', gap: 2, pt: '20px !important' }}>
         <TextField 
+          id="car-license-plate-input"
           label="License Plate" 
           fullWidth 
           value={formData.licensePlate} 
@@ -94,12 +95,14 @@ export default function CarDialog({
         />
         <div className="flex gap-2 w-full">
           <TextField 
+            id="car-brand-input"
             label="Brand" 
             fullWidth 
             value={formData.brand} 
             onChange={e => setFormData({...formData, brand: e.target.value})} 
           />
           <TextField 
+            id="car-model-input"
             label="Model" 
             fullWidth 
             value={formData.model} 
@@ -108,6 +111,7 @@ export default function CarDialog({
         </div>
         <div className="flex gap-2 w-full">
           <TextField 
+            id="car-year-input"
             label="Year" 
             fullWidth 
             type="number"
@@ -115,6 +119,7 @@ export default function CarDialog({
             onChange={e => setFormData({...formData, year: e.target.value})} 
           />
           <TextField 
+            id="car-color-input"
             label="Color" 
             fullWidth 
             value={formData.color} 
@@ -123,6 +128,7 @@ export default function CarDialog({
         </div>
         <div className="flex gap-2 w-full">
           <TextField 
+            id="car-transmission-input"
             select 
             label="Transmission" 
             fullWidth 
@@ -133,6 +139,7 @@ export default function CarDialog({
             <MenuItem value="Manual">Manual</MenuItem>
           </TextField>
           <TextField 
+            id="car-fuel-type-input"
             select 
             label="Fuel Type" 
             fullWidth 
@@ -147,6 +154,7 @@ export default function CarDialog({
         </div>
         <div className="flex gap-2 w-full">
           <TextField 
+            id="car-rent-price-input"
             label="Rent Price (฿/day)" 
             fullWidth 
             type="number"
@@ -154,6 +162,7 @@ export default function CarDialog({
             onChange={e => setFormData({...formData, rentPrice: e.target.value})} 
           />
           <TextField 
+            id="car-available-input"
             select 
             label="Available" 
             fullWidth 
@@ -165,15 +174,17 @@ export default function CarDialog({
           </TextField>
         </div>
         <TextField 
+          id="car-picture-input"
           label="Picture URL" 
           fullWidth 
           value={formData.picture} 
           onChange={e => setFormData({...formData, picture: e.target.value})} 
         />
       </DialogContent>
-      <DialogActions sx={{ p: 2 }}>
-        <Button onClick={onClose} disabled={isSubmitting} sx={{ color: '#666' }}>Cancel</Button>
+      <DialogActions id="car-dialog-actions" sx={{ p: 2 }}>
+        <Button id="car-cancel-button" onClick={onClose} disabled={isSubmitting} sx={{ color: '#666' }}>Cancel</Button>
         <Button 
+          id="car-save-button"
           onClick={handleSave} 
           variant="contained" 
           disabled={isSubmitting || !formData.licensePlate}

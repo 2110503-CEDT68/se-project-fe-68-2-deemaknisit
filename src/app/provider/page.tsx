@@ -142,7 +142,7 @@ export default function ProviderPage() {
       )}
 
       {error && (
-        <div className="text-center text-xl mt-10 text-red-500">{error}</div>
+        <div id="provider-page-error-message" className="text-center text-xl mt-10 text-red-500">{error}</div>
       )}
 
       {!isLoading && !error && providersData && (
@@ -157,6 +157,7 @@ export default function ProviderPage() {
       {/* Logged-in Add Button (FAB) */}
       {isAdminUser && (
         <Fab 
+          id="provider-page-add-button"
           color="primary" 
           aria-label="add" 
           onClick={() => setIsDialogOpen(true)}

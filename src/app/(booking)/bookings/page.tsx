@@ -154,7 +154,7 @@ export default function BookingsHubPage() {
         <div className="max-w-md w-full bg-stone-50 p-10 rounded-[32px] border border-stone-100 text-center">
             <h1 className="text-3xl font-black italic uppercase tracking-tighter text-[#111111] mb-4">Access Denied</h1>
             <p className="text-stone-500 mb-8">Please sign in to manage your bookings.</p>
-            <button onClick={() => router.push('/api/auth/signin')} className="w-full py-4 bg-[#111111] text-white rounded-2xl font-black uppercase tracking-widest hover:bg-[#FFD600] hover:text-[#111111] transition-all">Sign In</button>
+            <button id="bookings-signin-button" onClick={() => router.push('/api/auth/signin')} className="w-full py-4 bg-[#111111] text-white rounded-2xl font-black uppercase tracking-widest hover:bg-[#FFD600] hover:text-[#111111] transition-all">Sign In</button>
         </div>
       </main>
     );
@@ -176,6 +176,7 @@ export default function BookingsHubPage() {
                 {/* Tab Switcher */}
                 <div className="bg-stone-50 p-1.5 rounded-[24px] flex gap-1 border border-stone-100 shadow-sm h-fit">
                     <button 
+                        id="bookings-tab-history-button"
                         onClick={() => setActiveTab('history')}
                         className={`px-8 py-3 rounded-[18px] text-[10px] font-black uppercase tracking-widest transition-all duration-300 ${
                             activeTab === 'history' 
@@ -186,6 +187,7 @@ export default function BookingsHubPage() {
                         My Schedule ({bookings.length})
                     </button>
                     <button 
+                        id="bookings-tab-new-button"
                         onClick={() => setActiveTab('new')}
                         className={`px-8 py-3 rounded-[18px] text-[10px] font-black uppercase tracking-widest transition-all duration-300 ${
                             activeTab === 'new' 
@@ -213,7 +215,7 @@ export default function BookingsHubPage() {
                         {bookings.length === 0 ? (
                             <div className="py-32 text-center bg-stone-50 rounded-[40px] border-2 border-dashed border-stone-200">
                                 <p className="text-stone-400 font-bold italic text-xl uppercase tracking-widest mb-6">Booking not complete yet. Review will appear here after return</p>
-                                <button onClick={() => setActiveTab('new')} className="bg-[#111111] text-white px-8 py-4 rounded-full text-xs font-black uppercase tracking-widest hover:bg-[#FFD600] hover:text-[#111111] transition-all">Make Your First Booking</button>
+                                <button id="bookings-first-booking-button" onClick={() => setActiveTab('new')} className="bg-[#111111] text-white px-8 py-4 rounded-full text-xs font-black uppercase tracking-widest hover:bg-[#FFD600] hover:text-[#111111] transition-all">Make Your First Booking</button>
                             </div>
                         ) : (
                             <BookingList 
@@ -258,6 +260,7 @@ export default function BookingsHubPage() {
                                         <FormControl fullWidth>
                                             <InputLabel sx={{ fontWeight: 'bold', textTransform: 'uppercase', fontSize: '10px', tracking: '0.2em' }}>Select Provider</InputLabel>
                                             <Select
+                                                id="bookings-provider-select"
                                                 value={selectedProviderId}
                                                 label="Select Provider"
                                                 onChange={(e) => setSelectedProviderId(e.target.value)}
@@ -272,6 +275,7 @@ export default function BookingsHubPage() {
                                         <FormControl fullWidth disabled={!selectedProviderId}>
                                             <InputLabel sx={{ fontWeight: 'bold', textTransform: 'uppercase', fontSize: '10px', tracking: '0.2em' }}>Select Vehicle</InputLabel>
                                             <Select
+                                                id="bookings-car-select"
                                                 value={selectedCarId}
                                                 label="Select Vehicle"
                                                 onChange={(e) => setSelectedCarId(e.target.value)}
@@ -286,20 +290,21 @@ export default function BookingsHubPage() {
 
                                     <div className="grid grid-cols-1 md:grid-cols-2 gap-8">
                                         <DatePicker
+                                            slotProps={{ textField: { id: 'bookings-pickup-date-input', fullWidth: true, sx: { '& .MuiOutlinedInput-root': { borderRadius: '16px' } } } }}
                                             label="Pickup Date"
                                             value={bookingDate}
                                             onChange={(val) => setBookingDate(val)}
-                                            slotProps={{ textField: { fullWidth: true, sx: { '& .MuiOutlinedInput-root': { borderRadius: '16px' } } } }}
                                         />
                                         <DatePicker
+                                            slotProps={{ textField: { id: 'bookings-return-date-input', fullWidth: true, sx: { '& .MuiOutlinedInput-root': { borderRadius: '16px' } } } }}
                                             label="Return Date"
                                             value={returnDate}
                                             onChange={(val) => setReturnDate(val)}
-                                            slotProps={{ textField: { fullWidth: true, sx: { '& .MuiOutlinedInput-root': { borderRadius: '16px' } } } }}
                                         />
                                     </div>
 
                                     <button 
+                                        id="bookings-confirm-reservation-button"
                                         onClick={handleCreateBooking}
                                         disabled={isLimitReached || !selectedCarId || !bookingDate || !returnDate}
                                         className={`w-full py-6 rounded-2xl font-black uppercase tracking-[0.2em] transition-all duration-300 ${

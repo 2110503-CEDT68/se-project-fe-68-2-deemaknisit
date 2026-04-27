@@ -16,13 +16,13 @@ export default function SuccessDialog({
   onClose,
 }: SuccessDialogProps) {
   return (
-    <Dialog open={open} onClose={onClose} maxWidth="xs" fullWidth>
-      <DialogTitle sx={{ fontWeight: 'bold' }}>{title}</DialogTitle>
-      <DialogContent>
-        <Typography>{message}</Typography>
+    <Dialog id="success-dialog" open={open} onClose={onClose} maxWidth="xs" fullWidth>
+      <DialogTitle id="success-dialog-title" sx={{ fontWeight: 'bold' }}>{title}</DialogTitle>
+      <DialogContent id="success-dialog-content">
+        <Typography id="success-dialog-message">{message}</Typography>
       </DialogContent>
-      <DialogActions sx={{ p: 2 }}>
-        <Button onClick={onClose} variant="contained" sx={{ backgroundColor: '#22c55e', color: '#fff', '&:hover': { backgroundColor: '#16a34a' } }}>
+      <DialogActions id="success-dialog-actions" sx={{ p: 2 }}>
+        <Button id="success-dialog-ok-button" onClick={onClose} variant="contained" sx={{ backgroundColor: '#22c55e', color: '#fff', '&:hover': { backgroundColor: '#16a34a' } }}>
           OK
         </Button>
       </DialogActions>

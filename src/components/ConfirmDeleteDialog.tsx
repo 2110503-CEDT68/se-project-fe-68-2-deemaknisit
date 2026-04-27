@@ -18,16 +18,17 @@ export default function ConfirmDeleteDialog({
   isSubmitting = false,
 }: ConfirmDeleteDialogProps) {
   return (
-    <Dialog open={open} onClose={!isSubmitting ? onClose : undefined} maxWidth="xs" fullWidth>
-      <DialogTitle sx={{ fontWeight: 'bold' }}>{title}</DialogTitle>
-      <DialogContent>
-        <Typography>{description}</Typography>
+    <Dialog id="confirm-delete-dialog" open={open} onClose={!isSubmitting ? onClose : undefined} maxWidth="xs" fullWidth>
+      <DialogTitle id="confirm-delete-dialog-title" sx={{ fontWeight: 'bold' }}>{title}</DialogTitle>
+      <DialogContent id="confirm-delete-dialog-content">
+        <Typography id="confirm-delete-dialog-message">{description}</Typography>
       </DialogContent>
-      <DialogActions sx={{ p: 2 }}>
-        <Button onClick={onClose} disabled={isSubmitting} sx={{ color: '#666' }}>
+      <DialogActions id="confirm-delete-dialog-actions" sx={{ p: 2 }}>
+        <Button id="confirm-delete-cancel-button" onClick={onClose} disabled={isSubmitting} sx={{ color: '#666' }}>
           Cancel
         </Button>
         <Button 
+          id="confirm-delete-submit-button"
           onClick={onConfirm} 
           variant="contained" 
           disabled={isSubmitting}

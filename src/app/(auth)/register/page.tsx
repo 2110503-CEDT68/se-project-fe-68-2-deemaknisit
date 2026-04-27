@@ -56,9 +56,9 @@ export default function RegisterPage() {
                 <p className="text-stone-400 text-sm font-bold uppercase tracking-[0.2em]">Join us</p>
             </div>
 
-            <form onSubmit={handleSubmit} className="bg-white p-1 md:p-10 rounded-[40px] flex flex-col gap-8">
+            <form id="register-form" onSubmit={handleSubmit} className="bg-white p-1 md:p-10 rounded-[40px] flex flex-col gap-8">
                 {error && (
-                    <div className="text-white text-[10px] font-black uppercase tracking-widest bg-[#f87171] p-4 rounded-xl text-center animate-in fade-in slide-in-from-top-2">
+                    <div id="register-error-message" className="text-white text-[10px] font-black uppercase tracking-widest bg-[#f87171] p-4 rounded-xl text-center animate-in fade-in slide-in-from-top-2">
                         {error}
                     </div>
                 )}
@@ -69,6 +69,7 @@ export default function RegisterPage() {
                             Full Name
                         </label>
                         <input
+                            id="register-name-input"
                             type="text"
                             value={name}
                             onChange={(e) => setName(e.target.value)}
@@ -83,6 +84,7 @@ export default function RegisterPage() {
                             Telephone
                         </label>
                         <input
+                            id="register-telephone-input"
                             type="tel"
                             value={telephone}
                             onChange={(e) => setTelephone(e.target.value)}
@@ -97,6 +99,7 @@ export default function RegisterPage() {
                             Email
                         </label>
                         <input
+                            id="register-email-input"
                             type="email"
                             value={email}
                             onChange={(e) => setEmail(e.target.value)}
@@ -111,6 +114,7 @@ export default function RegisterPage() {
                             Password
                         </label>
                         <input
+                            id="register-password-input"
                             type="password"
                             value={password}
                             onChange={(e) => setPassword(e.target.value)}
@@ -125,6 +129,7 @@ export default function RegisterPage() {
                             Confirm Password
                         </label>
                         <input
+                            id="register-confirm-password-input"
                             type="password"
                             value={confirmPassword}
                             onChange={(e) => setConfirmPassword(e.target.value)}
@@ -137,6 +142,7 @@ export default function RegisterPage() {
 
                 <div className="mt-4">
                     <button
+                        id="register-submit-button"
                         type="submit"
                         disabled={isLoading}
                         className="w-full py-5 px-4 bg-[#111111] text-white rounded-2xl text-xs font-black uppercase tracking-[0.3em] shadow-2xl hover:bg-[#FFD600] hover:text-[#111111] transition-all duration-500 disabled:opacity-50 disabled:cursor-not-allowed"
@@ -151,7 +157,7 @@ export default function RegisterPage() {
 
             <div className="border-t border-stone-100 pt-10 flex flex-col sm:flex-row justify-center items-center gap-4">
                 <span className="text-stone-400 text-[10px] font-bold uppercase tracking-widest">Already have an account?</span>
-                <Link href="/login" className="bg-[#FFD600] text-[#111111] text-[10px] font-black px-6 py-2.5 rounded-full hover:bg-[#111111] hover:text-white transition-all duration-300 uppercase tracking-widest shadow-lg shadow-yellow-400/20">
+                <Link id="register-login-link" href="/login" className="bg-[#FFD600] text-[#111111] text-[10px] font-black px-6 py-2.5 rounded-full hover:bg-[#111111] hover:text-white transition-all duration-300 uppercase tracking-widest shadow-lg shadow-yellow-400/20">
                     Login
                 </Link>
             </div>
