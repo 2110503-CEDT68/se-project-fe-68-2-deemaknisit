@@ -110,7 +110,7 @@ export default function BookingList({ initialBookings, onRefresh }: { initialBoo
   }
 
   return (
-    <div className="flex flex-col items-center gap-6 w-full max-w-4xl pb-10">
+    <div className="grid grid-cols-1 md:grid-cols-2 gap-8 w-full pb-10">
       {initialBookings.map((booking) => (
         <BookingCard
           key={booking._id}

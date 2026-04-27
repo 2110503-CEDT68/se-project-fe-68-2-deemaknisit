@@ -29,7 +29,7 @@ export default function BookingCard({
   const rDate = new Date(booking.returnDate).toLocaleDateString('en-GB', { day: 'numeric', month: 'short', year: 'numeric' });
 
   return (
-    <div className={`w-full max-w-2xl bg-white border rounded-[32px] p-6 shadow-sm transition-all duration-300 flex flex-col sm:flex-row items-center gap-6 ${isComplete ? 'border-green-100 bg-green-50/20' : 'border-stone-200 hover:shadow-md'}`}>
+    <div className={`w-full bg-white border rounded-[32px] p-6 shadow-sm transition-all duration-300 flex flex-col sm:flex-row items-center gap-6 ${isComplete ? 'border-green-100 bg-green-50/20' : 'border-stone-200 hover:shadow-md'}`}>
       <div className="flex-grow space-y-3">
         <div className="flex justify-between items-start">
           <div>
