@@ -34,7 +34,6 @@ export default function RegisterPage() {
 
     try {
       await userRegister(name, email, telephone, password);
-      // Auto-login after registration
       await signIn("credentials", {
         email,
         password,
@@ -49,7 +48,6 @@ export default function RegisterPage() {
 
   return (
     <div className="w-full min-h-screen bg-white flex flex-col justify-center items-center px-6 py-20 relative overflow-hidden">
-      {/* Aesthetic Background Elements */}
       <div className="absolute top-0 left-0 w-full h-1 bg-[#FFD600]" />
       <div className="absolute -top-24 -left-24 w-96 h-96 bg-stone-50 rounded-full blur-3xl opacity-50" />
       <div className="absolute -bottom-24 -right-24 w-96 h-96 bg-[#FFD600]/5 rounded-full blur-3xl" />
@@ -155,6 +153,8 @@ export default function RegisterPage() {
               />
             </div>
           </div>
+
+          {/* Privacy Policy Consent */}
           <label
             id="register-consent-label"
             className={`flex items-start gap-3 p-4 rounded-2xl border cursor-pointer transition-all duration-300 ${
@@ -163,7 +163,6 @@ export default function RegisterPage() {
                 : "border-stone-100 bg-stone-50"
             }`}
           >
-            {/* Hidden native checkbox — custom box below */}
             <input
               id="register-consent-checkbox"
               type="checkbox"
@@ -171,7 +170,6 @@ export default function RegisterPage() {
               onChange={(e) => setConsentGiven(e.target.checked)}
               className="sr-only"
             />
-            {/* Custom checkbox box */}
             <div
               className={`mt-0.5 w-5 h-5 rounded-md border-2 flex-shrink-0 flex items-center justify-center transition-all duration-300 ${
                 consentGiven
@@ -209,18 +207,16 @@ export default function RegisterPage() {
             </span>
           </label>
 
-          <div className="mt-4">
+          {/* Submit Button */}
+          <div className="mt-2">
             <button
               id="register-submit-button"
               type="submit"
-              disabled={isLoading}
+              disabled={isLoading || !consentGiven}
               className="w-full py-5 px-4 bg-[#111111] text-white rounded-2xl text-xs font-black uppercase tracking-[0.3em] shadow-2xl hover:bg-[#FFD600] hover:text-[#111111] transition-all duration-500 disabled:opacity-50 disabled:cursor-not-allowed"
             >
               {isLoading ? "Signing up..." : "Register"}
             </button>
-            <p className="text-[9px] text-stone-400 font-bold uppercase tracking-widest text-center mt-6">
-              By registering, you agree to our terms and conditions.
-            </p>
           </div>
         </form>
 
