@@ -32,13 +32,20 @@ jobs:
 
       - name: Push snapshot to Vercel repo
         env:
-          VERCEL_REPO_URL: ${{ secrets.VERCEL_REPO_URL }}
+          VERCEL_REPO_SLUG: ${{ secrets.VERCEL_REPO_SLUG }}
           VERCEL_REPO_TOKEN: ${{ secrets.VERCEL_REPO_TOKEN }}
         run: |
-          if [ -z "$VERCEL_REPO_URL" ] || [ -z "$VERCEL_REPO_TOKEN" ]; then
-            echo "Missing VERCEL_REPO_URL or VERCEL_REPO_TOKEN secret"
+          if [ -z "$VERCEL_REPO_SLUG" ] || [ -z "$VERCEL_REPO_TOKEN" ]; then
+            echo "Missing VERCEL_REPO_SLUG or VERCEL_REPO_TOKEN secret"
             exit 1
           fi
 
-          AUTHED_URL=$(echo "$VERCEL_REPO_URL" | sed "s#https://#https://x-access-token:${VERCEL_REPO_TOKEN}@#")
+          AUTHED_URL="https://x-access-token:${VERCEL_REPO_TOKEN}@github.com/${VERCEL_REPO_SLUG}.git"
+
+          if ! git ls-remote "$AUTHED_URL" HEAD >/dev/null 2>&1; then
+            echo "Cannot access the Vercel repo with the provided token."
+            echo "Check that VERCEL_REPO_SLUG is correct and that VERCEL_REPO_TOKEN has write access to that repo."
+            exit 1
+          fi
+
           git push --force "$AUTHED_URL" "${{ steps.snapshot.outputs.snapshot_commit }}:main"
