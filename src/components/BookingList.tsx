@@ -1,6 +1,6 @@
 'use client';
 
-import { useState } from 'react';
+import React, { useState } from 'react';
 import { Booking, BookingWithDetails } from '@/types/interface';
 import { updateBooking, deleteBooking, completeBooking } from '@/libs/bookingService';
 import { useSession } from 'next-auth/react';
@@ -12,7 +12,7 @@ import NotificationDialog from './NotificationDialog';
 import ReviewSubmissionDialog from './ReviewSubmissionDialog';
 import { addBookingReview, updateReview, deleteReview } from '@/libs/reviewService';
 
-export default function BookingList({ initialBookings, onRefresh }: { initialBookings: BookingWithDetails[], onRefresh: () => void }) {
+const BookingList = ({ initialBookings, onRefresh }: { initialBookings: BookingWithDetails[], onRefresh: () => void | Promise<void> }): React.ReactElement => {
   const { data: session } = useSession();
   const token = session?.user?.token;
 
@@ -78,7 +78,6 @@ export default function BookingList({ initialBookings, onRefresh }: { initialBoo
       } else {
         await addBookingReview(token, reviewingBooking._id, { rating, comment });
         setNotification({ title: 'Review Submitted', message: 'Thank you for your feedback!', severity: 'success' });
-      }
       }
       setReviewingBooking(null);
       setIsReviewEditing(false);
@@ -187,4 +186,6 @@ export default function BookingList({ initialBookings, onRefresh }: { initialBoo
     </div>
   );
 }
+
+export default BookingList;
 
