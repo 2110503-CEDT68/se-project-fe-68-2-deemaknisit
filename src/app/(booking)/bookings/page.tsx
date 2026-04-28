@@ -11,6 +11,7 @@ import { getProviders } from '@/libs/providerService';
 import { addBooking, getBookings, deleteBooking, updateBooking } from '@/libs/bookingService';
 import { Provider, Car, ProviderWithCars, BookingWithDetails } from '@/types/interface';
 import BookingList from '@/components/BookingList';
+import NotificationDialog from '@/components/NotificationDialog';
 
 export default function BookingsHubPage() {
   const { data: session, status } = useSession();
@@ -28,6 +29,7 @@ export default function BookingsHubPage() {
   const [bookings, setBookings] = useState<BookingWithDetails[]>([]);
   const [isLoading, setIsLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
+  const [notification, setNotification] = useState<{ title: string; message: string; severity: 'success' | 'error' | 'info' } | null>(null);
 
   // New Booking State
   const [selectedProviderId, setSelectedProviderId] = useState('');
@@ -116,6 +118,7 @@ export default function BookingsHubPage() {
       // Success! Switch to history and refresh
       setActiveTab('history');
       await fetchData();
+      setNotification({ title: 'Booking Created', message: 'Your new booking was created successfully.', severity: 'success' });
       // Clear form
       setSelectedProviderId('');
       setSelectedCarId('');
@@ -133,8 +136,10 @@ export default function BookingsHubPage() {
     try {
       await deleteBooking(token, id);
       await fetchData();
+      setNotification({ title: 'Booking Cancelled', message: 'Your booking was successfully cancelled.', severity: 'success' });
     } catch (e) {
       console.error("Delete failed", e);
+      setNotification({ title: 'Cancellation Failed', message: 'Unable to cancel booking. Please try again.', severity: 'error' });
     }
   };
 
@@ -143,8 +148,10 @@ export default function BookingsHubPage() {
     try {
       await updateBooking(token, id, bookingDate, returnDate);
       await fetchData();
+      setNotification({ title: 'Booking Updated', message: 'Your booking has been updated successfully.', severity: 'success' });
     } catch (e) {
       console.error("Update failed", e);
+      setNotification({ title: 'Update Failed', message: 'Unable to update booking. Please try again.', severity: 'error' });
     }
   };
 
@@ -322,6 +329,13 @@ export default function BookingsHubPage() {
                 )}
             </div>
         </div>
+        <NotificationDialog
+          open={!!notification}
+          title={notification?.title ?? ''}
+          message={notification?.message ?? ''}
+          severity={notification?.severity ?? 'info'}
+          onClose={() => setNotification(null)}
+        />
       </main>
     </LocalizationProvider>
   );

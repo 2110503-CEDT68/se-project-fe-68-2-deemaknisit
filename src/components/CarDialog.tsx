@@ -9,6 +9,7 @@ interface CarDialogProps {
   onSave: (payload: any) => Promise<void>;
   initialData: Car | CarWithProvider | null;
   providerId?: string;
+  onError?: (message: string) => void;
 }
 
 export default function CarDialog({
@@ -16,7 +17,8 @@ export default function CarDialog({
   onClose,
   onSave,
   initialData,
-  providerId
+  providerId,
+  onError
 }: CarDialogProps) {
   const [formData, setFormData] = useState({
     licensePlate: '',
@@ -59,7 +61,8 @@ export default function CarDialog({
 
   const handleSave = async () => {
     if (!formData.licensePlate || !formData.brand || !formData.model) {
-      return alert('License Plate, Brand, and Model are required');
+      onError?.('License Plate, Brand, and Model are required');
+      return;
     }
     
     setIsSubmitting(true);
