@@ -11,6 +11,7 @@ import ReviewCard from '@/components/ReviewCard';
 import { CircularProgress, Rating, Divider } from '@mui/material';
 import { useSession } from 'next-auth/react';
 import ConfirmDeleteDialog from '@/components/ConfirmDeleteDialog';
+import NotificationDialog from '@/components/NotificationDialog';
 import ReviewSubmissionDialog from '@/components/ReviewSubmissionDialog';
 import { updateReview, deleteReview } from '@/libs/reviewService';
 import { addToWishlist, removeFromWishlist, getWishlist } from '@/libs/wishlistService';
@@ -30,6 +31,7 @@ export default function CarDetailPage() {
     const [reviewToDelete, setReviewToDelete] = useState<Review | null>(null);
     const [wishlistItemId, setWishlistItemId] = useState<string | null>(null);
     const [isWishlistLoading, setIsWishlistLoading] = useState(false);
+    const [notification, setNotification] = useState<{ title: string; message: string; severity: 'success' | 'error' | 'info' } | null>(null);
 
     const refreshData = async () => {
         if (!id) return;
@@ -293,10 +295,14 @@ export default function CarDetailPage() {
                 onClose={() => setReviewToEdit(null)}
                 onSave={async (rating, comment) => {
                     if (!token || !reviewToEdit) return;
-                    await updateReview(token, reviewToEdit._id, { rating, comment });
-                    setReviewToEdit(null);
-                    alert("Review updated successfully!");
-                    await refreshData();
+                    try {
+                        await updateReview(token, reviewToEdit._id, { rating, comment });
+                        setReviewToEdit(null);
+                        setNotification({ title: 'Review Updated', message: 'Your review was updated successfully.', severity: 'success' });
+                        await refreshData();
+                    } catch (error) {
+                        setNotification({ title: 'Update Failed', message: error instanceof Error ? error.message : 'Unable to update review.', severity: 'error' });
+                    }
                 }}
                 bookingDescription={`${car.brand} ${car.model}`}
                 initialData={reviewToEdit}
@@ -310,14 +316,25 @@ export default function CarDetailPage() {
                     description="Are you sure you want to delete your review? This action cannot be undone."
                     onConfirm={async () => {
                         if (!token || !reviewToDelete) return;
-                        await deleteReview(token, reviewToDelete._id);
-                        setReviewToDelete(null);
-                        alert("Review deleted successfully.");
-                        await refreshData();
+                        try {
+                            await deleteReview(token, reviewToDelete._id);
+                            setReviewToDelete(null);
+                            setNotification({ title: 'Review Deleted', message: 'Your review has been removed successfully.', severity: 'success' });
+                            await refreshData();
+                        } catch (error) {
+                            setNotification({ title: 'Delete Failed', message: error instanceof Error ? error.message : 'Unable to delete review.', severity: 'error' });
+                        }
                     }}
                     onClose={() => setReviewToDelete(null)}
                 />
             )}
+            <NotificationDialog
+              open={!!notification}
+              title={notification?.title ?? ''}
+              message={notification?.message ?? ''}
+              severity={notification?.severity ?? 'info'}
+              onClose={() => setNotification(null)}
+            />
         </main>
     );
 }

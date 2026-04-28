@@ -205,7 +205,7 @@ export default function CarGalleryPage() {
             open={isDialogOpen}
             onClose={() => { setIsDialogOpen(false); setEditingCar(null); setIsAddingCar(false); }}
             onSave={handleSaveCar}
-            initialData={editingCar || (isAddingCar ? {} : null)}
+            initialData={editingCar}
             onError={(message) => setNotification({ title: 'Validation Error', message, severity: 'error' })}
         />
 

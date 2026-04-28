@@ -100,11 +100,17 @@ export default function BookingsHubPage() {
   const handleCreateBooking = async () => {
     if (!token) return;
     if (!selectedCarId || !bookingDate || !returnDate) {
-      return setError("All fields are required");
+      const message = "All fields are required";
+      setError(message);
+      setNotification({ title: 'Validation Error', message, severity: 'error' });
+      return;
     }
 
     if (returnDate.isBefore(bookingDate, 'day')) {
-      return setError("Return date cannot be before booking date");
+      const message = "Return date cannot be before booking date";
+      setError(message);
+      setNotification({ title: 'Validation Error', message, severity: 'error' });
+      return;
     }
 
     setIsLoading(true);
@@ -125,7 +131,9 @@ export default function BookingsHubPage() {
       setBookingDate(null);
       setReturnDate(null);
     } catch (e) {
-      setError("Failed to create booking. Please try again.");
+      const message = "Failed to create booking. Please try again.";
+      setError(message);
+      setNotification({ title: 'Booking Failed', message, severity: 'error' });
     } finally {
       setIsLoading(false);
     }

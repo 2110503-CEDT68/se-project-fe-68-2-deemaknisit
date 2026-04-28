@@ -7,6 +7,7 @@ import { useSession } from 'next-auth/react';
 import { CarWithProvider } from '@/types/interface';
 import { getWishlist, removeFromWishlist } from '@/libs/wishlistService';
 import { decodeSafeUrl } from '@/libs/urlUtils';
+import NotificationDialog from '@/components/NotificationDialog';
 
 type WishlistItem = CarWithProvider & { wishlistItemId: string };
 
@@ -109,6 +110,7 @@ export default function WishlistPage() {
   const [error, setError] = useState<string | null>(null);
   const [removingId, setRemovingId] = useState<string | null>(null);
   const [isUnauthorized, setIsUnauthorized] = useState(false);
+  const [notification, setNotification] = useState<{ title: string; message: string; severity: 'success' | 'error' | 'info' } | null>(null);
 
   const loadWishlist = useCallback(async () => {
     if (!token) {
@@ -149,9 +151,10 @@ export default function WishlistPage() {
       setRemovingId(wishlistItemId);
       await removeFromWishlist(token, wishlistItemId);
       setItems((prev) => prev.filter((item) => item.wishlistItemId !== wishlistItemId));
+      setNotification({ title: 'Removed from Wishlist', message: 'Car has been removed from your wishlist.', severity: 'success' });
     } catch (err) {
       const message = err instanceof Error ? err.message : 'Failed to remove item';
-      setError(message);
+      setNotification({ title: 'Remove Failed', message, severity: 'error' });
     } finally {
       setRemovingId(null);
     }
@@ -259,6 +262,13 @@ export default function WishlistPage() {
           </div>
         )}
       </div>
+      <NotificationDialog
+        open={!!notification}
+        title={notification?.title ?? ''}
+        message={notification?.message ?? ''}
+        severity={notification?.severity ?? 'info'}
+        onClose={() => setNotification(null)}
+      />
     </main>
   );
 }
