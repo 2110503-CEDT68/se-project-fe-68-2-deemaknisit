@@ -13,7 +13,7 @@ export default function UserConsentCheckbox({
   onChange,
 }: UserConsentCheckboxProps) {
   return (
-    <label
+    <div
       id="register-consent-label"
       className={`flex items-start gap-3 p-4 rounded-2xl border cursor-pointer transition-all duration-300 ${
         checked
@@ -29,7 +29,7 @@ export default function UserConsentCheckbox({
         onChange={(e) => onChange(e.target.checked)}
         className="mt-1 cursor-pointer accent-blue-600"
       />
-      <label htmlFor="user-consent" className="text-sm text-gray-700">
+      <label htmlFor="register-consent-checkbox" className="text-sm text-gray-700 cursor-pointer">
         I have read and agree to the{" "}
         <Link
           href="/privacy-policy"
