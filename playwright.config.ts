@@ -4,6 +4,8 @@ import path from "path";
 
 dotenv.config({ path: path.resolve(__dirname, ".env") });
 
+const isDemoMode = process.env.PLAYWRIGHT_DEMO === "1";
+
 export default defineConfig({
   testDir: "./e2e",
   testMatch: "**/*.spec.ts",
@@ -17,6 +19,9 @@ export default defineConfig({
   use: {
     baseURL: "http://127.0.0.1:3000",
     trace: "on-first-retry",
+    launchOptions: {
+      slowMo: isDemoMode ? 500 : 0,
+    },
   },
   projects: [
     {

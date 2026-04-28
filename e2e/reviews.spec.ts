@@ -1,87 +1,128 @@
-import { test, expect } from '@playwright/test';
-import { loginAndExpectHome } from './helpers/auth';
+import { expect, test } from '@playwright/test';
+import { COMPLETED_BOOKING, REVIEW_ITEM } from './helpers/fixtures';
+import { mockAppApi } from './helpers/mocks';
 
-test.describe('Epic 1 - Review System', () => {
-  test.describe.configure({ mode: 'serial' });
+test.describe('Review system', () => {
+  test('submits a review from completed booking', async ({ page }) => {
+    await mockAppApi(page, {
+      authenticated: true,
+      bookings: [{ ...COMPLETED_BOOKING, review: null }],
+      reviews: [],
+    });
 
-  let targetBookingId: string | null = null;
-  let createdComment = '';
-  let updatedComment = '';
-  let submitExecuted = false;
-
-  test('US1-1 · Submit a Review', async ({ page }) => {
-    await loginAndExpectHome(page);
     await page.goto('/bookings');
-    await page.waitForLoadState('networkidle');
+    await expect(page.getByText('Toyota Camry')).toBeVisible();
 
-    const reviewButtons = page.locator('[id^="booking-review-button-"]');
-    const reviewButtonCount = await reviewButtons.count();
-    test.skip(reviewButtonCount === 0, 'No completed booking without review found for this account.');
-
-    const firstReviewButton = reviewButtons.first();
-    const buttonId = await firstReviewButton.getAttribute('id');
-    targetBookingId = buttonId?.replace('booking-review-button-', '') ?? null;
-    test.skip(!targetBookingId, 'Could not resolve booking ID from review button.');
-
-    createdComment = `E2E review created ${Date.now()}`;
-
-    await firstReviewButton.click();
+    await page.click('#booking-review-button-booking-e2e-001');
     await expect(page.locator('#review-dialog')).toBeVisible();
-    await page.fill('#review-comment-input', createdComment);
+
+    await page.fill('#review-comment-input', 'Great booking experience.');
     await page.click('#review-submit-button');
 
-    await expect(page.locator('#review-dialog')).not.toBeVisible({ timeout: 10_000 });
-    await expect(page.locator(`#booking-review-comment-${targetBookingId}`)).toContainText(createdComment);
-    submitExecuted = true;
+    await expect(page.locator('#review-dialog')).not.toBeVisible();
+    await expect(page.locator('#booking-review-comment-booking-e2e-001')).toContainText(
+      'Great booking experience.'
+    );
   });
 
-  test('US1-2 · View Review History', async ({ page }) => {
-    test.skip(!submitExecuted || !targetBookingId, 'Submit review step did not run.');
+  test('validates empty comment before submit', async ({ page }) => {
+    await mockAppApi(page, {
+      authenticated: true,
+      bookings: [{ ...COMPLETED_BOOKING, review: null }],
+      reviews: [],
+    });
 
-    await loginAndExpectHome(page);
+    await page.goto('/bookings');
+    await page.click('#booking-review-button-booking-e2e-001');
+    await page.click('#review-submit-button');
+
+    await expect(page.locator('#review-comment-helper')).toContainText(
+      'Please share your thoughts - we require your comment!'
+    );
+  });
+
+  test('edits review from personal reviews tab', async ({ page }) => {
+    await mockAppApi(page, {
+      authenticated: true,
+      reviews: [REVIEW_ITEM],
+    });
+
     await page.goto('/reviews');
-    await page.waitForLoadState('networkidle');
     await page.click('#reviews-tab-personal-button');
 
-    await expect(page.locator('#reviews-tab-personal-button')).toBeVisible();
-    await expect(page.getByText(createdComment)).toBeVisible({ timeout: 10_000 });
-  });
+    await expect(page.locator('#review-list-edit-button-review-e2e-001')).toBeVisible();
+    await page.click('#review-list-edit-button-review-e2e-001');
 
-  test('US1-3 · Edit a Review', async ({ page }) => {
-    test.skip(!submitExecuted || !targetBookingId, 'Submit review step did not run.');
-
-    await loginAndExpectHome(page);
-    await page.goto('/bookings');
-    await page.waitForLoadState('networkidle');
-
-    const editButton = page.locator(`#booking-review-edit-button-${targetBookingId}`);
-    await expect(editButton).toBeVisible({ timeout: 10_000 });
-
-    updatedComment = `E2E review updated ${Date.now()}`;
-    await editButton.click();
-    await expect(page.locator('#review-dialog')).toBeVisible();
-    await page.fill('#review-comment-input', updatedComment);
+    await page.fill('#review-comment-input', 'Updated review from Playwright.');
     await page.click('#review-submit-button');
 
-    await expect(page.locator('#review-dialog')).not.toBeVisible({ timeout: 10_000 });
-    await expect(page.locator(`#booking-review-comment-${targetBookingId}`)).toContainText(updatedComment);
+    await expect(page.locator('#notification-dialog')).toBeVisible();
+    await expect(page.locator('#notification-dialog-message')).toContainText('updated successfully');
   });
 
-  test('US1-4 · Delete a Review', async ({ page }) => {
-    test.skip(!submitExecuted || !targetBookingId, 'Submit review step did not run.');
+  test('deletes review from personal reviews tab', async ({ page }) => {
+    await mockAppApi(page, {
+      authenticated: true,
+      reviews: [REVIEW_ITEM],
+    });
 
-    await loginAndExpectHome(page);
-    await page.goto('/bookings');
-    await page.waitForLoadState('networkidle');
+    await page.goto('/reviews');
+    await page.click('#reviews-tab-personal-button');
 
-    const deleteButton = page.locator(`#booking-review-delete-button-${targetBookingId}`);
-    await expect(deleteButton).toBeVisible({ timeout: 10_000 });
-    await deleteButton.click();
+    await expect(page.locator('#review-list-delete-button-review-e2e-001')).toBeVisible();
+    await page.click('#review-list-delete-button-review-e2e-001');
 
-    await expect(page.locator('#confirm-delete-dialog')).toBeVisible();
-    await page.click('#confirm-delete-submit-button');
-    await expect(page.locator('#confirm-delete-dialog')).not.toBeVisible({ timeout: 10_000 });
+    const confirmDialog = page.getByRole('dialog');
+    await expect(confirmDialog).toBeVisible();
+    await confirmDialog.getByRole('button', { name: 'Delete' }).click();
 
-    await expect(page.locator(`#booking-review-button-${targetBookingId}`)).toBeVisible({ timeout: 10_000 });
+    await expect(page.locator('#notification-dialog')).toBeVisible();
+    await expect(page.locator('#notification-dialog-message')).toContainText('removed successfully');
+  });
+
+  test('cancel delete keeps review visible', async ({ page }) => {
+    await mockAppApi(page, {
+      authenticated: true,
+      reviews: [REVIEW_ITEM],
+    });
+
+    await page.goto('/reviews');
+    await page.click('#reviews-tab-personal-button');
+
+    await page.click('#review-list-delete-button-review-e2e-001');
+    const confirmDialog = page.getByRole('dialog');
+    await expect(confirmDialog).toBeVisible();
+    await confirmDialog.getByRole('button', { name: 'Cancel' }).click();
+
+    await expect(page.locator('#review-list-comment-review-e2e-001')).toContainText(
+      'Smooth pickup and clean car.'
+    );
+  });
+
+  test('shows review card in all feedback tab', async ({ page }) => {
+    await mockAppApi(page, {
+      authenticated: true,
+      reviews: [REVIEW_ITEM],
+    });
+
+    await page.goto('/reviews');
+
+    await expect(page.locator('#reviews-tab-all-button')).toBeVisible();
+    await expect(page.locator('#review-list-comment-review-e2e-001')).toContainText(
+      'Smooth pickup and clean car.'
+    );
+  });
+
+  test('asks unauthenticated users to sign in for personal reviews', async ({ page }) => {
+    await mockAppApi(page, {
+      authenticated: false,
+      reviews: [REVIEW_ITEM],
+    });
+
+    await page.goto('/reviews');
+    await page.click('#reviews-tab-personal-button');
+
+    await expect(page.locator('#reviews-signin-link')).toBeVisible();
+    await expect(page.getByText('Sign in to view your reviews')).toBeVisible();
   });
 });
