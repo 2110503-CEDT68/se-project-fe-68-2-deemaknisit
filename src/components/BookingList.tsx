@@ -8,7 +8,7 @@ import BookingCard from './BookingCard';
 import BookingDialog from './BookingDialog';
 import ConfirmDeleteDialog from './ConfirmDeleteDialog';
 import ConfirmDialog from './ConfirmDialog';
-import SuccessDialog from './SuccessDialog';
+import NotificationDialog from './NotificationDialog';
 import ReviewSubmissionDialog from './ReviewSubmissionDialog';
 import { addBookingReview, updateReview, deleteReview } from '@/libs/reviewService';
 
@@ -20,7 +20,7 @@ export default function BookingList({ initialBookings, onRefresh }: { initialBoo
   const [bookingToDelete, setBookingToDelete] = useState<BookingWithDetails | null>(null);
   const [bookingToReturn, setBookingToReturn] = useState<BookingWithDetails | null>(null);
   const [returnSubmitting, setReturnSubmitting] = useState(false);
-  const [successMessage, setSuccessMessage] = useState('');
+  const [notification, setNotification] = useState<{ title: string; message: string; severity: 'success' | 'error' | 'info' } | null>(null);
   const [reviewingBooking, setReviewingBooking] = useState<BookingWithDetails | null>(null);
   const [isReviewEditing, setIsReviewEditing] = useState(false);
   const [bookingToReviewDelete, setBookingToReviewDelete] = useState<BookingWithDetails | null>(null);
@@ -31,8 +31,9 @@ export default function BookingList({ initialBookings, onRefresh }: { initialBoo
       await updateBooking(token, editingBooking._id, payload.bookingDate, payload.returnDate);
       setEditingBooking(null);
       onRefresh();
+      setNotification({ title: 'Booking Updated', message: 'Your booking changes have been saved.', severity: 'success' });
     } catch (err: any) {
-      alert(err.message || "Failed to update booking");
+      setNotification({ title: 'Update Failed', message: err.message || 'Failed to update booking.', severity: 'error' });
     }
   };
 
@@ -42,8 +43,9 @@ export default function BookingList({ initialBookings, onRefresh }: { initialBoo
       await deleteBooking(token, bookingToDelete._id);
       setBookingToDelete(null);
       onRefresh();
+      setNotification({ title: 'Booking Cancelled', message: 'The booking was successfully deleted.', severity: 'success' });
     } catch (err: any) {
-      alert(err.message || "Failed to delete booking");
+      setNotification({ title: 'Delete Failed', message: err.message || 'Failed to delete booking.', severity: 'error' });
     }
   };
 
@@ -58,17 +60,13 @@ export default function BookingList({ initialBookings, onRefresh }: { initialBoo
     try {
       await completeBooking(token, bookingToReturn._id);
       setBookingToReturn(null);
-      setSuccessMessage('Car returned successfully. Booking completed!');
       onRefresh();
+      setNotification({ title: 'Booking Completed', message: 'Car returned successfully and booking is complete.', severity: 'success' });
     } catch (err: any) {
-      alert(err.message || "Failed to complete booking");
+      setNotification({ title: 'Return Failed', message: err.message || 'Failed to complete booking.', severity: 'error' });
     } finally {
       setReturnSubmitting(false);
     }
-  };
-
-  const handleSuccessClose = () => {
-    setSuccessMessage('');
   };
 
   const handleReviewSubmit = async (rating: number, comment: string) => {
@@ -76,16 +74,16 @@ export default function BookingList({ initialBookings, onRefresh }: { initialBoo
     try {
       if (isReviewEditing && reviewingBooking.review) {
         await updateReview(token, reviewingBooking.review._id, { rating, comment });
-        alert("Review updated successfully");
+        setNotification({ title: 'Review Updated', message: 'Your review has been updated successfully.', severity: 'success' });
       } else {
         await addBookingReview(token, reviewingBooking._id, { rating, comment });
-        alert("Thank you for your feedback!");
+        setNotification({ title: 'Review Submitted', message: 'Thank you for your feedback!', severity: 'success' });
       }
       setReviewingBooking(null);
       setIsReviewEditing(false);
       onRefresh();
     } catch (err: any) {
-      alert(err.message || "Failed to submit review");
+      setNotification({ title: 'Review Failed', message: err.message || 'Failed to submit review.', severity: 'error' });
     }
   };
 
@@ -94,10 +92,10 @@ export default function BookingList({ initialBookings, onRefresh }: { initialBoo
     try {
       await deleteReview(token, bookingToReviewDelete.review._id);
       setBookingToReviewDelete(null);
-      alert("Review deleted successfully");
+      setNotification({ title: 'Review Deleted', message: 'Your review has been removed successfully.', severity: 'success' });
       onRefresh();
     } catch (err: any) {
-      alert(err.message || "Failed to delete review");
+      setNotification({ title: 'Delete Failed', message: err.message || 'Failed to delete review.', severity: 'error' });
     }
   };
 
@@ -158,11 +156,12 @@ export default function BookingList({ initialBookings, onRefresh }: { initialBoo
         />
       )}
 
-      <SuccessDialog
-        open={!!successMessage}
-        title="Return Completed"
-        message={successMessage}
-        onClose={handleSuccessClose}
+      <NotificationDialog
+        open={!!notification}
+        title={notification?.title ?? ''}
+        message={notification?.message ?? ''}
+        severity={notification?.severity ?? 'info'}
+        onClose={() => setNotification(null)}
       />
 
       {/* Review Dialog */}

@@ -2,12 +2,13 @@
 
 import { useEffect, useState, useCallback } from 'react';
 import { useSession } from 'next-auth/react';
-import { getCars, updateCar, deleteCar } from '@/libs/carService';
+import { getCars, updateCar, deleteCar, createCar } from '@/libs/carService';
 import { addToWishlist, removeFromWishlist, getWishlist } from '@/libs/wishlistService';
 import { CarWithProvider, Car } from '@/types/interface';
 import CarCard from '@/components/CarCard';
 import CarDialog from '@/components/CarDialog';
 import ConfirmDeleteDialog from '@/components/ConfirmDeleteDialog';
+import NotificationDialog from '@/components/NotificationDialog';
 
 export default function CarGalleryPage() {
   const { data: session } = useSession();
@@ -15,6 +16,7 @@ export default function CarGalleryPage() {
   const isAdmin = session?.user?.role === 'admin';
   
   const [cars, setCars] = useState<CarWithProvider[]>([]);
+  const [notification, setNotification] = useState<{ title: string; message: string; severity: 'success' | 'error' | 'info' } | null>(null);
   const [wishlistMap, setWishlistMap] = useState<Record<string, string>>({});
   const [loading, setLoading] = useState(true);
   const [wishlistLoading, setWishlistLoading] = useState(false);
@@ -23,6 +25,7 @@ export default function CarGalleryPage() {
   const [editingCar, setEditingCar] = useState<CarWithProvider | null>(null);
   const [carToDelete, setCarToDelete] = useState<CarWithProvider | null>(null);
   const [isDialogOpen, setIsDialogOpen] = useState(false);
+  const [isAddingCar, setIsAddingCar] = useState(false);
 
   const fetchData = useCallback(async () => {
     try {
@@ -54,7 +57,7 @@ export default function CarGalleryPage() {
 
   const handleWishlistToggle = async (carId: string) => {
     if (!token) {
-        alert("please log in first");
+        setNotification({ title: 'Login required', message: 'Please log in first to manage your wishlist.', severity: 'info' });
         return;
     }
     setWishlistLoading(true);
@@ -70,10 +73,11 @@ export default function CarGalleryPage() {
       } else {
         const res = await addToWishlist(token, carId);
         setWishlistMap(prev => ({ ...prev, [carId]: res.data._id }));
-        alert("Added successfully");
+        setNotification({ title: 'Added to Wishlist', message: 'Item added successfully.', severity: 'success' });
       }
     } catch (e) {
       console.error("Wishlist toggle error:", e);
+      setNotification({ title: 'Wishlist Error', message: e instanceof Error ? e.message : 'Unable to update wishlist.', severity: 'error' });
     } finally {
       setWishlistLoading(false);
     }
@@ -85,14 +89,21 @@ export default function CarGalleryPage() {
   };
 
   const handleSaveCar = async (payload: Partial<Car>) => {
-    if (!token || !editingCar) return;
+    if (!token) return;
     try {
-      await updateCar(token, editingCar._id, payload);
+      if (editingCar) {
+        await updateCar(token, editingCar._id, payload);
+        setNotification({ title: 'Car Updated', message: 'Vehicle information was updated successfully.', severity: 'success' });
+      } else {
+        await createCar(token, payload);
+        setNotification({ title: 'Car Added', message: 'New vehicle added to fleet successfully.', severity: 'success' });
+      }
       setIsDialogOpen(false);
       setEditingCar(null);
+      setIsAddingCar(false);
       await fetchData();
     } catch (err: any) {
-      alert(err.message || "Failed to update car");
+      setNotification({ title: editingCar ? 'Update Failed' : 'Add Failed', message: err.message || `Failed to ${editingCar ? 'update' : 'add'} car.`, severity: 'error' });
     }
   };
 
@@ -102,8 +113,9 @@ export default function CarGalleryPage() {
       await deleteCar(token, carToDelete._id);
       setCarToDelete(null);
       await fetchData();
+      setNotification({ title: 'Car Removed', message: 'Vehicle deleted from fleet successfully.', severity: 'success' });
     } catch (err: any) {
-      alert(err.message || "Failed to delete car");
+      setNotification({ title: 'Delete Failed', message: err.message || 'Failed to delete car.', severity: 'error' });
     }
   };
 
@@ -138,10 +150,20 @@ export default function CarGalleryPage() {
                         Premium <br /> <span className="text-[#FFD600]">Selection</span>
                     </h1>
                 </div>
-                <div className="bg-stone-50 px-8 py-4 rounded-3xl border border-stone-100 flex items-center gap-6">
-                    <div className="text-right">
-                        <p className="text-[10px] font-black text-stone-400 uppercase tracking-widest">Active Inventory</p>
-                        <p className="text-2xl font-black text-[#111111] tracking-tight">{cars.length} Vehicles</p>
+                <div className="flex items-center gap-4">
+                    {isAdmin && (
+                        <button
+                            onClick={() => { setIsAddingCar(true); setIsDialogOpen(true); }}
+                            className="bg-[#FFD600] text-[#111111] px-6 py-3 rounded-2xl font-black uppercase tracking-widest hover:bg-[#111111] hover:text-[#FFD600] transition-all duration-300"
+                        >
+                            Add Vehicle
+                        </button>
+                    )}
+                    <div className="bg-stone-50 px-8 py-4 rounded-3xl border border-stone-100 flex items-center gap-6">
+                        <div className="text-right">
+                            <p className="text-[10px] font-black text-stone-400 uppercase tracking-widest">Active Inventory</p>
+                            <p className="text-2xl font-black text-[#111111] tracking-tight">{cars.length} Vehicles</p>
+                        </div>
                     </div>
                 </div>
             </header>
@@ -181,9 +203,10 @@ export default function CarGalleryPage() {
         {/* Dialogs */}
         <CarDialog 
             open={isDialogOpen}
-            onClose={() => { setIsDialogOpen(false); setEditingCar(null); }}
+            onClose={() => { setIsDialogOpen(false); setEditingCar(null); setIsAddingCar(false); }}
             onSave={handleSaveCar}
-            initialData={editingCar || null}
+            initialData={editingCar}
+            onError={(message) => setNotification({ title: 'Validation Error', message, severity: 'error' })}
         />
 
         <ConfirmDeleteDialog 
@@ -192,6 +215,14 @@ export default function CarGalleryPage() {
             onConfirm={handleDeleteConfirm}
             title="Delete Vehicle"
             description={`Are you sure you want to remove ${carToDelete?.brand} ${carToDelete?.model} from the fleet? This action cannot be undone.`}
+        />
+
+        <NotificationDialog
+          open={!!notification}
+          title={notification?.title ?? ''}
+          message={notification?.message ?? ''}
+          severity={notification?.severity ?? 'info'}
+          onClose={() => setNotification(null)}
         />
     </main>
   );

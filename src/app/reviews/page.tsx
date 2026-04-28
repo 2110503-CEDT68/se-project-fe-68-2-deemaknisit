@@ -6,7 +6,7 @@ import Link from 'next/link';
 import ReviewListCard, { ReviewListData } from '@/components/ReviewListCard';
 import ReviewSubmissionDialog from '@/components/ReviewSubmissionDialog';
 import ConfirmDialog from '@/components/ConfirmDialog';
-import SuccessDialog from '@/components/SuccessDialog';
+import NotificationDialog from '@/components/NotificationDialog';
 import { getMyReviews, getAllReviews, updateReview, deleteReview } from '@/libs/reviewService';
 import { Review } from '@/types/interface';
 
@@ -19,9 +19,9 @@ export default function ReviewsPage() {
   const [editingReviewId, setEditingReviewId] = useState<string | null>(null);
   const [showEditDialog, setShowEditDialog] = useState(false);
   const [showDeleteDialog, setShowDeleteDialog] = useState(false);
-  const [showDeleteSuccessDialog, setShowDeleteSuccessDialog] = useState(false);
   const [deletingReviewId, setDeletingReviewId] = useState<string | null>(null);
   const [isSubmitting, setIsSubmitting] = useState(false);
+  const [notification, setNotification] = useState<{ title: string; message: string; severity: 'success' | 'error' | 'info' } | null>(null);
 
   useEffect(() => {
     // Allow unauthenticated users to view all reviews
@@ -179,9 +179,10 @@ export default function ReviewsPage() {
       
       setShowEditDialog(false);
       setEditingReviewId(null);
+      setNotification({ title: 'Review Updated', message: 'Your review was updated successfully.', severity: 'success' });
     } catch (err) {
       console.error('Error updating review:', err);
-      throw err;
+      setNotification({ title: 'Update Failed', message: err instanceof Error ? err.message : 'Failed to update review.', severity: 'error' });
     } finally {
       setIsSubmitting(false);
     }
@@ -199,10 +200,10 @@ export default function ReviewsPage() {
       
       setShowDeleteDialog(false);
       setDeletingReviewId(null);
-      setShowDeleteSuccessDialog(true);
+      setNotification({ title: 'Review Deleted', message: 'Your review has been removed successfully.', severity: 'success' });
     } catch (err) {
       console.error('Error deleting review:', err);
-      throw err;
+      setNotification({ title: 'Delete Failed', message: err instanceof Error ? err.message : 'Failed to delete review.', severity: 'error' });
     } finally {
       setIsSubmitting(false);
     }
@@ -344,11 +345,12 @@ export default function ReviewsPage() {
           }}
         />
 
-        <SuccessDialog
-          open={showDeleteSuccessDialog}
-          title="Delete Complete"
-          message="Review deleted successfully"
-          onClose={() => setShowDeleteSuccessDialog(false)}
+        <NotificationDialog
+          open={!!notification}
+          title={notification?.title ?? ''}
+          message={notification?.message ?? ''}
+          severity={notification?.severity ?? 'info'}
+          onClose={() => setNotification(null)}
         />
       </div>
     </main>

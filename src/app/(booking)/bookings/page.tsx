@@ -11,6 +11,7 @@ import { getProviders } from '@/libs/providerService';
 import { addBooking, getBookings, deleteBooking, updateBooking } from '@/libs/bookingService';
 import { Provider, Car, ProviderWithCars, BookingWithDetails } from '@/types/interface';
 import BookingList from '@/components/BookingList';
+import NotificationDialog from '@/components/NotificationDialog';
 
 export default function BookingsHubPage() {
   const { data: session, status } = useSession();
@@ -28,6 +29,7 @@ export default function BookingsHubPage() {
   const [bookings, setBookings] = useState<BookingWithDetails[]>([]);
   const [isLoading, setIsLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
+  const [notification, setNotification] = useState<{ title: string; message: string; severity: 'success' | 'error' | 'info' } | null>(null);
 
   // New Booking State
   const [selectedProviderId, setSelectedProviderId] = useState('');
@@ -98,11 +100,17 @@ export default function BookingsHubPage() {
   const handleCreateBooking = async () => {
     if (!token) return;
     if (!selectedCarId || !bookingDate || !returnDate) {
-      return setError("All fields are required");
+      const message = "All fields are required";
+      setError(message);
+      setNotification({ title: 'Validation Error', message, severity: 'error' });
+      return;
     }
 
     if (returnDate.isBefore(bookingDate, 'day')) {
-      return setError("Return date cannot be before booking date");
+      const message = "Return date cannot be before booking date";
+      setError(message);
+      setNotification({ title: 'Validation Error', message, severity: 'error' });
+      return;
     }
 
     setIsLoading(true);
@@ -116,13 +124,16 @@ export default function BookingsHubPage() {
       // Success! Switch to history and refresh
       setActiveTab('history');
       await fetchData();
+      setNotification({ title: 'Booking Created', message: 'Your new booking was created successfully.', severity: 'success' });
       // Clear form
       setSelectedProviderId('');
       setSelectedCarId('');
       setBookingDate(null);
       setReturnDate(null);
     } catch (e) {
-      setError("Failed to create booking. Please try again.");
+      const message = "Failed to create booking. Please try again.";
+      setError(message);
+      setNotification({ title: 'Booking Failed', message, severity: 'error' });
     } finally {
       setIsLoading(false);
     }
@@ -133,8 +144,10 @@ export default function BookingsHubPage() {
     try {
       await deleteBooking(token, id);
       await fetchData();
+      setNotification({ title: 'Booking Cancelled', message: 'Your booking was successfully cancelled.', severity: 'success' });
     } catch (e) {
       console.error("Delete failed", e);
+      setNotification({ title: 'Cancellation Failed', message: 'Unable to cancel booking. Please try again.', severity: 'error' });
     }
   };
 
@@ -143,8 +156,10 @@ export default function BookingsHubPage() {
     try {
       await updateBooking(token, id, bookingDate, returnDate);
       await fetchData();
+      setNotification({ title: 'Booking Updated', message: 'Your booking has been updated successfully.', severity: 'success' });
     } catch (e) {
       console.error("Update failed", e);
+      setNotification({ title: 'Update Failed', message: 'Unable to update booking. Please try again.', severity: 'error' });
     }
   };
 
@@ -161,6 +176,7 @@ export default function BookingsHubPage() {
   }
 
   return (
+    <>
     <LocalizationProvider dateAdapter={AdapterDayjs}>
       <main className="min-h-screen bg-white pt-24 pb-20 px-6 relative overflow-hidden">
         <div className="max-w-6xl mx-auto">
@@ -324,5 +340,13 @@ export default function BookingsHubPage() {
         </div>
       </main>
     </LocalizationProvider>
+    <NotificationDialog
+      open={!!notification}
+      title={notification?.title ?? ''}
+      message={notification?.message ?? ''}
+      severity={notification?.severity ?? 'info'}
+      onClose={() => setNotification(null)}
+    />
+    </>
   );
 }
