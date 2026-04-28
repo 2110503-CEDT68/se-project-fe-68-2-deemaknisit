@@ -164,7 +164,7 @@ export default function ProviderDetailWithCars({ initialProvider }: { initialPro
                     <div className="w-10 h-[2px] bg-[#FFD600]" />
                     <span className="text-[#FFD600] text-xs font-black uppercase tracking-[0.3em]">Verified Provider</span>
                   </div>
-                  <h1 className="text-white text-5xl md:text-7xl font-black italic tracking-tighter uppercase leading-none">
+                  <h1 className="text-[#111111] text-5xl md:text-7xl font-black italic tracking-tighter uppercase leading-none">
                     {provider.name}
                   </h1>
                 </div>
