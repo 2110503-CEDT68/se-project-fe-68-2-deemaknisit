@@ -6,6 +6,7 @@ import Link from 'next/link';
 import ReviewListCard, { ReviewListData } from '@/components/ReviewListCard';
 import ReviewSubmissionDialog from '@/components/ReviewSubmissionDialog';
 import ConfirmDialog from '@/components/ConfirmDialog';
+import SuccessDialog from '@/components/SuccessDialog';
 import { getMyReviews, getAllReviews, updateReview, deleteReview } from '@/libs/reviewService';
 import { Review } from '@/types/interface';
 
@@ -18,6 +19,7 @@ export default function ReviewsPage() {
   const [editingReviewId, setEditingReviewId] = useState<string | null>(null);
   const [showEditDialog, setShowEditDialog] = useState(false);
   const [showDeleteDialog, setShowDeleteDialog] = useState(false);
+  const [showDeleteSuccessDialog, setShowDeleteSuccessDialog] = useState(false);
   const [deletingReviewId, setDeletingReviewId] = useState<string | null>(null);
   const [isSubmitting, setIsSubmitting] = useState(false);
 
@@ -197,6 +199,7 @@ export default function ReviewsPage() {
       
       setShowDeleteDialog(false);
       setDeletingReviewId(null);
+      setShowDeleteSuccessDialog(true);
     } catch (err) {
       console.error('Error deleting review:', err);
       throw err;
@@ -339,6 +342,13 @@ export default function ReviewsPage() {
             setShowDeleteDialog(false);
             setDeletingReviewId(null);
           }}
+        />
+
+        <SuccessDialog
+          open={showDeleteSuccessDialog}
+          title="Delete Complete"
+          message="Review deleted successfully"
+          onClose={() => setShowDeleteSuccessDialog(false)}
         />
       </div>
     </main>
