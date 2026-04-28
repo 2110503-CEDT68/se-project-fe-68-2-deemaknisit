@@ -32,11 +32,11 @@ jobs:
 
       - name: Push snapshot to Vercel repo
         env:
-          VERCEL_REPO_SLUG: ${{ secrets.VERCEL_REPO_SLUG }}
+          VERCEL_REPO_SLUG: Pitichod/se-project-fe-68-2-deemaknisit
           VERCEL_REPO_TOKEN: ${{ secrets.VERCEL_REPO_TOKEN }}
         run: |
-          if [ -z "$VERCEL_REPO_SLUG" ] || [ -z "$VERCEL_REPO_TOKEN" ]; then
-            echo "Missing VERCEL_REPO_SLUG or VERCEL_REPO_TOKEN secret"
+          if [ -z "$VERCEL_REPO_TOKEN" ]; then
+            echo "Missing VERCEL_REPO_TOKEN secret"
             exit 1
           fi
 
