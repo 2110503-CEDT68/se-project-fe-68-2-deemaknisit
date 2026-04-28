@@ -76,16 +76,15 @@ export default function BookingList({ initialBookings, onRefresh }: { initialBoo
     try {
       if (isReviewEditing && reviewingBooking.review) {
         await updateReview(token, reviewingBooking.review._id, { rating, comment });
-        alert("Review updated successfully");
       } else {
         await addBookingReview(token, reviewingBooking._id, { rating, comment });
-        alert("Thank you for your feedback!");
       }
       setReviewingBooking(null);
       setIsReviewEditing(false);
       onRefresh();
     } catch (err: any) {
       alert(err.message || "Failed to submit review");
+      throw err;
     }
   };
 
@@ -94,7 +93,6 @@ export default function BookingList({ initialBookings, onRefresh }: { initialBoo
     try {
       await deleteReview(token, bookingToReviewDelete.review._id);
       setBookingToReviewDelete(null);
-      alert("Review deleted successfully");
       onRefresh();
     } catch (err: any) {
       alert(err.message || "Failed to delete review");

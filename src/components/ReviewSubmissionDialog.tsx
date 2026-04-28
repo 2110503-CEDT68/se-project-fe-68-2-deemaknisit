@@ -9,9 +9,60 @@ import {
   Button,
   TextField,
   Typography,
-  Rating,
   Box,
 } from '@mui/material';
+
+function StarRatingInput({
+  value,
+  onChange,
+}: {
+  value: number | null;
+  onChange: (value: number) => void;
+}) {
+  return (
+    <div style={{ display: 'inline-flex', gap: 4 }}>
+      {[1, 2, 3, 4, 5].map((star) => {
+        const filled = value !== null && star <= value;
+        return (
+          <label
+            key={star}
+            style={{ cursor: 'pointer', display: 'inline-flex', alignItems: 'center' }}
+          >
+            <input
+              type="radio"
+              name="review-rating"
+              value={star}
+              checked={value === star}
+              onChange={() => onChange(star)}
+              style={{
+                position: 'absolute',
+                width: 1,
+                height: 1,
+                padding: 0,
+                margin: -1,
+                overflow: 'hidden',
+                clip: 'rect(0,0,0,0)',
+                whiteSpace: 'nowrap',
+                border: 0,
+              }}
+            />
+            <svg
+              width="28"
+              height="28"
+              viewBox="0 0 24 24"
+              fill={filled ? '#FFD600' : 'none'}
+              stroke={filled ? '#FFD600' : '#bbb'}
+              strokeWidth="2"
+              strokeLinejoin="round"
+            >
+              <polygon points="12 2 15.09 8.26 22 9.27 17 14.14 18.18 21.02 12 17.77 5.82 21.02 7 14.14 2 9.27 8.91 8.26 12 2" />
+            </svg>
+          </label>
+        );
+      })}
+    </div>
+  );
+}
 
 interface ReviewSubmissionDialogProps {
   open: boolean;
@@ -34,15 +85,17 @@ export default function ReviewSubmissionDialog({
   const [isSubmitting, setIsSubmitting] = useState(false);
   const [successMessage,setSuccessMessage] = useState<string | null>(null);
 
+  const initialRating = initialData?.rating;
+  const initialComment = initialData?.comment;
   useEffect(() => {
     if (open) {
-      setRating(initialData?.rating || 3);
-      setComment(initialData?.comment || '');
+      setRating(initialRating || 3);
+      setComment(initialComment || '');
       setIsSubmitting(false);
       setError(null);
       setSuccessMessage(null);
     }
-  }, [open, initialData]);
+  }, [open, initialRating, initialComment]);
 
   const handleSave = async () => {
     setError(null);
@@ -89,12 +142,7 @@ export default function ReviewSubmissionDialog({
 
         <Box sx={{ display: 'flex', alignItems: 'center', gap: 2, mt: 1 }}>
           <Typography sx={{ minWidth: 80, fontWeight: 'bold' }}>Rating</Typography>
-          <Rating
-            name="review-rating"
-            value={rating}
-            precision={1}
-            onChange={(_, value) => setRating(value)}
-          />
+          <StarRatingInput value={rating} onChange={(v) => setRating(v)} />
         </Box>
 
         <TextField
