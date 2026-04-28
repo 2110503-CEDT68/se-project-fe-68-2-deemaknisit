@@ -1,3 +1,4 @@
+// src/components/UserConsentCheckbox.tsx
 "use client";
 
 import Link from "next/link";
@@ -12,10 +13,18 @@ export default function UserConsentCheckbox({
   onChange,
 }: UserConsentCheckboxProps) {
   return (
-    <div className="flex items-start gap-2 mt-4">
+    <label
+      id="register-consent-label"
+      className={`flex items-start gap-3 p-4 rounded-2xl border cursor-pointer transition-all duration-300 ${
+        checked
+          ? "border-[#FFD600] bg-[#FFD600]/5"
+          : "border-stone-100 bg-stone-50"
+      }`}
+    >
+      {/* Hidden native checkbox */}
       <input
+        id="register-consent-checkbox"
         type="checkbox"
-        id="user-consent"
         checked={checked}
         onChange={(e) => onChange(e.target.checked)}
         className="mt-1 cursor-pointer accent-blue-600"
