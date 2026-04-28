@@ -176,6 +176,7 @@ export default function BookingsHubPage() {
   }
 
   return (
+    <>
     <LocalizationProvider dateAdapter={AdapterDayjs}>
       <main className="min-h-screen bg-white pt-24 pb-20 px-6 relative overflow-hidden">
         <div className="max-w-6xl mx-auto">
@@ -337,14 +338,15 @@ export default function BookingsHubPage() {
                 )}
             </div>
         </div>
-        <NotificationDialog
-          open={!!notification}
-          title={notification?.title ?? ''}
-          message={notification?.message ?? ''}
-          severity={notification?.severity ?? 'info'}
-          onClose={() => setNotification(null)}
-        />
       </main>
     </LocalizationProvider>
+    <NotificationDialog
+      open={!!notification}
+      title={notification?.title ?? ''}
+      message={notification?.message ?? ''}
+      severity={notification?.severity ?? 'info'}
+      onClose={() => setNotification(null)}
+    />
+    </>
   );
 }
