@@ -21,13 +21,13 @@ export default function UserConsentCheckbox({
         className="mt-1 cursor-pointer accent-blue-600"
       />
       <label htmlFor="user-consent" className="text-sm text-gray-700">
-        I have read and agree to the{" "}
+        I have read and agree to{" "}
         <Link
           href="/privacy-policy"
           target="_blank"
-          className="text-blue-600 underline hover:text-blue-800"
+          className="text-blue-600 font-bold underline hover:text-blue-800"
         >
-          Privacy Policy
+          the Privacy Policy
         </Link>
         . I consent to the collection and use of my personal data as described.
       </label>

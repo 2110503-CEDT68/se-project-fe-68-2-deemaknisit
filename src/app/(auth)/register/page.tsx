@@ -195,15 +195,15 @@ export default function RegisterPage() {
                 </svg>
               )}
             </div>
-            <span className="text-[10px] font-black uppercase tracking-[0.15em] text-stone-500 leading-relaxed">
-              I have read and agree to the{" "}
+            <span className="text-xs text-stone-500 leading-relaxed">
+              I have read and agree to{" "}
               <Link
                 href="/privacy-policy"
                 target="_blank"
                 onClick={(e) => e.stopPropagation()}
-                className="text-[#111111] underline underline-offset-2 hover:text-[#FFD600] transition-colors duration-200"
+                className="text-[#111111] font-bold underline-offset-2 hover:text-[#FFD600] transition-colors duration-200"
               >
-                Privacy Policy
+                the Privacy Policy
               </Link>
               . I consent to the collection and use of my personal data.
             </span>
