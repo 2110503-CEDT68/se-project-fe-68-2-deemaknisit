@@ -1,0 +1,44 @@
+name: Mirror to Vercel Repo
+
+on:
+  push:
+    branches:
+      - main
+  workflow_dispatch:
+
+permissions:
+  contents: read
+
+jobs:
+  mirror-snapshot:
+    runs-on: ubuntu-latest
+
+    steps:
+      - name: Checkout source code
+        uses: actions/checkout@v5
+        with:
+          fetch-depth: 1
+
+      - name: Configure git identity
+        run: |
+          git config user.name "github-actions[bot]"
+          git config user.email "github-actions[bot]@users.noreply.github.com"
+
+      - name: Create history-free snapshot commit
+        id: snapshot
+        run: |
+          SNAPSHOT_COMMIT=$(git commit-tree HEAD^{tree} -m "Vercel snapshot ${GITHUB_SHA}")
+          echo "snapshot_commit=${SNAPSHOT_COMMIT}" >> "$GITHUB_OUTPUT"
+
+      - name: Push snapshot to Vercel repo
+        env:
+          VERCEL_REPO_URL: ${{ secrets.VERCEL_REPO_URL }}
+          VERCEL_REPO_TOKEN: ${{ secrets.VERCEL_REPO_TOKEN }}
+        run: |
+          if [ -z "$VERCEL_REPO_URL" ] || [ -z "$VERCEL_REPO_TOKEN" ]; then
+            echo "Missing VERCEL_REPO_URL or VERCEL_REPO_TOKEN secret"
+            exit 1
+          fi
+
+          AUTHED_URL=$(echo "$VERCEL_REPO_URL" | sed "s#https://#https://x-access-token:${VERCEL_REPO_TOKEN}@#")
+          git push --force "$AUTHED_URL" "${{ steps.snapshot.outputs.snapshot_commit }}:main"
