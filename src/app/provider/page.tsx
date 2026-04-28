@@ -5,10 +5,11 @@ import { getProviders, createProvider, updateProvider, deleteProvider } from "@/
 import { getRoleFromToken } from "@/libs/authService";
 import { useSession } from "next-auth/react";
 import { useState, useEffect, useCallback } from 'react'; 
-import { ResponseList, Provider } from "@/../interface"; 
+import { ResponseList, Provider } from "@/types/interface";
 import { Fab, Typography } from "@mui/material";
 import ProviderDialog from "@/components/ProviderDialog";
 import ConfirmDeleteDialog from "@/components/ConfirmDeleteDialog";
+import NotificationDialog from "@/components/NotificationDialog";
 
 const PlusIcon = () => (
   <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
@@ -30,6 +31,7 @@ export default function ProviderPage() {
   
   const [isDialogOpen, setIsDialogOpen] = useState(false);
   const [editingProvider, setEditingProvider] = useState<Provider | null>(null);
+  const [notification, setNotification] = useState<{ title: string; message: string; severity: 'success' | 'error' | 'info' } | null>(null);
 
   const [providerToDelete, setProviderToDelete] = useState<Provider | null>(null);
 
@@ -53,19 +55,24 @@ export default function ProviderPage() {
 
   const handleSaveProvider = async (payload: Partial<Provider>) => {
     const token = session?.user?.token as string;
-    if (!token) return alert('Please login first');
+    if (!token) {
+      setNotification({ title: 'Login required', message: 'Please login first', severity: 'info' });
+      return;
+    }
     
     try {
       if (editingProvider) {
         await updateProvider(token, editingProvider._id, payload);
+        setNotification({ title: 'Provider Updated', message: 'Provider details were updated successfully.', severity: 'success' });
       } else {
         await createProvider(token, payload);
+        setNotification({ title: 'Provider Created', message: 'New provider was added successfully.', severity: 'success' });
       }
 
       closeDialog();
       await fetchProviders(); // Refresh list
     } catch (err: any) {
-      alert(err.message || 'Failed to save provider');
+      setNotification({ title: 'Save Failed', message: err.message || 'Failed to save provider', severity: 'error' });
     }
   };
 
@@ -85,8 +92,9 @@ export default function ProviderPage() {
     try {
       await deleteProvider(token, providerToDelete._id);
       await fetchProviders();
+      setNotification({ title: 'Provider Deleted', message: 'Provider was removed from the system.', severity: 'success' });
     } catch (err: any) {
-      alert(err.message || 'Failed to delete provider');
+      setNotification({ title: 'Delete Failed', message: err.message || 'Failed to delete provider', severity: 'error' });
     } finally {
       setProviderToDelete(null);
     }
@@ -142,7 +150,7 @@ export default function ProviderPage() {
       )}
 
       {error && (
-        <div className="text-center text-xl mt-10 text-red-500">{error}</div>
+        <div id="provider-page-error-message" className="text-center text-xl mt-10 text-red-500">{error}</div>
       )}
 
       {!isLoading && !error && providersData && (
@@ -157,6 +165,7 @@ export default function ProviderPage() {
       {/* Logged-in Add Button (FAB) */}
       {isAdminUser && (
         <Fab 
+          id="provider-page-add-button"
           color="primary" 
           aria-label="add" 
           onClick={() => setIsDialogOpen(true)}
@@ -182,6 +191,14 @@ export default function ProviderPage() {
         onClose={closeDialog} 
         onSave={handleSaveProvider} 
         initialData={editingProvider}
+      />
+
+      <NotificationDialog
+        open={!!notification}
+        title={notification?.title ?? ''}
+        message={notification?.message ?? ''}
+        severity={notification?.severity ?? 'info'}
+        onClose={() => setNotification(null)}
       />
     </main>
   );

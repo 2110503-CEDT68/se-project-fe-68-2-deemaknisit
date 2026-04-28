@@ -1,5 +1,5 @@
 import { createSlice, PayloadAction } from '@reduxjs/toolkit';
-import { LocalBookingItem } from '@/../interface';
+import { LocalBookingItem } from '@/types/interface';
 
 export interface BookState {
   bookItems: LocalBookingItem[];

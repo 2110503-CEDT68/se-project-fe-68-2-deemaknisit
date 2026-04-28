@@ -1,4 +1,4 @@
-import { Provider, ProviderWithCars, ResponseList, ResponseSingle } from "@/../interface";
+import { Provider, ProviderWithCars, ResponseList, ResponseSingle } from "@/types/interface";
 import { baseUrl } from '../config/api';
 
 export async function getProviders(token?: string): Promise<ResponseList<ProviderWithCars>> {

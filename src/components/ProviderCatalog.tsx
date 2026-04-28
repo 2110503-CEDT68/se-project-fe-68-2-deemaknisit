@@ -1,7 +1,7 @@
 import ProviderCard from "./ProviderCard";
 import Link from "next/link";
 // Updated import to use ResponseList and Provider from the interface
-import { Provider, ResponseList } from "@/../interface"; 
+import { Provider, ResponseList } from "@/types/interface";
 
 export default function ProviderCatalog({
   providersList, // Renamed prop for clarity
@@ -26,7 +26,7 @@ export default function ProviderCatalog({
         </div>
       ) : (
         providersData.data.map((provider: Provider) => (
-          <Link key={provider._id} href={`/provider/${provider._id}`}>
+          <Link id={`provider-catalog-item-${provider._id}`} key={provider._id} href={`/provider/${provider._id}`}>
             {/* Pass new props: address and telephone */}
             <ProviderCard 
               providerName={provider.name} 

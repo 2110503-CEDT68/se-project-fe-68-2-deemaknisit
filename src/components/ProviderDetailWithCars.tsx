@@ -2,12 +2,13 @@
 
 import { useState, useCallback, useEffect } from "react";
 import Image from "next/image";
-import { Provider, ProviderWithCars, Car } from "@/../interface";
+import { Provider, ProviderWithCars, Car } from "@/types/interface";
 import { decodeSafeUrl } from "@/libs/urlUtils";
 import { useSession } from "next-auth/react";
 import CarCard from "./CarCard";
 import CarDialog from "./CarDialog";
 import ConfirmDeleteDialog from "./ConfirmDeleteDialog";
+import NotificationDialog from "./NotificationDialog";
 import { createCar, updateCar, deleteCar } from "@/libs/carService";
 import { addToWishlist, removeFromWishlist, getWishlist } from "@/libs/wishlistService";
 import { Fab, Typography, Rating } from "@mui/material";
@@ -30,6 +31,7 @@ export default function ProviderDetailWithCars({ initialProvider }: { initialPro
   const [carToDelete, setCarToDelete] = useState<Car | null>(null);
   const [wishlistMap, setWishlistMap] = useState<Record<string, any>>({});
   const [isLoadingWishlist, setIsLoadingWishlist] = useState(false);
+  const [notification, setNotification] = useState<{ title: string; message: string; severity: 'success' | 'error' | 'info' } | null>(null);
 
   const refreshProviderData = useCallback(async () => {
     try {
@@ -71,7 +73,7 @@ export default function ProviderDetailWithCars({ initialProvider }: { initialPro
 
   const handleAddCarToWishlist = async (carId: string) => {
     if (!token) {
-        alert("please log in first");
+        setNotification({ title: 'Login Required', message: 'Please log in first to manage your wishlist.', severity: 'info' });
         return;
     }
     try {
@@ -83,15 +85,16 @@ export default function ProviderDetailWithCars({ initialProvider }: { initialPro
         ...prev, 
         [carId]: { _id: carId, wishlistItemId: response.data._id } 
       }));
-      alert("Added successfully");
+      setNotification({ title: 'Added to Wishlist', message: 'Car added to your wishlist successfully.', severity: 'success' });
     } catch (error) {
       console.error('Error adding to wishlist:', error);
+      setNotification({ title: 'Wishlist Error', message: 'Failed to add car to wishlist.', severity: 'error' });
     }
   };
 
   const handleRemoveCarFromWishlist = async (carId: string) => {
     if (!token) {
-        alert("please log in first");
+        setNotification({ title: 'Login Required', message: 'Please log in first to manage your wishlist.', severity: 'info' });
         return;
     }
     const wishlistItem = wishlistMap[carId];
@@ -105,8 +108,10 @@ export default function ProviderDetailWithCars({ initialProvider }: { initialPro
         delete newMap[carId];
         return newMap;
       });
+      setNotification({ title: 'Removed from Wishlist', message: 'Car removed from your wishlist.', severity: 'success' });
     } catch (error) {
       console.error('Error removing from wishlist:', error);
+      setNotification({ title: 'Wishlist Error', message: 'Failed to remove car from wishlist.', severity: 'error' });
     }
   };
 
@@ -115,14 +120,16 @@ export default function ProviderDetailWithCars({ initialProvider }: { initialPro
     try {
       if (editingCar) {
         await updateCar(token, editingCar._id, payload);
+        setNotification({ title: 'Car Updated', message: 'Vehicle information updated successfully.', severity: 'success' });
       } else {
         await createCar(token, payload);
+        setNotification({ title: 'Car Added', message: 'New vehicle added to fleet successfully.', severity: 'success' });
       }
       setIsCarDialogOpen(false);
       setEditingCar(null);
       await refreshProviderData();
     } catch (err: any) {
-      alert(err.message || "Failed to save car");
+      setNotification({ title: editingCar ? 'Update Failed' : 'Add Failed', message: err.message || `Failed to ${editingCar ? 'update' : 'add'} car.`, severity: 'error' });
     }
   };
 
@@ -137,8 +144,9 @@ export default function ProviderDetailWithCars({ initialProvider }: { initialPro
       await deleteCar(token, carToDelete._id);
       setCarToDelete(null);
       await refreshProviderData();
+      setNotification({ title: 'Car Deleted', message: 'Vehicle removed from fleet successfully.', severity: 'success' });
     } catch (err: any) {
-      alert(err.message || "Failed to delete car");
+      setNotification({ title: 'Delete Failed', message: err.message || 'Failed to delete car.', severity: 'error' });
     }
   };
 
@@ -164,7 +172,7 @@ export default function ProviderDetailWithCars({ initialProvider }: { initialPro
                     <div className="w-10 h-[2px] bg-[#FFD600]" />
                     <span className="text-[#FFD600] text-xs font-black uppercase tracking-[0.3em]">Verified Provider</span>
                   </div>
-                  <h1 className="text-white text-5xl md:text-7xl font-black italic tracking-tighter uppercase leading-none">
+                  <h1 className="text-[#111111] text-5xl md:text-7xl font-black italic tracking-tighter uppercase leading-none">
                     {provider.name}
                   </h1>
                 </div>
@@ -240,6 +248,7 @@ export default function ProviderDetailWithCars({ initialProvider }: { initialPro
       {/* Admin Quick Action */}
       {isAdminUser && (
         <Fab 
+          id="provider-add-car-button"
           color="primary" 
           aria-label="add-car" 
           onClick={() => setIsCarDialogOpen(true)}
@@ -267,6 +276,7 @@ export default function ProviderDetailWithCars({ initialProvider }: { initialPro
         onSave={handleSaveCar}
         initialData={editingCar}
         providerId={provider._id}
+        onError={(message) => setNotification({ title: 'Validation Error', message, severity: 'error' })}
       />
 
       {carToDelete && (
@@ -278,6 +288,14 @@ export default function ProviderDetailWithCars({ initialProvider }: { initialPro
           onClose={() => setCarToDelete(null)}
         />
       )}
+
+      <NotificationDialog
+        open={!!notification}
+        title={notification?.title ?? ''}
+        message={notification?.message ?? ''}
+        severity={notification?.severity ?? 'info'}
+        onClose={() => setNotification(null)}
+      />
     </main>
   );
 }

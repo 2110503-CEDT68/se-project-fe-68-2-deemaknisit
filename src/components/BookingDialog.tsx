@@ -6,7 +6,7 @@ import { LocalizationProvider } from '@mui/x-date-pickers/LocalizationProvider';
 import { AdapterDayjs } from '@mui/x-date-pickers/AdapterDayjs';
 import { DatePicker } from '@mui/x-date-pickers/DatePicker';
 import dayjs, { Dayjs } from 'dayjs';
-import { Booking, BookingWithDetails } from "@/../interface";
+import { Booking, BookingWithDetails } from "@/types/interface";
 
 interface BookingDialogProps {
   open: boolean;
@@ -53,29 +53,32 @@ export default function BookingDialog({
 
   return (
     <LocalizationProvider dateAdapter={AdapterDayjs}>
-      <Dialog open={open} onClose={!isSubmitting ? onClose : undefined} fullWidth maxWidth="xs" sx={{ '& .MuiDialog-paper': { borderRadius: '24px' } }}>
-        <DialogTitle sx={{ fontWeight: 'bold', pt: 3 }}>Update Reservation</DialogTitle>
-        <DialogContent sx={{ display: 'flex', flexDirection: 'column', gap: 3, pt: '10px !important' }}>
+      <Dialog id="booking-dialog" open={open} onClose={!isSubmitting ? onClose : undefined} fullWidth maxWidth="xs" sx={{ '& .MuiDialog-paper': { borderRadius: '24px' } }}>
+        <DialogTitle id="booking-dialog-title" sx={{ fontWeight: 'bold', pt: 3 }}>Update Reservation</DialogTitle>
+        <form id="booking-form">
+          <DialogContent sx={{ display: 'flex', flexDirection: 'column', gap: 3, pt: '10px !important' }}>
           <Typography variant="body2" className="text-stone-400 mb-2">
             Modifying dates for: <span className="text-[#111111] font-bold">{initialData?.car?.brand} {initialData?.car?.model}</span>
           </Typography>
 
           <DatePicker
+            slotProps={{ textField: { id: 'booking-date-input', fullWidth: true } }}
             label="New Booking Date"
             value={bookingDate}
             onChange={(newValue) => setBookingDate(newValue)}
-            slotProps={{ textField: { fullWidth: true } }}
           />
           <DatePicker
+            slotProps={{ textField: { id: 'return-date-input', fullWidth: true } }}
             label="New Return Date"
             value={returnDate}
             onChange={(newValue) => setReturnDate(newValue)}
-            slotProps={{ textField: { fullWidth: true } }}
           />
         </DialogContent>
-        <DialogActions sx={{ p: 3 }}>
-          <Button onClick={onClose} disabled={isSubmitting} sx={{ color: '#666' }}>Cancel</Button>
+        </form>
+        <DialogActions id="booking-dialog-actions" sx={{ p: 3 }}>
+          <Button id="booking-cancel-button" onClick={onClose} disabled={isSubmitting} sx={{ color: '#666' }}>Cancel</Button>
           <Button 
+            id="booking-save-button"
             onClick={handleSave} 
             variant="contained" 
             disabled={isSubmitting}

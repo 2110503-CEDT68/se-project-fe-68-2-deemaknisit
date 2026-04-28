@@ -28,16 +28,17 @@ export default function ConfirmDialog({
   const hoverColor = confirmColor === '#111111' ? '#333333' : confirmColor;
 
   return (
-    <Dialog open={open} onClose={!isSubmitting ? onClose : undefined} maxWidth="xs" fullWidth>
-      <DialogTitle sx={{ fontWeight: 'bold' }}>{title}</DialogTitle>
-      <DialogContent>
-        <Typography>{description}</Typography>
+    <Dialog id="confirm-dialog" open={open} onClose={!isSubmitting ? onClose : undefined} maxWidth="xs" fullWidth>
+      <DialogTitle id="confirm-dialog-title" sx={{ fontWeight: 'bold' }}>{title}</DialogTitle>
+      <DialogContent id="confirm-dialog-content">
+        <Typography id="confirm-dialog-message">{description}</Typography>
       </DialogContent>
-      <DialogActions sx={{ p: 2 }}>
-        <Button onClick={onClose} disabled={isSubmitting} sx={{ color: '#666' }}>
+      <DialogActions id="confirm-dialog-actions" sx={{ p: 2 }}>
+        <Button id="confirm-dialog-cancel-button" onClick={onClose} disabled={isSubmitting} sx={{ color: '#666' }}>
           {cancelText}
         </Button>
         <Button
+          id="confirm-dialog-submit-button"
           onClick={onConfirm}
           variant="contained"
           disabled={isSubmitting}

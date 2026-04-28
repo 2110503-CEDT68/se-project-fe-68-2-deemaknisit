@@ -1,13 +1,20 @@
-import { Page } from '@playwright/test';
-import { TEST_USER } from './mockData';
+import { Page, expect } from '@playwright/test';
+import { TEST_USER as MOCK_USER } from './mockData';
 
 const JSON_HEADERS = { 'content-type': 'application/json' };
 
+// Real user credentials for actual login tests
+export const LOGIN_CREDENTIALS = {
+  email: process.env.E2E_USER_EMAIL ?? 'user@gmail.com',
+  password: process.env.E2E_USER_PASSWORD ?? '12345678',
+};
+
 /**
+ * --- MOCKING HELPERS ---
  * Set up a NextAuth-style session by intercepting the /api/auth/session
- * endpoint so the page treats the test user as logged in.
+ * endpoint so the page treats the test user as logged in without hitting the DB.
  */
-export async function mockNextAuthSession(page: Page, user = TEST_USER) {
+export async function mockNextAuthSession(page: Page, user = MOCK_USER) {
   await page.route('**/api/auth/session*', async (route) => {
     await route.fulfill({
       status: 200,
@@ -81,18 +88,39 @@ export async function mockUnauthenticatedSession(page: Page) {
 }
 
 /**
- * Wait for the NextAuth session fetch to complete so the page is
- * fully hydrated as authenticated/unauthenticated before further
- * interactions.
+ * Wait for the NextAuth session fetch to complete.
  */
 export async function waitForSession(page: Page) {
-  // The session endpoint may be hit multiple times; wait at least once.
   await page
     .waitForResponse(
       (resp) => /\/api\/auth\/session/.test(resp.url()) && resp.status() === 200,
       { timeout: 15000 }
     )
     .catch(() => {
-      // session might already be in cache — fall through
+      // session might already be in cache
     });
+}
+
+/**
+ * --- REAL LOGIN HELPERS ---
+ * Performs a real UI login.
+ */
+export async function login(
+  page: Page,
+  email: string = LOGIN_CREDENTIALS.email,
+  password: string = LOGIN_CREDENTIALS.password,
+) {
+  await page.goto('/login');
+  await page.waitForLoadState('networkidle');
+  await page.fill('input[type="email"]', email);
+  await page.fill('input[type="password"]', password);
+  await page.click('button[type="submit"]');
+}
+
+export async function loginAndExpectHome(page: Page) {
+  await login(page);
+  await page.waitForURL((url) => url.pathname === '/' || url.pathname === '', {
+    timeout: 10_000,
+  });
+  await expect(page).toHaveURL(/\/$/);
 }

@@ -6,8 +6,9 @@ import Link from 'next/link';
 import ReviewListCard, { ReviewListData } from '@/components/ReviewListCard';
 import ReviewSubmissionDialog from '@/components/ReviewSubmissionDialog';
 import ConfirmDialog from '@/components/ConfirmDialog';
+import NotificationDialog from '@/components/NotificationDialog';
 import { getMyReviews, getAllReviews, updateReview, deleteReview } from '@/libs/reviewService';
-import { Review } from '@/../interface';
+import { Review } from '@/types/interface';
 
 export default function ReviewsPage() {
   const { data: session, status } = useSession();
@@ -20,6 +21,7 @@ export default function ReviewsPage() {
   const [showDeleteDialog, setShowDeleteDialog] = useState(false);
   const [deletingReviewId, setDeletingReviewId] = useState<string | null>(null);
   const [isSubmitting, setIsSubmitting] = useState(false);
+  const [notification, setNotification] = useState<{ title: string; message: string; severity: 'success' | 'error' | 'info' } | null>(null);
 
   useEffect(() => {
     // Allow unauthenticated users to view all reviews
@@ -177,9 +179,10 @@ export default function ReviewsPage() {
       
       setShowEditDialog(false);
       setEditingReviewId(null);
+      setNotification({ title: 'Review Updated', message: 'Your review was updated successfully.', severity: 'success' });
     } catch (err) {
       console.error('Error updating review:', err);
-      throw err;
+      setNotification({ title: 'Update Failed', message: err instanceof Error ? err.message : 'Failed to update review.', severity: 'error' });
     } finally {
       setIsSubmitting(false);
     }
@@ -197,9 +200,10 @@ export default function ReviewsPage() {
       
       setShowDeleteDialog(false);
       setDeletingReviewId(null);
+      setNotification({ title: 'Review Deleted', message: 'Your review has been removed successfully.', severity: 'success' });
     } catch (err) {
       console.error('Error deleting review:', err);
-      throw err;
+      setNotification({ title: 'Delete Failed', message: err instanceof Error ? err.message : 'Failed to delete review.', severity: 'error' });
     } finally {
       setIsSubmitting(false);
     }
@@ -218,6 +222,7 @@ export default function ReviewsPage() {
                 </div>
                 <div className="bg-stone-50 p-1.5 rounded-[24px] flex gap-1 border border-stone-100 shadow-sm h-fit">
                     <button
+                        id="reviews-tab-all-button"
                         onClick={() => setTab('all')}
                         className={`px-8 py-3 rounded-[18px] text-[10px] font-black uppercase tracking-widest transition-all duration-300 ${
                             tab === 'all'
@@ -228,6 +233,7 @@ export default function ReviewsPage() {
                         All Feedbacks
                     </button>
                     <button
+                        id="reviews-tab-personal-button"
                         onClick={() => setTab('personal')}
                         className={`px-8 py-3 rounded-[18px] text-[10px] font-black uppercase tracking-widest transition-all duration-300 ${
                             tab === 'personal'
@@ -277,6 +283,7 @@ export default function ReviewsPage() {
             <p className="text-blue-700 font-semibold mb-4 text-lg">Sign in to view your reviews</p>
             <p className="text-blue-600 text-sm mb-6">You need to be logged in to view your personal reviews.</p>
             <Link
+              id="reviews-signin-link"
               href="/login"
               className="inline-block px-6 py-2 bg-[#FFD600] text-[#111111] font-bold rounded-lg hover:bg-yellow-500 transition-colors duration-300"
             >
@@ -336,6 +343,14 @@ export default function ReviewsPage() {
             setShowDeleteDialog(false);
             setDeletingReviewId(null);
           }}
+        />
+
+        <NotificationDialog
+          open={!!notification}
+          title={notification?.title ?? ''}
+          message={notification?.message ?? ''}
+          severity={notification?.severity ?? 'info'}
+          onClose={() => setNotification(null)}
         />
       </div>
     </main>

@@ -1,4 +1,4 @@
-import { Booking, BookingWithDetails, ResponseList, ResponseSingle } from "@/../interface";
+import { Booking, BookingWithDetails, ResponseList, ResponseSingle } from "@/types/interface";
 import { baseUrl } from '../config/api';
 
 export async function getBookings(token: string): Promise<ResponseList<BookingWithDetails>> {

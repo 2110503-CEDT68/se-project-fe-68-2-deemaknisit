@@ -1,5 +1,5 @@
-import { User } from "@/../interface";
-import { ResponseSingle } from "@/../interface";
+import { User } from "@/types/interface";
+import { ResponseSingle } from "@/types/interface";
 import { baseUrl } from '../config/api';
 
 export async function userLogIn(userEmail: string, userPassword: string) {

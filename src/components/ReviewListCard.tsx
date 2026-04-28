@@ -55,6 +55,7 @@ export default function ReviewListCard({
             {isOwner && (
               <div className="flex flex-col gap-2 ml-4 pl-4 border-l border-stone-200">
                 <button
+                  id={`review-list-edit-button-${review.reviewId}`}
                   onClick={onEdit}
                   className="p-1.5 text-xs font-bold bg-blue-100 text-blue-700 rounded hover:bg-blue-200 transition-colors"
                   title="Edit review"
@@ -62,6 +63,7 @@ export default function ReviewListCard({
                   Edit
                 </button>
                 <button
+                  id={`review-list-delete-button-${review.reviewId}`}
                   onClick={onDelete}
                   className="p-1.5 text-xs font-bold bg-red-100 text-red-700 rounded hover:bg-red-200 transition-colors"
                   title="Delete review"
@@ -78,11 +80,11 @@ export default function ReviewListCard({
       {review.comment && (
         <div className="p-4 border-b border-stone-100">
           <div className="flex items-center gap-3 mb-3">
-            <Rating value={review.rating} readOnly size="small" />
+            <Rating id={`review-list-rating-${review.reviewId}`} value={review.rating} readOnly size="small" />
             <span className="text-xs font-bold text-[#FFD600]">{review.rating.toFixed(1)}</span>
           </div>
           <p className="text-xs font-bold text-stone-500 uppercase tracking-wide mb-2">Comment:</p>
-          <p className="text-sm text-stone-700 leading-relaxed italic">
+          <p id={`review-list-comment-${review.reviewId}`} className="text-sm text-stone-700 leading-relaxed italic">
             "{review.comment}"
           </p>
         </div>

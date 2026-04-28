@@ -9,8 +9,9 @@ import { AdapterDayjs } from '@mui/x-date-pickers/AdapterDayjs';
 import dayjs, { Dayjs } from 'dayjs';
 import { getProviders } from '@/libs/providerService';
 import { addBooking, getBookings, deleteBooking, updateBooking } from '@/libs/bookingService';
-import { Provider, Car, ProviderWithCars, BookingWithDetails } from '@/../interface';
+import { Provider, Car, ProviderWithCars, BookingWithDetails } from '@/types/interface';
 import BookingList from '@/components/BookingList';
+import NotificationDialog from '@/components/NotificationDialog';
 
 export default function BookingsHubPage() {
   const { data: session, status } = useSession();
@@ -28,6 +29,7 @@ export default function BookingsHubPage() {
   const [bookings, setBookings] = useState<BookingWithDetails[]>([]);
   const [isLoading, setIsLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
+  const [notification, setNotification] = useState<{ title: string; message: string; severity: 'success' | 'error' | 'info' } | null>(null);
 
   // New Booking State
   const [selectedProviderId, setSelectedProviderId] = useState('');
@@ -98,11 +100,17 @@ export default function BookingsHubPage() {
   const handleCreateBooking = async () => {
     if (!token) return;
     if (!selectedCarId || !bookingDate || !returnDate) {
-      return setError("All fields are required");
+      const message = "All fields are required";
+      setError(message);
+      setNotification({ title: 'Validation Error', message, severity: 'error' });
+      return;
     }
 
     if (returnDate.isBefore(bookingDate, 'day')) {
-      return setError("Return date cannot be before booking date");
+      const message = "Return date cannot be before booking date";
+      setError(message);
+      setNotification({ title: 'Validation Error', message, severity: 'error' });
+      return;
     }
 
     setIsLoading(true);
@@ -116,13 +124,16 @@ export default function BookingsHubPage() {
       // Success! Switch to history and refresh
       setActiveTab('history');
       await fetchData();
+      setNotification({ title: 'Booking Created', message: 'Your new booking was created successfully.', severity: 'success' });
       // Clear form
       setSelectedProviderId('');
       setSelectedCarId('');
       setBookingDate(null);
       setReturnDate(null);
     } catch (e) {
-      setError("Failed to create booking. Please try again.");
+      const message = "Failed to create booking. Please try again.";
+      setError(message);
+      setNotification({ title: 'Booking Failed', message, severity: 'error' });
     } finally {
       setIsLoading(false);
     }
@@ -133,8 +144,10 @@ export default function BookingsHubPage() {
     try {
       await deleteBooking(token, id);
       await fetchData();
+      setNotification({ title: 'Booking Cancelled', message: 'Your booking was successfully cancelled.', severity: 'success' });
     } catch (e) {
       console.error("Delete failed", e);
+      setNotification({ title: 'Cancellation Failed', message: 'Unable to cancel booking. Please try again.', severity: 'error' });
     }
   };
 
@@ -143,8 +156,10 @@ export default function BookingsHubPage() {
     try {
       await updateBooking(token, id, bookingDate, returnDate);
       await fetchData();
+      setNotification({ title: 'Booking Updated', message: 'Your booking has been updated successfully.', severity: 'success' });
     } catch (e) {
       console.error("Update failed", e);
+      setNotification({ title: 'Update Failed', message: 'Unable to update booking. Please try again.', severity: 'error' });
     }
   };
 
@@ -154,13 +169,14 @@ export default function BookingsHubPage() {
         <div className="max-w-md w-full bg-stone-50 p-10 rounded-[32px] border border-stone-100 text-center">
             <h1 className="text-3xl font-black italic uppercase tracking-tighter text-[#111111] mb-4">Access Denied</h1>
             <p className="text-stone-500 mb-8">Please sign in to manage your bookings.</p>
-            <button onClick={() => router.push('/api/auth/signin')} className="w-full py-4 bg-[#111111] text-white rounded-2xl font-black uppercase tracking-widest hover:bg-[#FFD600] hover:text-[#111111] transition-all">Sign In</button>
+            <button id="bookings-signin-button" onClick={() => router.push('/api/auth/signin')} className="w-full py-4 bg-[#111111] text-white rounded-2xl font-black uppercase tracking-widest hover:bg-[#FFD600] hover:text-[#111111] transition-all">Sign In</button>
         </div>
       </main>
     );
   }
 
   return (
+    <>
     <LocalizationProvider dateAdapter={AdapterDayjs}>
       <main className="min-h-screen bg-white pt-24 pb-20 px-6 relative overflow-hidden">
         <div className="max-w-6xl mx-auto">
@@ -176,6 +192,7 @@ export default function BookingsHubPage() {
                 {/* Tab Switcher */}
                 <div className="bg-stone-50 p-1.5 rounded-[24px] flex gap-1 border border-stone-100 shadow-sm h-fit">
                     <button 
+                        id="bookings-tab-history-button"
                         onClick={() => setActiveTab('history')}
                         className={`px-8 py-3 rounded-[18px] text-[10px] font-black uppercase tracking-widest transition-all duration-300 ${
                             activeTab === 'history' 
@@ -186,6 +203,7 @@ export default function BookingsHubPage() {
                         My Schedule ({bookings.length})
                     </button>
                     <button 
+                        id="bookings-tab-new-button"
                         onClick={() => setActiveTab('new')}
                         className={`px-8 py-3 rounded-[18px] text-[10px] font-black uppercase tracking-widest transition-all duration-300 ${
                             activeTab === 'new' 
@@ -213,7 +231,7 @@ export default function BookingsHubPage() {
                         {bookings.length === 0 ? (
                             <div className="py-32 text-center bg-stone-50 rounded-[40px] border-2 border-dashed border-stone-200">
                                 <p className="text-stone-400 font-bold italic text-xl uppercase tracking-widest mb-6">Booking not complete yet. Review will appear here after return</p>
-                                <button onClick={() => setActiveTab('new')} className="bg-[#111111] text-white px-8 py-4 rounded-full text-xs font-black uppercase tracking-widest hover:bg-[#FFD600] hover:text-[#111111] transition-all">Make Your First Booking</button>
+                                <button id="bookings-first-booking-button" onClick={() => setActiveTab('new')} className="bg-[#111111] text-white px-8 py-4 rounded-full text-xs font-black uppercase tracking-widest hover:bg-[#FFD600] hover:text-[#111111] transition-all">Make Your First Booking</button>
                             </div>
                         ) : (
                             <BookingList 
@@ -258,6 +276,7 @@ export default function BookingsHubPage() {
                                         <FormControl fullWidth>
                                             <InputLabel sx={{ fontWeight: 'bold', textTransform: 'uppercase', fontSize: '10px', tracking: '0.2em' }}>Select Provider</InputLabel>
                                             <Select
+                                                id="bookings-provider-select"
                                                 value={selectedProviderId}
                                                 label="Select Provider"
                                                 onChange={(e) => setSelectedProviderId(e.target.value)}
@@ -272,6 +291,7 @@ export default function BookingsHubPage() {
                                         <FormControl fullWidth disabled={!selectedProviderId}>
                                             <InputLabel sx={{ fontWeight: 'bold', textTransform: 'uppercase', fontSize: '10px', tracking: '0.2em' }}>Select Vehicle</InputLabel>
                                             <Select
+                                                id="bookings-car-select"
                                                 value={selectedCarId}
                                                 label="Select Vehicle"
                                                 onChange={(e) => setSelectedCarId(e.target.value)}
@@ -286,20 +306,21 @@ export default function BookingsHubPage() {
 
                                     <div className="grid grid-cols-1 md:grid-cols-2 gap-8">
                                         <DatePicker
+                                            slotProps={{ textField: { id: 'bookings-pickup-date-input', fullWidth: true, sx: { '& .MuiOutlinedInput-root': { borderRadius: '16px' } } } }}
                                             label="Pickup Date"
                                             value={bookingDate}
                                             onChange={(val) => setBookingDate(val)}
-                                            slotProps={{ textField: { fullWidth: true, sx: { '& .MuiOutlinedInput-root': { borderRadius: '16px' } } } }}
                                         />
                                         <DatePicker
+                                            slotProps={{ textField: { id: 'bookings-return-date-input', fullWidth: true, sx: { '& .MuiOutlinedInput-root': { borderRadius: '16px' } } } }}
                                             label="Return Date"
                                             value={returnDate}
                                             onChange={(val) => setReturnDate(val)}
-                                            slotProps={{ textField: { fullWidth: true, sx: { '& .MuiOutlinedInput-root': { borderRadius: '16px' } } } }}
                                         />
                                     </div>
 
                                     <button 
+                                        id="bookings-confirm-reservation-button"
                                         onClick={handleCreateBooking}
                                         disabled={isLimitReached || !selectedCarId || !bookingDate || !returnDate}
                                         className={`w-full py-6 rounded-2xl font-black uppercase tracking-[0.2em] transition-all duration-300 ${
@@ -319,5 +340,13 @@ export default function BookingsHubPage() {
         </div>
       </main>
     </LocalizationProvider>
+    <NotificationDialog
+      open={!!notification}
+      title={notification?.title ?? ''}
+      message={notification?.message ?? ''}
+      severity={notification?.severity ?? 'info'}
+      onClose={() => setNotification(null)}
+    />
+    </>
   );
 }

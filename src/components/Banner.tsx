@@ -56,7 +56,7 @@ export default function Banner() {
                 </p>
 
                 <div className="flex flex-col sm:flex-row gap-4">
-                    <Link href="/car" className="bg-[#FFD600] text-[#111111] px-10 py-5 text-sm font-black uppercase tracking-widest rounded-full hover:bg-white transition-all text-center shadow-2xl shadow-yellow-600/20">
+                    <Link id="banner-browse-cars-link" href="/car" className="bg-[#FFD600] text-[#111111] px-10 py-5 text-sm font-black uppercase tracking-widest rounded-full hover:bg-white transition-all text-center shadow-2xl shadow-yellow-600/20">
                         Browse Cars
                     </Link>
                 </div>

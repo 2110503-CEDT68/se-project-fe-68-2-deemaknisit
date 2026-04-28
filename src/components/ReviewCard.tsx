@@ -1,7 +1,7 @@
 'use client';
 
 import { Rating } from "@mui/material";
-import { Review } from "@/../interface";
+import { Review } from "@/types/interface";
 
 export default function ReviewCard({ 
   review, 
@@ -35,7 +35,7 @@ export default function ReviewCard({
           </div>
         </div>
         <div className="flex flex-col items-end">
-          <Rating value={review.rating} readOnly precision={0.5} size="small" />
+          <Rating id={`review-card-rating-${review._id}`} value={review.rating} readOnly precision={0.5} size="small" />
           <span className="text-[10px] font-black text-[#FFD600] uppercase tracking-widest mt-1">Verified</span>
         </div>
       </div>
@@ -44,7 +44,7 @@ export default function ReviewCard({
         <svg width="24" height="24" viewBox="0 0 24 24" fill="#FFD600" className="opacity-10 absolute -top-2 -left-2 rotate-180">
           <path d="M14.017 21L14.017 18C14.017 16.8954 14.9124 16 16.017 16H19.017C20.1216 16 21.017 16.8954 21.017 18V21C21.017 22.1046 20.1216 23 19.017 23H16.017C14.9124 23 14.017 22.1046 14.017 21ZM14.017 21L14.017 18C14.017 16.8954 14.9124 16 16.017 16H19.017C20.1216 16 21.017 16.8954 21.017 18V21C21.017 22.1046 20.1216 23 19.017 23H16.017C14.9124 23 14.017 22.1046 14.017 21ZM3 21V18C3 16.8954 3.89543 16 5 16H8C9.10457 16 10 16.8954 10 18V21C10 22.1046 9.10457 23 8 23H5C3.89543 23 3 22.1046 3 21ZM3 21V18C3 16.8954 3.89543 16 5 16H8C9.10457 16 10 16.8954 10 18V21C10 22.1046 9.10457 23 8 23H5C3.89543 23 3 22.1046 3 21Z" />
         </svg>
-        <p className="text-stone-600 leading-relaxed italic font-medium relative z-10 pl-4">
+        <p id={`review-card-comment-${review._id}`} className="text-stone-600 leading-relaxed italic font-medium relative z-10 pl-4">
           "{review.comment || 'No written feedback provided.'}"
         </p>
       </div>
@@ -52,6 +52,7 @@ export default function ReviewCard({
       <div className="flex justify-end gap-3 pt-4 border-t border-stone-200">
         {onEdit && (
           <button 
+            id={`review-card-edit-button-${review._id}`}
             onClick={onEdit} 
             className="w-9 h-9 flex items-center justify-center bg-blue-500 text-white rounded-xl hover:bg-blue-600 transition-all shadow-md active:scale-90"
             title="Edit Review"
@@ -61,6 +62,7 @@ export default function ReviewCard({
         )}
         {onDelete && (
           <button 
+            id={`review-card-delete-button-${review._id}`}
             onClick={onDelete} 
             className="w-9 h-9 flex items-center justify-center bg-red-500 text-white rounded-xl hover:bg-red-600 transition-all shadow-md active:scale-90"
             title="Delete Review"

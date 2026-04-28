@@ -10,59 +10,10 @@ import {
   TextField,
   Typography,
   Box,
+  Rating,
 } from '@mui/material';
 
-function StarRatingInput({
-  value,
-  onChange,
-}: {
-  value: number | null;
-  onChange: (value: number) => void;
-}) {
-  return (
-    <div style={{ display: 'inline-flex', gap: 4 }}>
-      {[1, 2, 3, 4, 5].map((star) => {
-        const filled = value !== null && star <= value;
-        return (
-          <label
-            key={star}
-            style={{ cursor: 'pointer', display: 'inline-flex', alignItems: 'center' }}
-          >
-            <input
-              type="radio"
-              name="review-rating"
-              value={star}
-              checked={value === star}
-              onChange={() => onChange(star)}
-              style={{
-                position: 'absolute',
-                width: 1,
-                height: 1,
-                padding: 0,
-                margin: -1,
-                overflow: 'hidden',
-                clip: 'rect(0,0,0,0)',
-                whiteSpace: 'nowrap',
-                border: 0,
-              }}
-            />
-            <svg
-              width="28"
-              height="28"
-              viewBox="0 0 24 24"
-              fill={filled ? '#FFD600' : 'none'}
-              stroke={filled ? '#FFD600' : '#bbb'}
-              strokeWidth="2"
-              strokeLinejoin="round"
-            >
-              <polygon points="12 2 15.09 8.26 22 9.27 17 14.14 18.18 21.02 12 17.77 5.82 21.02 7 14.14 2 9.27 8.91 8.26 12 2" />
-            </svg>
-          </label>
-        );
-      })}
-    </div>
-  );
-}
+
 
 interface ReviewSubmissionDialogProps {
   open: boolean;
@@ -120,17 +71,20 @@ export default function ReviewSubmissionDialog({
   };
 
   return (
-    <Dialog open={open} onClose={!isSubmitting ? onClose : undefined} fullWidth maxWidth="xs">
-      <DialogTitle sx={{ fontWeight: 'bold', pt: 3 }}>Submit Your Review</DialogTitle>
-      <DialogContent sx={{ display: 'flex', flexDirection: 'column', gap: 3, pt: 2 }}>
+    <Dialog id="review-dialog" open={open} onClose={!isSubmitting ? onClose : undefined} fullWidth maxWidth="xs">
+      <DialogTitle id="review-dialog-title" sx={{ fontWeight: 'bold', pt: 3 }}>Submit Your Review</DialogTitle>
+      <DialogContent
+        id="review-form"
+        sx={{ display: 'flex', flexDirection: 'column', gap: 3, pt: 2 }}
+      >
         {successMessage && (
-          <Box sx={{ p: 1.5, bgcolor: '#e8f5e9', color: '#385b3a', borderRadius: 1 }}>
+          <Box id="review-success-message" sx={{ p: 1.5, bgcolor: '#e8f5e9', color: '#385b3a', borderRadius: 1 }}>
             <Typography fontWeight="bold" variant="body2">{successMessage}</Typography>
           </Box>
         )}
 
         {error && error !== 'Please share your thoughts - we require your comment!' && (
-          <Box sx={{ p: 1.5, bgcolor: '#ffebee', color: '#871010', borderRadius: 1 }}>
+          <Box id="review-error-message" sx={{ p: 1.5, bgcolor: '#ffebee', color: '#871010', borderRadius: 1 }}>
             <Typography fontWeight="bold" variant="body2">{error}</Typography>
           </Box>
         )}
@@ -142,10 +96,18 @@ export default function ReviewSubmissionDialog({
 
         <Box sx={{ display: 'flex', alignItems: 'center', gap: 2, mt: 1 }}>
           <Typography sx={{ minWidth: 80, fontWeight: 'bold' }}>Rating</Typography>
-          <StarRatingInput value={rating} onChange={(v) => setRating(v)} />
+          <Rating
+            id="review-rating-input"
+            name="review-rating"
+            value={rating}
+            precision={1}
+            data-testid="review-rating"
+            onChange={(_, value) => setRating(value)}
+          />
         </Box>
 
         <TextField
+          id="review-comment-input"
           label="Comment"
           multiline
           minRows={4}
@@ -161,18 +123,22 @@ export default function ReviewSubmissionDialog({
           error={error === 'Please share your thoughts - we require your comment!'}
           helperText={error === 'Please share your thoughts - we require your comment!' ? 'Please share your thoughts - we require your comment!' : ''}
           FormHelperTextProps={{
+            id: 'review-comment-helper',
             sx: { fontWeight: 'bold', fontSize: '0.75rem' }
           }}
+          inputProps={{ "data-testid": "review-comment" }}
         />
       </DialogContent>
-      <DialogActions sx={{ p: 3, display: 'flex', justifyContent: 'space-between' }}>
-        <Button onClick={onClose} disabled={isSubmitting} sx={{ color: '#666' }}>
+      <DialogActions id="review-dialog-actions" sx={{ p: 3, display: 'flex', justifyContent: 'space-between' }}>
+        <Button id="review-cancel-button" onClick={onClose} disabled={isSubmitting} sx={{ color: '#666' }}>
           Cancel
         </Button>
         <Button
+          id="review-submit-button"
           onClick={handleSave}
           variant="contained"
           disabled={isSubmitting}
+          data-testid="review-submit-button"
           sx={{
             backgroundColor: '#FFD600',
             color: '#111111',
