@@ -79,6 +79,7 @@ export default function BookingList({ initialBookings, onRefresh }: { initialBoo
         await addBookingReview(token, reviewingBooking._id, { rating, comment });
         setNotification({ title: 'Review Submitted', message: 'Thank you for your feedback!', severity: 'success' });
       }
+      }
       setReviewingBooking(null);
       setIsReviewEditing(false);
       onRefresh();

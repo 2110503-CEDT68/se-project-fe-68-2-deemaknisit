@@ -9,9 +9,11 @@ import {
   Button,
   TextField,
   Typography,
-  Rating,
   Box,
+  Rating,
 } from '@mui/material';
+
+
 
 interface ReviewSubmissionDialogProps {
   open: boolean;
@@ -34,15 +36,17 @@ export default function ReviewSubmissionDialog({
   const [isSubmitting, setIsSubmitting] = useState(false);
   const [successMessage,setSuccessMessage] = useState<string | null>(null);
 
+  const initialRating = initialData?.rating;
+  const initialComment = initialData?.comment;
   useEffect(() => {
     if (open) {
-      setRating(initialData?.rating || 3);
-      setComment(initialData?.comment || '');
+      setRating(initialRating || 3);
+      setComment(initialComment || '');
       setIsSubmitting(false);
       setError(null);
       setSuccessMessage(null);
     }
-  }, [open, initialData]);
+  }, [open, initialRating, initialComment]);
 
   const handleSave = async () => {
     setError(null);

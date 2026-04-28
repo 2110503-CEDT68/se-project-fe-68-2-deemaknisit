@@ -9,7 +9,7 @@ export default function NextAuthProvider({
   session: any;
 }): React.ReactNode {
   return (
-    <SessionProvider session={session}>
+    <SessionProvider session={session ?? undefined}>
       {children}
     </SessionProvider>
   );
