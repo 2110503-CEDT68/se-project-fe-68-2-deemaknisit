@@ -75,9 +75,11 @@ const BookingList = ({ initialBookings, onRefresh }: { initialBookings: BookingW
       if (isReviewEditing && reviewingBooking.review) {
         await updateReview(token, reviewingBooking.review._id, { rating, comment });
         setNotification({ title: 'Review Updated', message: 'Your review has been updated successfully.', severity: 'success' });
+        alert('Your review has been updated successfully.');
       } else {
         await addBookingReview(token, reviewingBooking._id, { rating, comment });
         setNotification({ title: 'Review Submitted', message: 'Thank you for your feedback!', severity: 'success' });
+        alert('Thank you for your feedback!');
       }
       setReviewingBooking(null);
       setIsReviewEditing(false);
